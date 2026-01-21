@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/favicon.ico" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Krista Chatbot</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" />
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons" />
+  <base href="<%=chatbotBasePath %>" />
+  <script>
+    var basePath = "__chatbotBasePath__";
+  </script>
+  <script type="text/javascript" src="<%=chatbotAuthenticator %>/authn/authenticator.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDMhmhed2NDrTomc1dWZIKK1Sa1aiCT4vk&libraries=places" async defer></script>
+</head>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/index.tsx"></script>
+  <script>
+    if (global === undefined) {
+      var global = window;
+    }
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,72 @@
+export enum FieldTypes {
+  DATE_FIELD = "Date",
+  TIME_FIELD = "Time",
+  DATE_RANGE_FIELD = "DateRange",
+  DATE_TIME_RANGE_FIELD = "DateTimeRange",
+  TEXT_FIELD = "Text",
+  LABEL = "Label",
+  STREET_FIELD = "Street",
+  STREET2_FIELD = "Street2",
+  CITY_FIELD = "City",
+  STATE_FIELD = "State",
+  COUNTRY_FIELD = "Country",
+  POSTAL_CODE_FIELD = "PostalCode",
+  NUMBER_FIELD = "Number",
+  CURRENCY_FIELD = "Currency",
+  UNIT_FIELD = "Unit",
+  PERCENTAGE_FIELD = "Percentage",
+  PICK_ONE_FIELD = "PickOne",
+  CHECKBOXES_FIELD = "Checkboxes",
+  PHONE_FIELD = "Phone",
+  PARAGRAPH_FIELD = "Paragraph",
+  PROPER_NOUN_FIELD = "ProperNoun",
+  PERSON_FIELD = "Person",
+  IDENTIFIER_FIELD = "Identifier",
+  SWITCH_FIELD = "Switch",
+  RATING_FIELD = "Rating",
+  EMAIL_FIELD = "Email",
+  FILE_FIELD = "File",
+  CAMERA_FIELD = "Camera",
+  RICH_TEXT_FIELD = "RichText",
+  LOCATION_FIELD = "Location",
+  CALCULATION_FIELD = "Calculation",
+  ENTITY_SELECTION = "Entity",
+
+  // complex field
+  MULTI_FIELD = "MultiField",
+  COMPOSITE_FIELD = "Composite",
+  ENTITY_FIELD = "EntityReference",
+  LIST_FIELD = "List",
+  TABLE_FIELD = "Table",
+  ADDRESS_FIELD = "Address",
+
+  UNKNOWN_FIELD = "Unknown",
+
+  // Deprecated
+  BOOLEAN_FIELD = "Boolean",
+  DOUBLE_FIELD = "Double",
+
+  //Stream
+  STREAM_FIELD = "Stream",
+}
+
+export const FOCUSABLE_FIELDS = [
+  FieldTypes.PARAGRAPH_FIELD,
+  FieldTypes.EMAIL_FIELD,
+  FieldTypes.STREET_FIELD,
+  FieldTypes.STREET2_FIELD,
+  FieldTypes.CITY_FIELD,
+  FieldTypes.STATE_FIELD,
+  FieldTypes.POSTAL_CODE_FIELD,
+  FieldTypes.COUNTRY_FIELD,
+  FieldTypes.TEXT_FIELD,
+  FieldTypes.PERSON_FIELD,
+  FieldTypes.PROPER_NOUN_FIELD,
+  FieldTypes.IDENTIFIER_FIELD,
+  FieldTypes.RICH_TEXT_FIELD,
+
+  FieldTypes.NUMBER_FIELD,
+  FieldTypes.PERCENTAGE_FIELD,
+  FieldTypes.UNIT_FIELD,
+  FieldTypes.CURRENCY_FIELD,
+];

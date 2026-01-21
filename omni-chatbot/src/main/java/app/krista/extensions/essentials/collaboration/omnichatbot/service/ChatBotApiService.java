@@ -1,0 +1,229 @@
+/*
+ * Omni Chatbot Extension for Krista
+ * Copyright (C) 2025 Krista Software
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ */
+
+package app.krista.extensions.essentials.collaboration.omnichatbot.service;
+
+import app.krista.extension.authorization.AuthorizationException;
+import app.krista.extension.executor.Invoker;
+import app.krista.extensions.essentials.collaboration.omnichatbot.ChatBotExtension;
+import app.krista.extensions.essentials.collaboration.omnichatbot.contants.Constants;
+import app.krista.extensions.essentials.collaboration.omnichatbot.resource.dto.Configuration;
+import app.krista.extensions.essentials.collaboration.omnichatbot.resource.dto.SessionDto;
+import app.krista.extensions.essentials.collaboration.omnichatbot.store.SessionStore;
+import app.krista.extensions.essentials.collaboration.omnichatbot.utils.ChatBotUtil;
+import app.krista.ksdk.accounts.Account;
+import app.krista.ksdk.context.AuthorizationContext;
+import app.krista.ksdk.context.RuntimeContext;
+import app.krista.ksdk.inboxes.Inbox;
+import app.krista.ksdk.inboxes.InboxManager;
+import app.krista.ksdk.message.Message;
+import app.krista.ksdk.message.MessageAnswer;
+import app.krista.ksdk.nlp.Language;
+import app.krista.ksdk.workspace.Workspace;
+import app.krista.omni.sdk.complex_fields.impl.MessageDtoFactory;
+import app.krista.omni.sdk.medium.api.dto.FormResponse;
+import app.krista.omni.sdk.medium.api.dto.MessageDto;
+import app.krista.omni.sdk.medium.api.message.MediumInfo;
+import app.krista.omni.sdk.medium.interactive.InteractiveMediumService;
+import app.krista.omni.sdk.medium.interactive.InteractiveMessageIn;
+import app.krista.omni.sdk.spi.OmniChannelService;
+import org.jvnet.hk2.annotations.Service;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.inject.Inject;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+/**
+ * Service class for ChatBot API operations.
+ *
+ * @service
+ */
+@Service
+public class ChatBotApiService {
+
+    private final AuthorizationContext authorizationContext;
+    private final InboxManager inboxManager;
+    private final InteractiveMediumService mediumService;
+    private final OmniChannelService omniChannelService;
+    private final Workspace workspace;
+    private final Invoker invoker;
+    private final SessionStore sessionStore;
+    private final RuntimeContext runtimeContext;
+    private final ChatBotExtension chatBotExtension;
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChatBotApiService.class);
+
+    /**
+     * Constructs a new ChatBotApiService.
+     *
+     * @param authorizationContext
+     * @param inboxManager         The inbox manager.
+     * @param workspace
+     * @param invoker
+     * @inject
+     */
+    @Inject
+    public ChatBotApiService(AuthorizationContext authorizationContext, InboxManager inboxManager, Workspace workspace,
+                             Invoker invoker, SessionStore sessionStore, ChatBotMessageSender chatBotMessageSender,
+                             RuntimeContext runtimeContext, ChatBotExtension chatBotExtension) {
+        this.authorizationContext = authorizationContext;
+        this.inboxManager = inboxManager;
+        this.workspace = workspace;
+        this.invoker = invoker;
+        this.runtimeContext = runtimeContext;
+        this.chatBotExtension = chatBotExtension;
+        this.omniChannelService = OmniChannelService.getInstance();
+        this.mediumService = InteractiveMediumService.getInstance();
+        this.sessionStore = sessionStore;
+        this.mediumService.registerSender(chatBotMessageSender);
+    }
+
+    /**
+     * Creates a session for the authenticated user or retrieves an existing one.
+     *
+     * <p>This method performs the following operations:
+     * <ul>
+     *   <li>Retrieves the authorized account from the authorization context</li>
+     *   <li>Creates an interactive message input with the medium info</li>
+     *   <li>Gets or creates an authenticated account with the specified language</li>
+     *   <li>Stores the session in the session store</li>
+     * </ul>
+     *
+     * @param languageCode the language code for the session (e.g., "en", "es")
+     * @return the inbox ID associated with the user's session
+     */
+    public String getOrCreateSession(String languageCode) {
+        Account authorizedAccount = authorizationContext.getAuthorizedAccount();
+        if (authorizedAccount == null) {
+            LOGGER.error("#####-CHATBOT- NO AUTHORIZED ACCOUNT FOUND IN CONTEXT");
+        }
+        InteractiveMessageIn textMediumMessageIn = new InteractiveMessageIn(new MediumInfo(Constants.MEDIUM_TYPE, authorizedAccount.getAccountId()), null);
+        Account authenticatedAccount = mediumService.getAuthenticatedAccount(textMediumMessageIn, languageCode);
+        String inboxId = mediumService.getSessionInbox(authenticatedAccount).getInboxId();
+        sessionStore.put(authenticatedAccount.getAccountId(), new SessionDto(inboxId));
+        return inboxId;
+    }
+
+    /**
+     * Retrieves messages from the specified inbox with pagination support.
+     *
+     * <p>Fetches messages from the inbox and converts them to MessageDto objects
+     * for API response.
+     *
+     * @param inboxId the unique identifier of the inbox
+     * @param offset the message offset for pagination (message ID to start from)
+     * @param inclusive whether to include the message at the offset position
+     * @param pageSize the maximum number of messages to retrieve
+     * @return a list of MessageDto objects representing the messages
+     */
+    public List<MessageDto> getMessages(String inboxId, String offset, boolean inclusive, int pageSize) {
+        List<MessageDto> messageDtos = new LinkedList<>();
+        try {
+            Inbox inbox = inboxManager.getInbox(inboxId);
+            if (inbox == null) {
+                LOGGER.error("#####-CHATBOT- INBOX NOT FOUND FOR INBOX ID: {}", inboxId);
+                return messageDtos;
+            }
+            List<Message> messages = inbox.getMessages(offset, inclusive, pageSize);
+            for (Message message : messages) {
+                MessageDto messageDto = MessageDtoFactory.create(message);
+                messageDtos.add(messageDto);
+            }
+        } catch (Exception e) {
+            LOGGER.error("#####-CHATBOT- ERROR RETRIEVING MESSAGES FOR INBOX ID: {}", inboxId, e);
+        }
+        return messageDtos;
+    }
+
+    /**
+     * Retrieves the chatbot configuration including UI settings and workspace information.
+     *
+     * <p>The configuration includes:
+     * <ul>
+     *   <li>UI configuration from the uiConfigJson attribute</li>
+     *   <li>Workspace ID and logo</li>
+     *   <li>Node name from routing info</li>
+     *   <li>Multilingual support status</li>
+     *   <li>Krista account ID</li>
+     * </ul>
+     *
+     * @return a Configuration object containing the complete chatbot configuration
+     * @throws AuthorizationException if authorization context is invalid
+     */
+    public Configuration getConfiguration() throws AuthorizationException {
+        String configJson = ChatBotUtil.getJsonConfig(invoker, chatBotExtension);
+        Map<String, Object> configMap = ChatBotUtil.getConfigMap(configJson);
+        String nodeName = invoker.getRoutingInfo().getNodeName();
+        return new Configuration(configMap, workspace.getWorkspaceId(), nodeName, workspace.getWorkspaceLogo(), isMultilingualEnabled(), runtimeContext.getKristaAccount().getAccountId());
+    }
+
+    /**
+     * Submits a form response answer for a specific message in the inbox.
+     *
+     * <p>Processes the form response by:
+     * <ul>
+     *   <li>Converting the submit type to the appropriate enum value</li>
+     *   <li>Creating a MessageAnswer with the form values</li>
+     *   <li>Sending the answer to the omni-channel receiver</li>
+     *   <li>Returning the updated message</li>
+     * </ul>
+     *
+     * @param inboxId the unique identifier of the inbox
+     * @param messageId the unique identifier of the message being answered
+     * @param formResponse the form response containing the user's answer
+     * @return the updated MessageDto after the answer is submitted
+     */
+    public MessageDto submitAnswer(String inboxId, String messageId, FormResponse formResponse) {
+        try {
+            MessageAnswer.SubmitType submitType = MessageAnswer.SubmitType.valueOf(formResponse.getSubmit().getType().toUpperCase());
+            MessageAnswer messageAnswer = MessageAnswer.create(messageId, formResponse.getValues(), submitType, formResponse.getSubmit().getValue());
+            omniChannelService.getReceiver().receiveMessageAnswerForInbox(inboxId, messageAnswer);
+            Inbox inbox = inboxManager.getInbox(inboxId);
+            Message message = inbox.getMessage(messageId);
+            return MessageDtoFactory.create(message);
+        } catch (Exception e) {
+            LOGGER.error("#####-CHATBOT- ERROR SUBMITTING ANSWER FOR INBOX ID: {}, MESSAGE ID: {}", inboxId, messageId, e);
+            return null;
+        }
+    }
+
+    /**
+     * Retrieves the set of supported languages for the workspace.
+     *
+     * @return a set of Language objects representing the supported languages
+     */
+    public Set<Language> getSupportedLanguages() {
+        return workspace.getSupportedLanguages();
+    }
+
+    /**
+     * Checks if multilingual support is enabled for the workspace.
+     *
+     * @return {@code true} if multilingual support is enabled, {@code false} otherwise
+     */
+    private boolean isMultilingualEnabled() {
+        final Set<Language> supportedLanguages = workspace.getSupportedLanguages();
+        return !(supportedLanguages != null
+                && supportedLanguages.size() <= 1
+                && supportedLanguages.contains(workspace.getLanguage()));
+    }
+}

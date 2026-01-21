@@ -1,0 +1,311 @@
+plugins {
+    id 'java-library'
+    id "com.github.node-gradle.node" version "7.0.1"
+    id("io.github.surpsg.code-lines") version "0.0.1"
+}
+codeLinesStat {
+    sourceFilters.skipBlankLines = true // optional, `false` by default
+    fileExtensions = ['java'] // optional, empty by default
+}
+jar.archiveBaseName = "omni-chatbot-extension"
+group 'app.krista.extensions.essentials.collaboration'
+
+/*
+ * Use extension.name for archiveBaseName, extension.version for version.
+ * Resulting jar: <extension.name>-<extension.version>.jar e.g. Omni-Chatbot-2.0.13-rc1.jar
+ */
+def computedBaseName = ""
+def computedVersion = "local"
+
+tasks.register("setReleaseProperties") {
+    dependsOn("generateReleaseProperties")
+    doFirst {
+        def releasePropsFile = file("release.properties")
+        if (releasePropsFile.exists()) {
+            def props = new Properties()
+            releasePropsFile.withInputStream { stream -> props.load(stream) }
+            computedBaseName = (props['extension.name'] ?: computedBaseName).replaceAll(/\s+/, "")
+            computedVersion = props['extension.version'] ?: computedVersion
+
+            project.ext.set("finalBaseName", computedBaseName)
+            project.version = computedVersion
+
+            println "✔ Loaded extension name = ${computedBaseName}, version = ${computedVersion}"
+        } else {
+            logger.warn("⚠ release.properties not found; using default values.")
+            project.ext.set("finalBaseName", computedBaseName)
+            project.version = computedVersion
+        }
+    }
+}
+
+node {
+    // Version of node to use.
+    version = "22.18.0"
+    // Version of npm to use
+    // If specified, installs it in the npmWorkDir
+    // If empty, the plugin will use the npm command bundled with Node.js
+//    npmVersion = "9.6.7"
+    npmVersion = ""
+
+    // Whether to download and install a specific Node.js version or not
+    // If false, it will use the globally installed Node.js
+    // If true, it will download node using above parameters
+    // Note that npm is bundled with Node.js
+    download = true
+
+    // The directory where Node.js is unpacked (when download is true)
+    workDir = file("$projectDir/.gradle/nodejs")
+
+    // The directory where npm is installed (when a specific version is defined)
+    npmWorkDir = file("$projectDir/.gradle/npm")
+
+    // The Node.js project directory location
+    // This is where the package.json file and node_modules directory are located
+    // By default it is at the root of the current project
+    nodeProjectDir = file("$projectDir/src/main/ui/")
+}
+
+if (rootProject.file('buildnr.txt').canRead()) {
+    ext.buildnr = rootProject.file('buildnr.txt').text.trim()
+} else {
+    ext.buildnr = "0"
+}
+
+//Install packages locally
+tasks.register('installPackages', NpmTask) {
+    dependsOn 'nodeSetup'
+    args = ['install']
+}
+//Build and create ui bundle
+tasks.register('bundleUI', NpmTask) {
+    dependsOn 'installPackages'
+    args = ['run', 'build']
+}
+//Build launcher files
+tasks.register('bundleLauncher', NpmTask) {
+    dependsOn 'bundleUI'
+    args = ['run', 'build-launcher']
+}
+
+tasks.register('buildUI') { dependsOn 'bundleLauncher' }
+
+compileJava.dependsOn clean
+compileJava.dependsOn buildUI
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(21))
+    }
+}
+
+test {
+    useJUnitPlatform()
+}
+
+repositories {
+    maven {
+        url "https://packages.cicd.in.antbrains.com/artifactory/libs-release"
+    }
+    mavenCentral()
+}
+
+configurations {
+    implementation {
+        canBeConsumed = false
+        canBeResolved = true
+    }
+}
+
+dependencies {
+    annotationProcessor 'app.krista:extension-impl-anno-processors:feature_KR-19276'
+    implementation 'app.krista:krista-apis:feature_KR-19276'
+    implementation 'org.glassfish.hk2:hk2-api:3.0.3'
+    implementation 'com.kristasoft.common:common-test:1.0.43'
+    implementation 'javax.jms:javax.jms-api:2.0'
+
+    // JUnit 5 (Jupiter) dependencies for testing
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.0'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+
+    // Mockito for mocking
+    testImplementation 'org.mockito:mockito-core:5.5.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.5.0'
+
+    // AssertJ for fluent assertions
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+//Generate launcher.properties from .env file
+tasks.register('generateLauncherProperties') {
+    doLast {
+        def envFile = file("$projectDir/src/main/ui/.env")
+        def propsFile = file("$projectDir/src/main/resources/launcher.properties")
+
+        // Create resources directory if it doesn't exist
+        propsFile.parentFile.mkdirs()
+
+        def launcherVersion = "v1" // default
+
+        if (envFile.exists()) {
+            envFile.eachLine { line ->
+                if (line.startsWith("LAUNCHER_VERSION=")) {
+                    launcherVersion = line.substring("LAUNCHER_VERSION=".length()).trim()
+                }
+            }
+        }
+
+        propsFile.text = "launcher.version=${launcherVersion}\n"
+        println "✔ Generated launcher.properties with version: ${launcherVersion}"
+    }
+}
+
+//Added to copy dist into resource folder
+processResources {
+    dependsOn generateLauncherProperties
+    from("$projectDir/src/main/ui/dist") {
+        into 'ui'
+    }
+}
+
+tasks.register('createSourceDir', Exec) {
+    dependsOn processResources
+    commandLine "mkdir", "-p", "$projectDir/build/classes/java/main/META-INF/project"
+}
+
+tasks.register('copyGradleFile', Exec) {
+    dependsOn createSourceDir
+    commandLine "cp", "$projectDir/build.gradle", "$projectDir/build/classes/java/main/META-INF/project/build.gradle"
+}
+
+tasks.register('includeSources', Exec) {
+    dependsOn copyGradleFile
+    commandLine "cp", "-r", "$projectDir/src", "$projectDir/build/classes/java/main/META-INF/project/src"
+}
+
+tasks.register('cleanDir', Delete) {
+    delete "$projectDir/src/main/ui/dist"
+    delete "$projectDir/src/main/ui/node_modules"
+}
+
+import java.util.regex.Pattern
+
+/*
+    Task to generate release.properties files in below format.
+    extension.version=<version>
+    extension.name=<name>
+    domain.name=<domain>
+    ecosystem.name=<ecosystem>
+    Every extension developer should update extensionFile and areaFileName with relative path.
+ */
+
+abstract class GenerateReleasePropertiesTask extends DefaultTask {
+    @TaskAction
+    def generateProperties() {
+        def extensionFilePath = 'src/main/java/app/krista/extensions/essentials/collaboration/omnichatbot/ChatBotExtension.java'
+        def areaFilePath = 'src/main/java/app/krista/extensions/essentials/collaboration/omnichatbot/catalog/MediumArea.java'
+        def extensionFile = project.file(extensionFilePath)
+        def areaFile = project.file(areaFilePath)
+        if (!extensionFile.exists()) {
+            throw new GradleException("Extension file not found: ${extensionFilePath}")
+        }
+        if (!areaFile.exists()) {
+            throw new GradleException("Area file not found: ${areaFilePath}")
+        }
+        def properties = new Properties()
+        // Pre-compile the regex pattern for better performance
+        def keyValuePattern = Pattern.compile(/(\w+)\s*=\s*"([^"]+)"/)
+        // Extract Extension annotation information
+        extractAnnotationInfo(extensionFile, "@Extension", keyValuePattern) { key, value ->
+            if (key == "name") {
+                properties.setProperty("extension.name", value)
+                logger.lifecycle("Found extension name: ${value}")
+            } else if (key == "version") {
+                properties.setProperty("extension.version", value)
+                logger.lifecycle("Found extension version: ${value}")
+            }
+        }
+        // Extract Domain annotation information
+        extractAnnotationInfo(areaFile, "@Domain", keyValuePattern) { key, value ->
+            if (key == "name") {
+                properties.setProperty("domain.name", value)
+                logger.lifecycle("Found domain name: ${value}")
+            } else if (key == "ecosystemName") {
+                properties.setProperty("ecosystem.name", value)
+                logger.lifecycle("Found ecosystem name: ${value}")
+            }
+        }
+        if (!properties.getProperty('extension.version')) {
+            throw new GradleException("Could not find extension version in ${extensionFilePath}")
+        }
+        if (!properties.getProperty('domain.name') || !properties.getProperty('ecosystem.name')) {
+            throw new GradleException("Could not find domain name or ecosystem name in ${areaFilePath}")
+        }
+        def releasePropertiesFile = project.file('release.properties')
+        def content = properties.collect { key, value -> "${key}=${value}" }.join('\n')
+        releasePropertiesFile.text = content + '\n'
+        logger.lifecycle("Generated release.properties with content:\n${content}")
+    }
+    /**
+     * Extracts annotation information from a file
+     * @param file The file to extract from
+     * @param annotationName The annotation name to look for
+     * @param keyValuePattern The regex pattern to extract key-value pairs
+     * @param processProperty Closure to process each property
+     */
+    private static void extractAnnotationInfo(File file, String annotationName, Pattern keyValuePattern, Closure processProperty) {
+        StringBuilder annotationText = new StringBuilder()
+        boolean inAnnotation = false
+        file.eachLine { line ->
+            line = line.trim()
+            if (line.contains(annotationName)) {
+                inAnnotation = true
+            }
+            if (inAnnotation) {
+                annotationText.append(line)
+                if (line.contains(")")) {
+                    inAnnotation = false
+                    def matcher = keyValuePattern.matcher(annotationText.toString())
+                    while (matcher.find()) {
+                        def key = matcher.group(1)
+                        def value = matcher.group(2)
+                        processProperty.call(key, value)
+                    }
+                }
+            }
+        }
+    }
+}
+
+tasks.register('generateReleaseProperties', GenerateReleasePropertiesTask) {
+    group = 'build'
+    description = 'Generates release.properties file with extension version and domain information'
+}
+tasks.named("jar") {
+    dependsOn tasks.named("generateReleaseProperties")
+}
+
+jar {
+    // This task ensures that release.properties is read *after* it has been generated.
+    // Gradle's configuration phase runs before tasks like `generateReleaseProperties` execute,
+    // so directly reading the release.properties file earlier results in missing or default values.
+    dependsOn tasks.named("setReleaseProperties")
+    archiveBaseName = project.ext.has("finalBaseName") ? project.ext.finalBaseName : "OmniChatbot"
+
+    manifest {
+    }
+    from {
+        configurations.implementation.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+    exclude 'META-INF/*.RSA', 'META-INF/*.SF', 'META-INF/*.DSA'
+    duplicatesStrategy = "exclude"
+}
+
+jar.finalizedBy(cleanDir)

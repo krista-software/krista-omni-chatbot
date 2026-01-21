@@ -1,0 +1,318 @@
+/*
+  "!important" is not necessary if the override css file is
+  included AFTER the default css file
+ */
+
+/* :root {
+  --krista-picker-primary: #0d47a1;
+  --krista-picker-contrast-text: #fff;
+  --krista-picker-text: rgba(0, 0, 0, 0.87);
+  --krista-picker-border: rgba(0, 0, 0, 0.2);
+  --krista-picker-panel-bg: #fff;
+  --krista-picker-days: rgba(0, 0, 0, 0.6);
+  --krista-picker-date-focus-bg: rgba(0, 0, 0, 0.04);
+} */
+
+.rc-picker {
+  width: 100%;
+  font-family: var(--krista-picker-font-family);
+}
+
+.rc-picker-clear {
+  top: 4px !important;
+  right: 0px !important;
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 50%;
+}
+
+.rc-picker-clear:hover {
+  background: var(--krista-picker-date-focus-bg);
+}
+
+.rc-picker-input > input {
+  border-width: 0 0 1px 0;
+  border-radius: 0 !important;
+  border-color: var(--krista-picker-border);
+  border-style: solid;
+  padding: 4px 0 5px;
+  outline: none;
+  background: none;
+  -webkit-tap-highlight-color: transparent;
+  color: inherit;
+  line-height: 1.4375rem;
+  transition: border-color 200ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  font-family: var(--krista-picker-font-family);
+}
+
+.rc-picker-input > input::placeholder {
+  color: currentColor;
+  opacity: 0.4;
+}
+
+.rc-picker-input > input:hover {
+  border-color: var(--krista-picker-text);
+}
+
+.rc-picker-range:has(.rc-picker-clear)
+  .rc-picker-input
+  ~ .rc-picker-input
+  > input {
+  padding-right: 24px;
+}
+
+.inside-table .rc-picker-input > input {
+  border-width: 0;
+}
+
+.rc-picker-focused:not(.rc-picker-range) input {
+  border-color: var(--krista-picker-primary) !important;
+}
+
+.rc-picker-disabled input {
+  border: none !important;
+}
+
+.rc-picker-range-separator {
+  display: flex;
+  align-items: center;
+}
+
+.rc-picker-focused {
+  border: none !important;
+}
+
+.rc-picker-dropdown {
+  box-shadow: none !important;
+  max-width: 100%;
+  z-index: 9999;
+}
+
+.rc-picker-dropdown table {
+  border-collapse: separate !important;
+  border-spacing: 1px !important;
+}
+
+.rc-picker-header-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rc-picker-header-view button:first-of-type {
+  margin-right: 8px;
+}
+
+.rc-picker-panel-container {
+  box-shadow: 0px 5px 5px -3px rgb(0 0 0 / 20%),
+    0px 8px 10px 1px rgb(0 0 0 / 14%), 0px 3px 14px 2px rgb(0 0 0 / 12%) !important;
+  max-width: 100%;
+  overflow: auto;
+}
+
+.rc-picker-panels {
+  display: flex;
+  /* padding-bottom: 16px; */
+  overflow: auto;
+  max-width: 100%;
+  background-color: var(--krista-picker-panel-bg) !important;
+  box-shadow: 0px 5px 5px -3px rgb(0 0 0 / 20%),
+    0px 8px 10px 1px rgb(0 0 0 / 14%), 0px 3px 14px 2px rgb(0 0 0 / 12%) !important;
+}
+
+.rc-picker-panels .rc-picker-panel {
+  box-shadow: none !important;
+}
+
+.rc-picker-panel {
+  background-color: var(--krista-picker-panel-bg) !important;
+  padding: 16px;
+  border: none !important;
+  box-shadow: none !important;
+  font-family: var(--krista-picker-font-family);
+}
+
+.rc-picker-footer {
+  background-color: var(--krista-picker-panel-bg) !important;
+}
+
+.rc-picker-cell {
+  color: #ccc !important;
+  visibility: hidden;
+}
+
+.rc-picker-cell-in-view {
+  color: var(--krista-picker-text) !important;
+  font-size: 0.75rem;
+  visibility: visible;
+  font-family: var(--krista-picker-font-family);
+}
+
+.rc-picker-cell-inner:hover {
+  background-color: var(--krista-picker-date-focus-bg) !important;
+}
+
+.rc-picker-date-panel .rc-picker-cell-inner {
+  height: 30px;
+  min-width: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+
+.rc-picker-content thead th {
+  height: 40px !important;
+  color: var(--krista-picker-days) !important;
+  font-size: 0.75rem;
+  font-family: var(--krista-picker-font-family);
+}
+
+.rc-picker-body {
+  margin-top: 12px;
+}
+
+.rc-picker-cell-today > .rc-picker-cell-inner {
+  border: 1px solid var(--krista-picker-border) !important;
+}
+
+.rc-picker-cell-range-start > .rc-picker-cell-inner,
+.rc-picker-cell-range-end > .rc-picker-cell-inner,
+.rc-picker-cell-selected > .rc-picker-cell-inner {
+  background: var(--krista-picker-primary) !important;
+  color: var(--krista-picker-contrast-text) !important;
+}
+
+.rc-picker-header button {
+  border: none;
+  cursor: pointer;
+  background: none;
+}
+
+.rc-picker-header > button {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.rc-picker-header > button:hover {
+  background: var(--krista-picker-date-focus-bg);
+}
+
+.rc-picker-cell-in-range > .rc-picker-cell-inner {
+  /* background-color: rgba(0, 0, 255, 0.1) !important; */
+  background-color: transparent !important;
+  border: 1px dashed var(--krista-picker-primary) !important;
+}
+
+.rc-picker-cell.rc-picker-cell-range-hover:first-of-type:after,
+.rc-picker-cell-range-hover-start::after {
+  border-radius: 15px 0 0 15px;
+}
+
+.rc-picker-cell.rc-picker-cell-range-hover:last-of-type:after,
+.rc-picker-cell-range-hover-end::after {
+  border-radius: 0 15px 15px 0;
+}
+
+.rc-picker-cell-range-hover-start::after,
+.rc-picker-cell-range-hover-end::after,
+.rc-picker-cell-range-hover::after {
+  top: 0 !important;
+}
+
+.rc-picker-cell.rc-picker-cell-range-hover::after,
+.rc-picker-cell.rc-picker-cell-range-hover-end::after,
+.rc-picker-cell.rc-picker-cell-range-hover-start::after {
+  border-color: var(--krista-picker-border) !important;
+  border-style: dashed !important;
+}
+
+.rc-picker-range .rc-picker-active-bar {
+  height: 2px !important;
+  background: var(--krista-picker-primary) !important;
+}
+
+.rc-picker-time-panel-cell-inner {
+  color: var(--krista-picker-text) !important;
+}
+
+.rc-picker-time-panel-cell-selected .rc-picker-time-panel-cell-inner {
+  background: var(--krista-picker-primary) !important;
+  color: var(--krista-picker-contrast-text) !important;
+}
+
+.rc-picker-time-panel-column > .rc-picker-time-panel-cell-disabled {
+  opacity: 0.2 !important;
+}
+
+.rc-picker-time-panel-cell-inner {
+  padding: 0 !important;
+  text-align: center !important;
+}
+
+.rc-picker-time-panel .rc-picker-content {
+  margin-top: 20px !important;
+}
+
+.rc-picker-datetime-panel .rc-picker-time-panel {
+  border-color: var(--krista-picker-border) !important;
+  margin-left: 8px;
+}
+
+.rc-picker-ranges {
+  padding: 4px 8px !important;
+}
+
+.rc-picker-footer button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--krista-picker-text);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-family: var(--krista-picker-font-family);
+}
+
+.rc-picker-footer button:hover {
+  background: var(--krista-picker-date-focus-bg);
+}
+
+.rc-picker-range-arrow {
+  display: none;
+}
+
+.rc-picker-dropdown .rc-picker-range-arrow::before {
+  border-color: var(--krista-picker-primary) var(--krista-picker-primary)
+    transparent transparent !important;
+}
+
+.rc-picker-dropdown .rc-picker-range-arrow::after {
+  border-color: var(--krista-picker-panel-bg) var(--krista-picker-panel-bg)
+    transparent transparent !important;
+}
+
+.entity-selection-filter {
+  z-index: 10000;
+}
+
+.entity-selection-filter .rc-picker-range-arrow {
+  display: none;
+}
+
+.rc-picker-footer-extra {
+  font-style: italic;
+  font-size: 12px;
+  max-width: 230px;
+  font-family: var(--krista-picker-font-family);
+}
+
+.rc-picker-dropdown-range .rc-picker-footer-extra {
+  max-width: 400px;
+  padding: 16px;
+  padding-top: 0;
+}

@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Krista Chatbot Integration</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f6f6f7;
+            min-height: 100vh;
+        }
+
+        .container {
+            margin: 20px 40px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 30px;
+            align-items: start;
+        }
+
+        @media (max-width: 1200px) {
+            .main-content {
+                grid-template-columns: 1fr 400px;
+            }
+        }
+
+        @media (max-width: 900px) {
+            .main-content {
+                grid-template-columns: 1fr 350px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr 300px;
+                gap: 20px;
+            }
+        }
+
+        .config-panel {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            background: white;
+            color: #212121;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        }
+
+        .panel-header h2 {
+            margin: 0 0 4px 0;
+            font-size: 20px;
+            font-weight: 500;
+            color: #212121;
+        }
+
+        .panel-header p {
+            margin: 0;
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .panel-body {
+            padding: 24px;
+            max-height: calc(100vh - 300px);
+            overflow-y: auto;
+        }
+
+        .sticky-sidebar {
+            position: sticky;
+            top: 20px;
+        }
+
+        .integration-card {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .integration-header {
+            background: white;
+            color: #212121;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+        }
+
+        .integration-header .material-icons {
+            font-size: 24px;
+            color: #009BF4;
+        }
+
+        .integration-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 500;
+            color: #212121;
+        }
+
+        .integration-body {
+            padding: 18px;
+        }
+
+        .code-block {
+            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
+            border-radius: 10px;
+            padding: 12px;
+            position: relative;
+            margin-bottom: 16px;
+            border: 2px solid #3d3d3d;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .code-block pre {
+            color: #e8e8e8;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.8;
+            overflow-x: auto;
+        }
+
+        .code-block code {
+            color: #4fc3f7;
+            text-shadow: 0 0 10px rgba(79, 195, 247, 0.3);
+        }
+
+        .code-tag {
+            color: #f92672;
+        }
+
+        .code-attr {
+            color: #a6e22e;
+        }
+
+        .code-value {
+            color: #e6db74;
+        }
+
+        .code-keyword {
+            color: #c586c0;
+            font-weight: 500;
+        }
+
+        .code-function {
+            color: #dcdcaa;
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            padding: 6px 16px;
+            border-radius: 4px;
+            background: #009BF4;
+            cursor: pointer;
+            color: #fff;
+            border: none;
+            font-weight: 500;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .copy-button:hover {
+            background: #0077c2;
+            box-shadow: 0 2px 4px rgba(0, 155, 244, 0.3);
+        }
+
+        .copy-button.copied {
+            background: #2e7d32;
+        }
+
+        .copy-button.copied:hover {
+            background: #1b5e20;
+        }
+
+        .copy-button .material-icons {
+            font-size: 18px;
+        }
+
+        .save-button-container {
+            position: sticky;
+            bottom: 0;
+            background: white;
+            padding: 20px 24px;
+            border-top: 2px solid #e0e0e0;
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .save-button {
+            padding: 8px 22px;
+            border-radius: 4px;
+            background: #009BF4;
+            cursor: pointer;
+            color: #fff;
+            border: none;
+            font-weight: 500;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: all 0.2s;
+            min-width: 170px;
+        }
+
+        .save-button:hover {
+            background: #0077c2;
+            box-shadow: 0 2px 4px rgba(0, 155, 244, 0.3);
+        }
+
+        .save-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            background: rgba(0, 0, 0, 0.12);
+            color: rgba(0, 0, 0, 0.26);
+        }
+
+        .save-button.saved {
+            background: #2e7d32;
+            opacity: 1;
+            color: #fff;
+        }
+
+        .save-button.saved:hover {
+            background: #2e7d32;
+        }
+
+        .save-button .material-icons {
+            font-size: 20px;
+        }
+
+        .info-card {
+            background: #e3f2fd;
+            border-left: 4px solid #009BF4;
+            border-radius: 4px;
+            padding: 16px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .info-card .material-icons {
+            color: #009BF4;
+            font-size: 24px;
+        }
+
+        .info-card-content {
+            flex: 1;
+        }
+
+        .info-card-content h4 {
+            margin: 0 0 6px 0;
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .info-card-content p {
+            margin: 0;
+            font-size: 13px;
+            color: #666;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group select {
+            width: 100%;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .form-group-checkbox {
+            margin-bottom: 20px;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .checkbox-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .form-group-checkbox input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            border: 2px solid rgba(0, 0, 0, 0.54);
+            border-radius: 2px;
+            background-color: #fff;
+            position: relative;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .form-group-checkbox input[type="checkbox"]:hover {
+            border-color: #009BF4;
+        }
+
+        .form-group-checkbox input[type="checkbox"]:checked {
+            background-color: #009BF4;
+            border-color: #009BF4;
+        }
+
+        .form-group-checkbox input[type="checkbox"]:checked::after {
+            content: '✓';
+            position: absolute;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .form-group-checkbox label {
+            font-weight: 500;
+            font-size: 14px;
+            color: #212121;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-row .form-group {
+            margin-bottom: 0;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="number"],
+        .form-group input[type="url"],
+        .form-group input[type="color"],
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid rgba(0, 0, 0, 0.23);
+            border-radius: 4px;
+            font-size: 14px;
+            font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            transition: all 0.2s;
+            background: white;
+        }
+
+        .form-group input:hover,
+        .form-group select:hover,
+        .form-group textarea:hover {
+            border-color: rgba(0, 0, 0, 0.87);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #009BF4;
+            border-width: 2px;
+            padding: 7px 11px;
+        }
+
+        .form-group input.invalid,
+        .form-group textarea.invalid {
+            border-color: #d32f2f;
+            border-width: 2px;
+            padding: 7px 11px;
+        }
+
+        .form-group input.invalid:focus,
+        .form-group textarea.invalid:focus {
+            border-color: #d32f2f;
+        }
+
+        .field-error {
+            color: #d32f2f;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .field-error.visible {
+            display: block;
+        }
+
+        .checkbox-wrapper .help-text {
+            margin-left: 33px;
+            font-size: 13px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .color-input-wrapper {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .color-input-wrapper input[type="text"] {
+            flex: 1;
+        }
+
+        .color-input-wrapper input[type="color"] {
+            width: 34px;
+            height: 34px;
+            border-radius: 6px;
+            cursor: pointer;
+            padding: 0 2px;
+        }
+
+        .label-with-help {
+            margin-bottom: 8px;
+        }
+
+        .label-row {
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 4px;
+        }
+
+        .label-row label {
+            margin-bottom: 0;
+            font-weight: 600;
+            font-size: 13px;
+            color: #333;
+        }
+
+        .help-text {
+            font-size: 12px;
+            color: #888;
+            font-weight: normal;
+            line-height: 1.4;
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spinner 0.6s linear infinite;
+        }
+
+        @keyframes spinner {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Collapsible Section Styles */
+        .config-section {
+            margin-bottom: 16px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 4px;
+            overflow: hidden;
+            background-color: #fff;
+            transition: all 0.2s;
+        }
+
+        .config-section:hover {
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            background: #fafafa;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s;
+        }
+
+        .section-header:hover {
+            background: #f5f5f5;
+        }
+
+        .section-header-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .section-icon {
+            font-size: 24px;
+            width: 28px;
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 15px;
+            font-weight: 500;
+            color: #212121;
+            margin: 0 0 2px 0;
+        }
+
+        .section-subtitle {
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.6);
+            margin: 0;
+        }
+
+        .section-chevron {
+            color: #888;
+            font-size: 28px;
+            user-select: none;
+            transition: transform 0.3s;
+        }
+
+        .section-chevron.rotated {
+            transform: rotate(180deg);
+        }
+
+        .section-content {
+            padding: 24px;
+            display: none;
+            border-top: 2px solid #f0f0f0;
+            animation: expandSection 0.3s ease;
+        }
+
+        @keyframes expandSection {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .section-content.expanded {
+            display: block;
+        }
+
+        /* Checkbox Grid */
+        .checkbox-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="container">
+    <!-- Main Content Grid -->
+    <div class="main-content">
+        <!-- Configuration Panel (Left) -->
+        <div class="config-panel">
+            <div class="panel-header">
+                <h2>⚙️ Configuration</h2>
+                <p>Customize your chatbot appearance and behavior</p>
+            </div>
+            <div class="panel-body">
+                <form id="configForm">
+                    <!-- Chatbot Bubble Section -->
+                    <div class="config-section">
+                        <div class="section-header" onclick="toggleSection('chatbotBubble')">
+                            <div class="section-header-left">
+                                <span class="section-icon">💬</span>
+                                <div>
+                                    <h3 class="section-title">Chatbot Bubble</h3>
+                                    <p class="section-subtitle">Bubble appearance and icon</p>
+                                </div>
+                            </div>
+                            <span class="material-icons section-chevron" id="chatbotBubble-chevron">keyboard_arrow_down</span>
+                        </div>
+                        <div class="section-content expanded" id="chatbotBubble-content">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <div class="label-with-help">
+                                        <div class="label-row">
+                                            <label for="bubbleText">Bubble Name</label>
+                                            <span class="help-text">Text displayed on the chat bubble</span>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="bubbleText" name="chatBubble.text" placeholder="Talk to us">
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="label-with-help">
+                                        <div class="label-row">
+                                            <label for="bubblePosition">Bubble Position</label>
+                                            <span class="help-text">Bubble position on screen</span>
+                                        </div>
+                                    </div>
+                                    <select id="bubblePosition" name="chatBubble.position">
+                                        <option value="bottomRight">Bottom Right</option>
+                                        <option value="bottomLeft">Bottom Left</option>
+                                        <option value="centerLeft">Center Left</option>
+                                        <option value="centerRight">Center Right</option>
+                                        <option value="topLeft">Top Left</option>
+                                        <option value="topRight">Top Right</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <div class="label-with-help">
+                                        <div class="label-row">
+                                            <label for="bubbleBackgroundColor">Background Color</label>
+                                            <span class="help-text">Bubble icon background color</span>
+                                        </div>
+                                    </div>
+                                    <div class="color-input-wrapper">
+                                        <input type="color" id="bubbleBackgroundColorPicker" value="#4fd7ed">
+                                        <input type="text" id="bubbleBackgroundColor" name="chatBubble.backgroundColor" placeholder="#4fd7ed">
+                                    </div>
+                                    <div class="field-error" id="bubbleBackgroundColor-error">Must be in hex format (e.g., #4fd7ed)</div>
+                                </div>
+
+                                <div class="form-group">
+                                    <div class="label-with-help">
+                                        <div class="label-row">
+                                            <label for="bubbleBorderWidth">Border Width</label>
+                                            <span class="help-text">Border size of the bubble</span>
+                                        </div>
+                                    </div>
+                                    <input type="text" id="bubbleBorderWidth" name="chatBubble.borderWidth" placeholder="1px">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
+                                        <label for="bubbleIcon">Bubble Icon (SVG)</label>
+                                        <span class="help-text">SVG code for the bubble icon</span>
+                                    </div>
+                                </div>
+                                <textarea id="bubbleIcon" name="chatBubble.icon" rows="6" placeholder="<svg>...</svg>" style="font-family: 'Consolas', monospace;"></textarea>
+                            </div>
+
+                            <!-- Custom CSS Instructions -->
+                            <div class="info-card">
+                                <span class="material-icons">info</span>
+                                <div class="info-card-content">
+                                    <h4>Custom CSS Styling</h4>
+                                    <p>If you want to apply custom CSS styles to the chatbot bubble, you can modify the <code style="background-color: rgba(0, 0, 0, 0.08); padding: 2px 6px; border-radius: 3px; font-family: 'Consolas', monospace; font-size: 12px;">bubble-btn</code> CSS class accordingly in your website's stylesheet.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Basic Settings Section -->
+                    <div class="config-section">
+                        <div class="section-header" onclick="toggleSection('basicSettings')">
+                            <div class="section-header-left">
+                                <span class="section-icon">🤖</span>
+                                <div>
+                                    <h3 class="section-title">Basic Settings</h3>
+                                    <p class="section-subtitle">Bot name, subtitle, and logo</p>
+                                </div>
+                            </div>
+                            <span class="material-icons section-chevron" id="basicSettings-chevron">keyboard_arrow_down</span>
+                        </div>
+                        <div class="section-content expanded" id="basicSettings-content">
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
+                                        <label for="botName">Bot Name</label>
+                                        <span class="help-text">Title of the chatbot window</span>
+                                    </div>
+                                </div>
+                                <input type="text" id="botName" name="botName" placeholder="Krista">
+                            </div>
+
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
+                                        <label for="botSubTitle">Bot Subtitle</label>
+                                        <span class="help-text">Subtitle displayed below the bot name</span>
+                                    </div>
+                                </div>
+                                <input type="text" id="botSubTitle" name="botSubTitle" placeholder="Your AI Assistant">
+                            </div>
+
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
+                                        <label for="logo">Logo URL</label>
+                                        <span class="help-text">Chatbot logo image URL</span>
+                                    </div>
+                                </div>
+                                <input type="url" id="logo" name="logo" placeholder="https://yourdomain.com/logo.png">
+                                <div class="field-error" id="logo-error">Please enter a valid URL</div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
+                                        <label for="botNamePosition">Bot Name Position</label>
+                                        <span class="help-text">Header alignment</span>
+                                    </div>
+                                </div>
+                                <select id="botNamePosition" name="botNamePosition">
+                                    <option value="left">Left</option>
+                                    <option value="center">Center</option>
+                                    <option value="right">Right</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                <!-- Appearance Section -->
+                <div class="config-section">
+                    <div class="section-header" onclick="toggleSection('appearance')">
+                        <div class="section-header-left">
+                            <span class="section-icon">🎨</span>
+                            <div>
+                                <h3 class="section-title">Appearance</h3>
+                                <p class="section-subtitle">Colors, borders, and fonts</p>
+                            </div>
+                        </div>
+                        <span class="material-icons section-chevron" id="appearance-chevron">keyboard_arrow_down</span>
+                    </div>
+                    <div class="section-content expanded" id="appearance-content">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
+                                        <label for="borderWidth">Border Width</label>
+                                        <span class="help-text">Border size of the chatbot window</span>
+                                    </div>
+                                </div>
+                                <input type="text" id="borderWidth" name="theme.borderWidth" placeholder="1px">
+                            </div>
+
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
+                                        <label for="borderColor">Border Color</label>
+                                        <span class="help-text">Border color of the chatbot window</span>
+                                    </div>
+                                </div>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="borderColorPicker" value="#0176D6">
+                                    <input type="text" id="borderColor" name="theme.borderColor" placeholder="#ffffff">
+                                </div>
+                                <div class="field-error" id="borderColor-error">Must be in hex format (e.g., #0176D6)</div>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
+                                        <label for="brandColor">Brand Color</label>
+                                        <span class="help-text">Outgoing bubble and button color</span>
+                                    </div>
+                                </div>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="brandColorPicker">
+                                    <input type="text" id="brandColor" name="theme.brandColor" placeholder="#0176D6">
+                                </div>
+                                <div class="field-error" id="brandColor-error">Must be in hex format (e.g., #0176D6)</div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
+                                        <label for="textColor">Text Color</label>
+                                        <span class="help-text">Interface text</span>
+                                    </div>
+                                </div>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="textColorPicker" value="#ffffff">
+                                    <input type="text" id="textColor" name="theme.textColor" placeholder="#000000">
+                                </div>
+                                <div class="field-error" id="textColor-error">Must be in hex format (e.g., #ffffff)</div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
+                                        <label for="dividerColor">Divider Color</label>
+                                        <span class="help-text">Divider lines</span>
+                                    </div>
+                                </div>
+                                <div class="color-input-wrapper">
+                                    <input type="color" id="dividerColorPicker" value="#ffffff">
+                                    <input type="text" id="dividerColor" name="theme.dividerColor" placeholder="#000000">
+                                </div>
+                                <div class="field-error" id="dividerColor-error">Must be in hex format (e.g., #ffffff)</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="label-with-help">
+                                <div class="label-row">
+                                    <label for="fontFamily">Font Family</label>
+                                    <span class="help-text">e.g., Roboto, Arial</span>
+                                </div>
+                            </div>
+                            <input type="text" id="fontFamily" name="theme.fontFamily" placeholder="Roboto">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="label-with-help">
+                                <div class="label-row">
+                                    <label for="fontImportUrl">Font Import URL</label>
+                                    <span class="help-text">Custom fonts URL</span>
+                                </div>
+                            </div>
+                            <input type="url" id="fontImportUrl" name="theme.fontImportUrl" placeholder="https://fonts.googleapis.com/css2?family=Roboto&display=swap">
+                            <div class="field-error" id="fontImportUrl-error">Please enter a valid URL</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Behavior Section -->
+                <div class="config-section">
+                    <div class="section-header" onclick="toggleSection('behavior')">
+                        <div class="section-header-left">
+                            <span class="section-icon">⚙️</span>
+                            <div>
+                                <h3 class="section-title">Behavior</h3>
+                                <p class="section-subtitle">Chatbot functionality options</p>
+                            </div>
+                        </div>
+                        <span class="material-icons section-chevron" id="behavior-chevron">keyboard_arrow_down</span>
+                    </div>
+                    <div class="section-content expanded" id="behavior-content">
+                        <div class="checkbox-grid">
+                            <div class="form-group-checkbox">
+                                <div class="checkbox-wrapper">
+                                    <div class="checkbox-header">
+                                        <input type="checkbox" id="startAsBubble" name="startAsBubble">
+                                        <label for="startAsBubble">Start as Bubble</label>
+                                    </div>
+                                    <span class="help-text">Opens chat window directly if unchecked</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group-checkbox">
+                                <div class="checkbox-wrapper">
+                                    <div class="checkbox-header">
+                                        <input type="checkbox" id="isFullSize" name="isFullSize">
+                                        <label for="isFullSize">Full Size</label>
+                                    </div>
+                                    <span class="help-text">Chat window will occupy full size of the parent</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group-checkbox">
+                                <div class="checkbox-wrapper">
+                                    <div class="checkbox-header">
+                                        <input type="checkbox" id="hideSendMessage" name="hideSendMessage">
+                                        <label for="hideSendMessage">Hide Send Message</label>
+                                    </div>
+                                    <span class="help-text">Allows only conversation messages</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group-checkbox">
+                                <div class="checkbox-wrapper">
+                                    <div class="checkbox-header">
+                                        <input type="checkbox" id="restartOnRefresh" name="restartOnRefresh">
+                                        <label for="restartOnRefresh">Restart on Refresh</label>
+                                    </div>
+                                    <span class="help-text">New session on page refresh</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group-checkbox">
+                                <div class="checkbox-wrapper">
+                                    <div class="checkbox-header">
+                                        <input type="checkbox" id="canChangeLanguage" name="canChangeLanguage">
+                                        <label for="canChangeLanguage">Change Language</label>
+                                    </div>
+                                    <span class="help-text">Shows language selector</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Links & Integration Section -->
+                <div class="config-section">
+                    <div class="section-header" onclick="toggleSection('links')">
+                        <div class="section-header-left">
+                            <span class="section-icon">🔗</span>
+                            <div>
+                                <h3 class="section-title">Links & Integration</h3>
+                                <p class="section-subtitle">Terms, conditions, and API endpoints</p>
+                            </div>
+                        </div>
+                        <span class="material-icons section-chevron" id="links-chevron">keyboard_arrow_down</span>
+                    </div>
+                    <div class="section-content expanded" id="links-content">
+                        <div class="form-group">
+                            <div class="label-with-help">
+                                <div class="label-row">
+                                    <label for="TnCLabel">Terms & Conditions Label</label>
+                                    <span class="help-text">Display text for link</span>
+                                </div>
+                            </div>
+                            <input type="text" id="TnCLabel" name="TnCLabel" placeholder="Terms & Conditions">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="label-with-help">
+                                <div class="label-row">
+                                    <label for="TnC">Terms & Conditions URL</label>
+                                    <span class="help-text">Link to terms page</span>
+                                </div>
+                            </div>
+                            <input type="url" id="TnC" name="TnC" placeholder="https://yourdomain.com/terms">
+                            <div class="field-error" id="TnC-error">Please enter a valid URL</div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="label-with-help">
+                                <div class="label-row">
+                                    <label for="dashboardCallbackUrl">Dashboard Callback URL</label>
+                                    <span class="help-text">API endpoint for transcripts</span>
+                                </div>
+                            </div>
+                            <input type="url" id="dashboardCallbackUrl" name="dashboardCallbackUrl" placeholder="https://yourdomain.com/api/transcript">
+                            <div class="field-error" id="dashboardCallbackUrl-error">Please enter a valid URL</div>
+                        </div>
+                    </div>
+                </div>
+
+                </form>
+            </div>
+            <div class="save-button-container">
+                <button id="saveButton" class="save-button" onclick="saveConfiguration()">
+                    Save Configuration
+                </button>
+            </div>
+        </div>
+
+        <!-- Integration Sidebar (Right) -->
+        <div class="sticky-sidebar">
+            <!-- Integration Code Card -->
+            <div class="integration-card">
+                <div class="integration-header">
+                    <span class="material-icons">code</span>
+                    <h3>Integration Code</h3>
+                </div>
+                <div class="integration-body">
+                    <div class="info-card">
+                        <span class="material-icons">info</span>
+                        <div class="info-card-content">
+                            <h4>Quick Integration</h4>
+                            <p>Copy the code below and paste it into your website's HTML in two steps.</p>
+                        </div>
+                    </div>
+
+                    <!-- Head Tag Section -->
+                    <div style="margin-bottom: 12px;">
+                        <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #333;">Step 1: Add to the &lt;head&gt; tag</h4>
+                        <div class="code-block">
+                            <button class="copy-button" onclick="copyHeadCode()">
+                                <span class="material-icons">content_copy</span>
+                                <span id="copyHeadButtonText">Copy</span>
+                            </button>
+                            <pre><code>
+<span class="code-tag">&lt;link</span> <span class="code-attr">rel</span>=<span class="code-value">"stylesheet"</span> <span class="code-attr">href</span>=<span class="code-value">"_basePath_ui/launcher.css"</span><span class="code-tag">/&gt;</span>
+<span class="code-tag">&lt;script</span> <span class="code-attr">src</span>=<span class="code-value">"_basePath_ui/launcher.js"</span><span class="code-tag">&gt;&lt;/script&gt;</span></code></pre>
+                        </div>
+                    </div>
+
+                    <!-- Body Tag Section -->
+                    <div>
+                        <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #333;">Step 2: Add before closing &lt;/body&gt; tag</h4>
+                        <div class="code-block">
+                            <button class="copy-button" onclick="copyBodyCode()">
+                                <span class="material-icons">content_copy</span>
+                                <span id="copyBodyButtonText">Copy</span>
+                            </button>
+                            <pre><code><span class="code-tag">&lt;script&gt;</span>
+  <span class="code-keyword">const</span> options = {
+    host: <span class="code-value">"_basePath_"</span>
+  }
+  <span class="code-keyword">const</span> kristaChatbot = <span class="code-keyword">new</span> <span class="code-function">Chatbot</span>(options);
+  kristaChatbot.<span class="code-function">init</span>();
+<span class="code-tag">&lt;/script&gt;</span></code></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Configuration object
+let chatbotConfig = {};
+
+function loadConfiguration() {
+    chatbotConfig = _uiConfigJson_;
+    console.log("Loaded Configuration:", chatbotConfig);
+}
+
+// Copy head tag code
+function copyHeadCode() {
+    const codeBlocks = document.querySelectorAll('.code-block pre');
+    const headCodeBlock = codeBlocks[0].innerText;
+    const button = codeBlocks[0].parentElement.querySelector('.copy-button');
+    const buttonText = document.getElementById('copyHeadButtonText');
+
+    navigator.clipboard.writeText(headCodeBlock).then(() => {
+        button.classList.add('copied');
+        buttonText.textContent = 'Copied!';
+
+        setTimeout(() => {
+            button.classList.remove('copied');
+            buttonText.textContent = 'Copy';
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+    });
+}
+
+// Copy body tag code
+function copyBodyCode() {
+    const codeBlocks = document.querySelectorAll('.code-block pre');
+    const bodyCodeBlock = codeBlocks[1].innerText;
+    const button = codeBlocks[1].parentElement.querySelector('.copy-button');
+    const buttonText = document.getElementById('copyBodyButtonText');
+
+    navigator.clipboard.writeText(bodyCodeBlock).then(() => {
+        button.classList.add('copied');
+        buttonText.textContent = 'Copied!';
+
+        setTimeout(() => {
+            button.classList.remove('copied');
+            buttonText.textContent = 'Copy';
+        }, 2000);
+    }).catch(err => {
+        console.error('Failed to copy:', err);
+    });
+}
+
+// Toggle collapsible sections
+function toggleSection(sectionId) {
+    const content = document.getElementById(sectionId + '-content');
+    const chevron = document.getElementById(sectionId + '-chevron');
+
+    if (content.classList.contains('expanded')) {
+        content.classList.remove('expanded');
+        chevron.textContent = 'keyboard_arrow_down';
+        chevron.classList.remove('rotated');
+    } else {
+        content.classList.add('expanded');
+        chevron.textContent = 'keyboard_arrow_up';
+        chevron.classList.add('rotated');
+    }
+}
+
+// Hide messages
+function hideMessages() {
+    // Clear all field-level errors
+    document.querySelectorAll('.field-error').forEach(error => {
+        error.classList.remove('visible');
+    });
+    document.querySelectorAll('.invalid').forEach(field => {
+        field.classList.remove('invalid');
+    });
+}
+
+// Populate form with current configuration
+function populateForm() {
+    document.getElementById('botName').value = chatbotConfig.botName || 'Krista';
+    document.getElementById('botSubTitle').value = chatbotConfig.botSubTitle || '';
+    document.getElementById('logo').value = chatbotConfig.logo || '';
+
+    document.getElementById('borderWidth').value = chatbotConfig.outlineWidth || '';
+    document.getElementById('borderColor').value = chatbotConfig.outlineColor || '';
+    document.getElementById('borderColorPicker').value = chatbotConfig.outlineColor || '#ffffff';
+    document.getElementById('brandColor').value = chatbotConfig.theme?.brandColor || '';
+    document.getElementById('brandColorPicker').value = chatbotConfig.theme?.brandColor || '#0176D6';
+    document.getElementById('textColor').value = chatbotConfig.theme?.textColor || '';
+    document.getElementById('textColorPicker').value = chatbotConfig.theme?.textColor || '';
+    document.getElementById('dividerColor').value = chatbotConfig.theme?.dividerColor || '';
+    document.getElementById('dividerColorPicker').value = chatbotConfig.theme?.dividerColor || '';
+    document.getElementById('fontFamily').value = chatbotConfig.theme?.fontFamily || '';
+    document.getElementById('fontImportUrl').value = chatbotConfig.theme?.fontImportUrl || '';
+
+    document.getElementById('botNamePosition').value = chatbotConfig.botNamePosition || 'center';
+    document.getElementById('TnC').value = chatbotConfig.TnC || '';
+    document.getElementById('TnCLabel').value = chatbotConfig.TnCLabel || '';
+    document.getElementById('dashboardCallbackUrl').value = chatbotConfig['Dashboard Callback Url'] || '';
+
+    // Chatbot Bubble fields with proper defaults
+    const defaultBubbleIcon = `<svg width="26" height="21" viewBox="0 0 26 21" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M0.175781 13.2497C0.175781 11.7472 0.62133 10.2784 1.45609 9.02911C2.29084 7.77981 3.47731 6.8061 4.86546 6.23111C6.2536 5.65612 7.78108 5.50568 9.25473 5.79881C10.7284 6.09193 12.082 6.81547 13.1445 7.87791C14.2069 8.94035 14.9304 10.294 15.2236 11.7676C15.5167 13.2413 15.3662 14.7688 14.7912 16.1569C14.2163 17.5451 13.2425 18.7315 11.9932 19.5663C10.7439 20.401 9.27517 20.8466 7.77265 20.8466C6.48811 20.8466 5.27802 20.5278 4.21722 19.9649L1.12576 20.8482L2.00889 18.1988C0.866308 16.8694 0.175781 15.1402 0.175781 13.2497Z" fill="white"/>
+    <mask id="path-2-outside-1_1277_11480" maskUnits="userSpaceOnUse" x="7.71973" y="0.146484" width="19" height="20" fill="black">
+    <rect fill="white" x="7.71973" y="0.146484" width="19" height="20"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M24.7197 9.74336C24.7197 8.24084 24.2742 6.77206 23.4394 5.52276C22.6047 4.27346 21.4182 3.29975 20.03 2.72476C18.6419 2.14978 17.1144 1.99933 15.6408 2.29246C14.1671 2.58559 12.8135 3.30912 11.7511 4.37156C10.6886 5.434 9.96508 6.78764 9.67195 8.26129C9.37883 9.73494 9.52927 11.2624 10.1043 12.6506C10.6792 14.0387 11.653 15.2252 12.9023 16.0599C14.1516 16.8947 15.6203 17.3402 17.1229 17.3402C18.4074 17.3402 19.6174 17.0214 20.6782 16.4586L23.7697 17.3419L22.8866 14.6925C24.0292 13.3631 24.7197 11.6339 24.7197 9.74336Z"/>
+    </mask>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M24.7197 9.74336C24.7197 8.24084 24.2742 6.77206 23.4394 5.52276C22.6047 4.27346 21.4182 3.29975 20.03 2.72476C18.6419 2.14978 17.1144 1.99933 15.6408 2.29246C14.1671 2.58559 12.8135 3.30912 11.7511 4.37156C10.6886 5.434 9.96508 6.78764 9.67195 8.26129C9.37883 9.73494 9.52927 11.2624 10.1043 12.6506C10.6792 14.0387 11.653 15.2252 12.9023 16.0599C14.1516 16.8947 15.6203 17.3402 17.1229 17.3402C18.4074 17.3402 19.6174 17.0214 20.6782 16.4586L23.7697 17.3419L22.8866 14.6925C24.0292 13.3631 24.7197 11.6339 24.7197 9.74336Z" fill="white"/>
+    <path d="M23.4394 5.52276L24.4995 4.81441L24.4995 4.81441L23.4394 5.52276ZM20.03 2.72476L19.5421 3.90271V3.90271L20.03 2.72476ZM15.6408 2.29246L15.392 1.04196L15.6408 2.29246ZM11.7511 4.37156L12.6526 5.27312V5.27312L11.7511 4.37156ZM9.67195 8.26129L10.9225 8.51003L9.67195 8.26129ZM10.1043 12.6506L11.2822 12.1626L11.2822 12.1626L10.1043 12.6506ZM12.9023 16.0599L13.6106 14.9998H13.6106L12.9023 16.0599ZM20.6782 16.4586L20.0807 15.3323L20.5345 15.0915L21.0285 15.2327L20.6782 16.4586ZM23.7697 17.3419L24.9793 16.9387L25.7437 19.2319L23.4194 18.5678L23.7697 17.3419ZM22.8866 14.6925L21.677 15.0957L21.4484 14.4098L21.9196 13.8615L22.8866 14.6925ZM24.4995 4.81441C25.4744 6.27338 25.9947 7.98867 25.9947 9.74336H23.4447C23.4447 8.49301 23.074 7.27074 22.3793 6.23112L24.4995 4.81441ZM20.518 1.54682C22.1391 2.21831 23.5247 3.35544 24.4995 4.81441L22.3793 6.23112C21.6846 5.19149 20.6973 4.3812 19.5421 3.90271L20.518 1.54682ZM15.392 1.04196C17.113 0.699635 18.8968 0.875328 20.518 1.54682L19.5421 3.90271C18.387 3.42422 17.1158 3.29903 15.8895 3.54296L15.392 1.04196ZM10.8495 3.47C12.0902 2.22925 13.6711 1.38428 15.392 1.04196L15.8895 3.54296C14.6632 3.78689 13.5367 4.38899 12.6526 5.27312L10.8495 3.47ZM8.42145 8.01255C8.76377 6.29157 9.60874 4.71075 10.8495 3.47L12.6526 5.27312C11.7685 6.15725 11.1664 7.2837 10.9225 8.51003L8.42145 8.01255ZM8.92631 13.1385C8.25482 11.5174 8.07913 9.73352 8.42145 8.01255L10.9225 8.51003C10.6785 9.73635 10.8037 11.0075 11.2822 12.1626L8.92631 13.1385ZM12.1939 17.1201C10.7349 16.1452 9.5978 14.7596 8.92631 13.1385L11.2822 12.1626C11.7607 13.3178 12.571 14.3052 13.6106 14.9998L12.1939 17.1201ZM17.1229 18.6152C15.3682 18.6152 13.6529 18.0949 12.1939 17.1201L13.6106 14.9998C14.6502 15.6945 15.8725 16.0652 17.1229 16.0652V18.6152ZM21.2758 17.5849C20.0354 18.243 18.6207 18.6152 17.1229 18.6152V16.0652C18.194 16.0652 19.1995 15.7999 20.0807 15.3323L21.2758 17.5849ZM21.0285 15.2327L24.12 16.116L23.4194 18.5678L20.328 17.6846L21.0285 15.2327ZM22.5601 17.7451L21.677 15.0957L24.0961 14.2893L24.9793 16.9387L22.5601 17.7451ZM25.9947 9.74336C25.9947 11.9502 25.1874 13.9716 23.8535 15.5236L21.9196 13.8615C22.871 12.7545 23.4447 11.3175 23.4447 9.74336H25.9947Z" fill="currentColor" mask="url(#path-2-outside-1_1277_11480)"/>
+    <circle cx="14.2002" cy="9.15996" r="1.16875" fill="currentColor"/>
+    <circle cx="18.8758" cy="9.15996" r="1.16875" fill="currentColor"/>
+    </svg>`;
+
+    document.getElementById('bubbleText').value = chatbotConfig.chatBubble?.text != null ? chatbotConfig.chatBubble.text : 'Talk to us';
+    document.getElementById('bubblePosition').value = chatbotConfig.chatBubble?.position != null ? chatbotConfig.chatBubble.position : 'bottomRight';
+    document.getElementById('bubbleBackgroundColor').value = chatbotConfig.chatBubble?.backgroundColor != null ? chatbotConfig.chatBubble.backgroundColor : '#4fd7ed';
+    document.getElementById('bubbleBackgroundColorPicker').value = chatbotConfig.chatBubble?.backgroundColor != null ? chatbotConfig.chatBubble.backgroundColor : '#4fd7ed';
+    document.getElementById('bubbleBorderWidth').value = chatbotConfig.chatBubble?.borderWidth != null ? chatbotConfig.chatBubble.borderWidth : '1px';
+    document.getElementById('bubbleIcon').value = chatbotConfig.chatBubble?.icon != null ? chatbotConfig.chatBubble.icon : defaultBubbleIcon;
+
+    // Checkboxes - use proper default values and handle undefined/null vs false
+    document.getElementById('startAsBubble').checked = chatbotConfig.startAsBubble != null ? chatbotConfig.startAsBubble : true;
+    document.getElementById('isFullSize').checked = chatbotConfig.isFullSize != null ? chatbotConfig.isFullSize : false;
+    document.getElementById('hideSendMessage').checked = chatbotConfig.hideSendMessage != null ? chatbotConfig.hideSendMessage : false;
+    document.getElementById('restartOnRefresh').checked = chatbotConfig.restartOnRefresh != null ? chatbotConfig.restartOnRefresh : false;
+    document.getElementById('canChangeLanguage').checked = chatbotConfig.canChangeLanguage != null ? chatbotConfig.canChangeLanguage : false;
+}
+
+// Sync color picker with text input
+document.addEventListener('DOMContentLoaded', function() {
+    loadConfiguration();
+
+    // Border color sync
+    document.getElementById('borderColorPicker').addEventListener('input', function(e) {
+        document.getElementById('borderColor').value = e.target.value;
+    });
+    document.getElementById('borderColor').addEventListener('input', function(e) {
+        if (isValidHexColor(e.target.value)) {
+            document.getElementById('borderColorPicker').value = e.target.value;
+        }
+    });
+
+    // Brand color sync
+    document.getElementById('brandColorPicker').addEventListener('input', function(e) {
+        document.getElementById('brandColor').value = e.target.value;
+    });
+    document.getElementById('brandColor').addEventListener('input', function(e) {
+        if (isValidHexColor(e.target.value)) {
+            document.getElementById('brandColorPicker').value = e.target.value;
+        }
+    });
+
+    // Text color sync
+    document.getElementById('textColorPicker').addEventListener('input', function(e) {
+        document.getElementById('textColor').value = e.target.value;
+    });
+    document.getElementById('textColor').addEventListener('input', function(e) {
+        if (isValidHexColor(e.target.value)) {
+            document.getElementById('textColorPicker').value = e.target.value;
+        }
+    });
+
+    // Divider color sync
+    document.getElementById('dividerColorPicker').addEventListener('input', function(e) {
+        document.getElementById('dividerColor').value = e.target.value;
+    });
+    document.getElementById('dividerColor').addEventListener('input', function(e) {
+        if (isValidHexColor(e.target.value)) {
+            document.getElementById('dividerColorPicker').value = e.target.value;
+        }
+    });
+
+    // Bubble background color sync
+    document.getElementById('bubbleBackgroundColorPicker').addEventListener('input', function(e) {
+        document.getElementById('bubbleBackgroundColor').value = e.target.value;
+    });
+    document.getElementById('bubbleBackgroundColor').addEventListener('input', function(e) {
+        if (isValidHexColor(e.target.value)) {
+            document.getElementById('bubbleBackgroundColorPicker').value = e.target.value;
+        }
+    });
+
+    // Real-time URL validation
+    function setupUrlValidation(fieldId) {
+        const field = document.getElementById(fieldId);
+        const errorDiv = document.getElementById(fieldId + '-error');
+
+        field.addEventListener('blur', function() {
+            const value = field.value.trim();
+            if (value && !isValidUrl(value)) {
+                field.classList.add('invalid');
+                errorDiv.classList.add('visible');
+            } else {
+                field.classList.remove('invalid');
+                errorDiv.classList.remove('visible');
+            }
+        });
+
+        field.addEventListener('input', function() {
+            // Clear error on input
+            if (field.classList.contains('invalid')) {
+                const value = field.value.trim();
+                if (!value || isValidUrl(value)) {
+                    field.classList.remove('invalid');
+                    errorDiv.classList.remove('visible');
+                }
+            }
+        });
+    }
+
+    // Real-time color validation
+    function setupColorValidation(fieldId) {
+        const field = document.getElementById(fieldId);
+        const errorDiv = document.getElementById(fieldId + '-error');
+
+        field.addEventListener('blur', function() {
+            const value = field.value.trim();
+            if (value && !isValidHexColor(value)) {
+                field.classList.add('invalid');
+                errorDiv.classList.add('visible');
+            } else {
+                field.classList.remove('invalid');
+                errorDiv.classList.remove('visible');
+            }
+        });
+
+        field.addEventListener('input', function() {
+            // Clear error on input
+            if (field.classList.contains('invalid')) {
+                const value = field.value.trim();
+                if (!value || isValidHexColor(value)) {
+                    field.classList.remove('invalid');
+                    errorDiv.classList.remove('visible');
+                }
+            }
+        });
+    }
+
+    // Setup validation for all URL fields
+    setupUrlValidation('logo');
+    setupUrlValidation('fontImportUrl');
+    setupUrlValidation('TnC');
+    setupUrlValidation('dashboardCallbackUrl');
+
+    // Setup validation for all color fields
+    setupColorValidation('borderColor');
+    setupColorValidation('brandColor');
+    setupColorValidation('textColor');
+    setupColorValidation('dividerColor');
+    setupColorValidation('bubbleBackgroundColor');
+});
+
+// Validation functions
+function isValidHexColor(color) {
+    return /^#([0-9A-Fa-f]{3,4}|[0-9A-Fa-f]{6,8})$/.test(color);
+}
+
+function isValidUrl(str) {
+    try {
+        new URL(str);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function validateForm() {
+    let firstErrorField = null;
+    let hasErrors = false;
+
+    // Helper function to show field error
+    function showFieldError(fieldId) {
+        const field = document.getElementById(fieldId);
+        const errorDiv = document.getElementById(fieldId + '-error');
+        field.classList.add('invalid');
+        errorDiv.classList.add('visible');
+        if (!firstErrorField) {
+            firstErrorField = field;
+        }
+        hasErrors = true;
+    }
+
+    // Validate color fields - if provided, must be valid hex format
+    const borderColor = document.getElementById('borderColor').value.trim();
+    if (borderColor && !isValidHexColor(borderColor)) {
+        showFieldError('borderColor');
+    }
+
+    const brandColor = document.getElementById('brandColor').value.trim();
+    if (brandColor && !isValidHexColor(brandColor)) {
+        showFieldError('brandColor');
+    }
+
+    const textColor = document.getElementById('textColor').value.trim();
+    if (textColor && !isValidHexColor(textColor)) {
+        showFieldError('textColor');
+    }
+
+    const dividerColor = document.getElementById('dividerColor').value.trim();
+    if (dividerColor && !isValidHexColor(dividerColor)) {
+        showFieldError('dividerColor');
+    }
+
+    const bubbleBackgroundColor = document.getElementById('bubbleBackgroundColor').value.trim();
+    if (bubbleBackgroundColor && !isValidHexColor(bubbleBackgroundColor)) {
+        showFieldError('bubbleBackgroundColor');
+    }
+
+    // Validate URL fields - if provided, must be valid and start with http:// or https://
+    const logo = document.getElementById('logo').value.trim();
+    if (logo && !isValidUrl(logo)) {
+        showFieldError('logo');
+    }
+
+    const fontImportUrl = document.getElementById('fontImportUrl').value.trim();
+    if (fontImportUrl && !isValidUrl(fontImportUrl)) {
+        showFieldError('fontImportUrl');
+    }
+
+    const TnC = document.getElementById('TnC').value.trim();
+    if (TnC && !isValidUrl(TnC)) {
+        showFieldError('TnC');
+    }
+
+    const dashboardCallbackUrl = document.getElementById('dashboardCallbackUrl').value.trim();
+    if (dashboardCallbackUrl && !isValidUrl(dashboardCallbackUrl)) {
+        showFieldError('dashboardCallbackUrl');
+    }
+
+    // Scroll to first error field if there are errors
+    if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    return hasErrors;
+}
+
+// Save configuration
+async function saveConfiguration() {
+    // Hide any previous messages
+    hideMessages();
+
+    // Validate form
+    const hasErrors = validateForm();
+    if (hasErrors) {
+        return;
+    }
+
+    // Collect configuration from form with default values
+    const botNameValue = document.getElementById('botName').value.trim();
+    const botNamePositionValue = document.getElementById('botNamePosition').value;
+    const startAsBubbleChecked = document.getElementById('startAsBubble').checked;
+
+    chatbotConfig = {
+        botName: botNameValue || 'Krista',
+        botSubTitle: document.getElementById('botSubTitle').value,
+        logo: document.getElementById('logo').value,
+        outlineWidth: document.getElementById('borderWidth').value,
+        outlineColor: document.getElementById('borderColor').value,
+        theme: {
+            brandColor: document.getElementById('brandColor').value,
+            textColor: document.getElementById('textColor').value,
+            dividerColor: document.getElementById('dividerColor').value,
+            fontFamily: document.getElementById('fontFamily').value,
+            fontImportUrl: document.getElementById('fontImportUrl').value
+        },
+        chatBubble: {
+            text: document.getElementById('bubbleText').value,
+            position: document.getElementById('bubblePosition').value,
+            backgroundColor: document.getElementById('bubbleBackgroundColor').value,
+            borderWidth: document.getElementById('bubbleBorderWidth').value,
+            icon: document.getElementById('bubbleIcon').value
+        },
+        startAsBubble: botNameValue ? startAsBubbleChecked : true,
+        isFullSize: document.getElementById('isFullSize').checked,
+        hideSendMessage: document.getElementById('hideSendMessage').checked,
+        restartOnRefresh: document.getElementById('restartOnRefresh').checked,
+        botNamePosition: botNameValue ? botNamePositionValue : 'center',
+        canChangeLanguage: document.getElementById('canChangeLanguage').checked,
+        TnC: document.getElementById('TnC').value,
+        TnCLabel: document.getElementById('TnCLabel').value,
+        'Dashboard Callback Url': document.getElementById('dashboardCallbackUrl').value
+    };
+
+    // Get the save button and show loading state
+    const saveButton = document.getElementById('saveButton');
+    const originalButtonText = saveButton.innerHTML;
+    saveButton.disabled = true;
+    saveButton.innerHTML = '<span class="loading-spinner"></span> Saving...';
+
+    try {
+        // Get the base path from the page
+        const basePath = '_basePath_';
+        const apiUrl = basePath + 'saveUIConfig';
+
+        // Make POST API call
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(chatbotConfig)
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const result = await response.json();
+
+        if (result.success) {
+            // Change button text to "Saved successfully" with green background
+            saveButton.innerHTML = 'Saved successfully';
+            saveButton.classList.add('saved');
+
+            // Reset button after 2 seconds
+            setTimeout(() => {
+                saveButton.disabled = false;
+                saveButton.innerHTML = originalButtonText;
+                saveButton.classList.remove('saved');
+            }, 2000);
+        } else {
+            throw new Error(result.message || 'Failed to save configuration');
+        }
+
+    } catch (error) {
+        console.error('Error saving configuration:', error);
+        alert('Failed to save the configuration. Please ensure that all attributes have been successfully validated in the Setup tab.');
+
+        // Re-enable button
+        saveButton.disabled = false;
+        saveButton.innerHTML = originalButtonText;
+    }
+}
+
+// Initialize on page load
+window.addEventListener('DOMContentLoaded', function() {
+    loadConfiguration();
+    populateForm();
+});
+</script>
+</body>
+</html>
