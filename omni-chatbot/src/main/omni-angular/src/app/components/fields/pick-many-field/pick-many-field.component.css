@@ -1,0 +1,299 @@
+/* Pick Many Field (Checkboxes) - Match App */
+.pick-many-field .field-container {
+}
+
+/* .field-label intentionally not overridden here — see shared-field-styles.css. */
+
+.pick-many-field .checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pick-many-field .checkbox-option {
+  margin-left: -10px;
+  margin-right: 0;
+  font-size: var(--kr-font-size-sm);
+  max-width: 100%;
+  word-break: normal;
+}
+
+/* Match original app checkbox styling */
+.pick-many-field .checkbox-option .mat-mdc-checkbox {
+  padding: 6px 0;
+  --mdc-checkbox-state-layer-size: 40px;
+  --mdc-checkbox-selected-icon-color: #fff;
+  --mdc-checkbox-selected-hover-icon-color: #fff;
+  --mdc-checkbox-selected-focus-icon-color: #fff;
+  --mdc-checkbox-selected-pressed-icon-color: #fff;
+  --mdc-checkbox-unselected-icon-color: rgba(0, 0, 0, 0.54);
+  --mdc-checkbox-unselected-hover-icon-color: #1976d2;
+  --mdc-checkbox-unselected-focus-icon-color: #1976d2;
+  --mdc-checkbox-unselected-pressed-icon-color: rgba(0, 0, 0, 0.54);
+  --mdc-checkbox-selected-checkmark-color: #fff;
+  --mdc-checkbox-selected-focus-state-layer-color: #1976d2;
+  --mdc-checkbox-selected-hover-state-layer-color: #1976d2;
+  --mdc-checkbox-selected-pressed-state-layer-color: #1976d2;
+  --mdc-checkbox-unselected-focus-state-layer-color: rgba(0, 0, 0, 0.12);
+  --mdc-checkbox-unselected-hover-state-layer-color: rgba(0, 0, 0, 0.04);
+  --mdc-checkbox-unselected-pressed-state-layer-color: rgba(0, 0, 0, 0.12);
+}
+
+/* Checkbox size and spacing */
+.pick-many-field .checkbox-option .mat-mdc-checkbox .mdc-checkbox {
+  width: 18px;
+  height: 18px;
+  padding: 6px;
+}
+
+/* Unchecked state */
+.pick-many-field .checkbox-option .mat-mdc-checkbox:not(.mat-mdc-checkbox-checked) {
+  --mdc-checkbox-unselected-icon-color: rgba(0, 0, 0, 0.54);
+}
+
+/* Checked state */
+.pick-many-field .checkbox-option .mat-mdc-checkbox.mat-mdc-checkbox-checked {
+  --mdc-checkbox-selected-icon-color: #1976d2;
+  --mdc-checkbox-selected-checkmark-color: #fff;
+}
+
+/* Force checkbox colors using !important if needed */
+.pick-many-field .checkbox-option .mat-mdc-checkbox.mat-mdc-checkbox-checked .mdc-checkbox__native-control:enabled ~ .mdc-checkbox__background {
+  background-color: #1976d2 !important;
+  border-color: #1976d2 !important;
+}
+
+.pick-many-field .checkbox-option .mat-mdc-checkbox:not(.mat-mdc-checkbox-checked) .mdc-checkbox__native-control:enabled ~ .mdc-checkbox__background {
+  background-color: transparent !important;
+  border-color: rgba(0, 0, 0, 0.54) !important;
+}
+
+/* Dropdown with clear button layout */
+.dropdown-with-clear {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.dropdown-with-clear mat-select {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Clear button beside dropdown */
+.clear-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  color: rgba(0, 0, 0, 0.54);
+  transition: background-color 0.2s ease, color 0.2s ease;
+  flex-shrink: 0;
+}
+
+.clear-button:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.clear-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Clear button for checkbox mode */
+.clear-button-checkbox {
+  display: inline-flex;
+  align-items: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 2px 8px;
+  border-radius: 4px;
+  color: rgba(0, 0, 0, 0.54);
+  margin-top: 4px;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.clear-button-checkbox:hover {
+  background-color: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.87);
+}
+
+.clear-button-checkbox .clear-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.clear-text {
+  font-size: 0.75rem;
+  margin-left: 2px;
+  color: inherit;
+}
+
+/* Dropdown mode styling - mat-select with search */
+.pick-many-field .dropdown-field {
+  width: 100%;
+}
+
+.pick-many-field .dropdown-field ::ng-deep .mat-mdc-select {
+  background-color: #ffffff;
+  border: 1px solid var(--kr-color-border, #e4e4e4);
+  border-radius: 6px;
+  padding: 8px 12px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  transition: border-color 0.2s ease;
+}
+
+.pick-many-field .dropdown-field ::ng-deep .mat-mdc-select:hover {
+  border-color: var(--kr-color-primary, #0169BE);
+}
+
+.pick-many-field .dropdown-field ::ng-deep .mat-mdc-select-value-text {
+  font-size: var(--kr-font-size-sm);
+  color: var(--kr-text-color-primary, #212121);
+}
+
+.pick-many-field .dropdown-field ::ng-deep .mat-mdc-select-placeholder {
+  font-size: 0.8125rem;
+  color: var(--kr-text-color-light, #aaaaaa);
+}
+
+.pick-many-field .dropdown-field ::ng-deep .mat-mdc-select-arrow {
+  color: var(--kr-text-color-secondary, #434343);
+}
+
+/* Search input inside select panel */
+.select-search-wrapper {
+  display: flex;
+  align-items: center;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--kr-color-border, #e4e4e4);
+  position: sticky;
+  top: 0;
+  background: #ffffff;
+  z-index: 1;
+}
+
+.select-search-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--kr-font-size-sm);
+  color: var(--kr-text-color-primary, #212121);
+  padding: 4px 0;
+}
+
+.select-search-input::placeholder {
+  color: var(--kr-text-color-light, #aaaaaa);
+  font-size: 0.8125rem;
+}
+
+.search-clear-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+.no-results-message {
+  padding: 12px 16px;
+  font-size: var(--kr-font-size-sm);
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.54);
+}
+
+/* Readonly display - plain text for <= 5 items */
+.readonly-value {
+  font-size: var(--kr-font-size-sm);
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  word-break: break-word;
+}
+
+/* Readonly dropdown container */
+.readonly-dropdown {
+  position: relative;
+}
+
+/* Readonly dropdown trigger - looks like a select */
+.readonly-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  border: 1px solid var(--kr-color-border, #e4e4e4);
+  border-radius: 6px;
+  padding: 8px 12px;
+  min-height: 40px;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.readonly-trigger:hover {
+  border-color: var(--kr-color-primary, #0169BE);
+}
+
+.readonly-trigger-text {
+  font-size: var(--kr-font-size-sm);
+  color: var(--kr-text-color-primary, #212121);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.readonly-trigger-arrow {
+  color: var(--kr-text-color-secondary, #434343);
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+/* Hide the actual mat-select visually but keep full width for CDK overlay panel sizing */
+.readonly-hidden-select {
+  position: absolute;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* No options message styling */
+.no-options-message {
+  margin-top: 8px;
+  color: var(--krista-text-secondary, rgba(0, 0, 0, 0.6));
+  font-size: var(--kr-font-size-sm);
+  font-style: italic;
+}
+
+/* Error message styling */
+.field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+  margin-top: 4px;
+}
+
+/* Required asterisk */
+.required-asterisk {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+/* Responsive: scales naturally via max-width: 100% on parent. */

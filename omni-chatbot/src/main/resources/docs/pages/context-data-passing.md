@@ -413,7 +413,7 @@ const contextData = {
 ## See Also
 
 - [Extension Configuration](pages/extension-configuration.md) - Configure the chatbot extension
-- [Get Script Element](pages/get-script-element.md) - Generate integration script
+- [Get Integration Information](get-integration-script.md) - Embed script and direct chatbot link
 - [Testing the Chatbot](pages/testing-chatbot.md) - Test context data passing
 
 

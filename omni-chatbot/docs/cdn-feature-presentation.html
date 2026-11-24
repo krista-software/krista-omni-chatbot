@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CDN Boot Resilience — Omni Chatbot 3.0.6</title>
+<style>
+  :root{
+    --blue:#0177C6; --blue2:#009BF4; --ink:#0f2233; --muted:#5b6b7a;
+    --bg:#f4f8fc; --card:#ffffff; --good:#1aa251; --bad:#e5484d; --warn:#e8a33d;
+    --line:rgba(0,0,0,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    background:#0b1a2a;color:var(--ink);overflow:hidden;
+  }
+  #deck{height:100vh;width:100vw;position:relative}
+  .slide{
+    position:absolute;inset:0;display:none;flex-direction:column;
+    padding:56px 72px 72px;background:
+      radial-gradient(1200px 600px at 100% -10%,rgba(1,155,244,.10),transparent 60%),
+      radial-gradient(900px 500px at -10% 110%,rgba(1,119,198,.10),transparent 60%),
+      var(--bg);
+    animation:fade .35s ease;
+  }
+  .slide.active{display:flex}
+  @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .kicker{font-size:15px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin-bottom:10px}
+  h1{font-size:52px;line-height:1.08;font-weight:800;letter-spacing:-.02em}
+  h2{font-size:38px;line-height:1.12;font-weight:800;letter-spacing:-.01em;margin-bottom:6px}
+  h2 .mini{font-size:18px;font-weight:600;color:var(--muted);margin-left:12px}
+  p.lead{font-size:21px;color:var(--muted);max-width:60ch;line-height:1.5;margin-top:10px}
+  .fill{flex:1;display:flex;flex-direction:column;justify-content:center}
+  .row{display:flex;gap:28px;align-items:stretch}
+  .col{flex:1}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px 28px;box-shadow:0 10px 30px rgba(10,40,70,.06)}
+  .card h3{font-size:20px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+  .tag{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.06em;padding:5px 11px;border-radius:999px;text-transform:uppercase}
+  .tag.before{background:rgba(229,72,77,.12);color:var(--bad)}
+  .tag.after{background:rgba(26,162,81,.12);color:var(--good)}
+  ul.big{list-style:none;display:flex;flex-direction:column;gap:14px;margin-top:6px}
+  ul.big li{font-size:19px;line-height:1.45;padding-left:34px;position:relative;color:var(--ink)}
+  ul.big li::before{content:"";position:absolute;left:0;top:7px;width:18px;height:18px;border-radius:6px;background:linear-gradient(135deg,var(--blue2),var(--blue))}
+  ul.big.x li::before{background:var(--bad)}
+  ul.big.ok li::before{background:var(--good)}
+  .foot{position:absolute;bottom:26px;left:72px;right:72px;display:flex;justify-content:space-between;align-items:center;font-size:14px;color:var(--muted)}
+  .foot .brand{font-weight:800;color:var(--blue)}
+  .pg{font-variant-numeric:tabular-nums}
+  .progress{position:absolute;top:0;left:0;height:4px;background:linear-gradient(90deg,var(--blue2),var(--blue));transition:width .3s}
+  /* diagram bits */
+  .flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;justify-content:center}
+  .node{background:var(--card);border:2px solid var(--line);border-radius:14px;padding:16px 20px;font-weight:700;font-size:17px;text-align:center;min-width:118px;box-shadow:0 6px 18px rgba(10,40,70,.06)}
+  .node small{display:block;font-weight:600;color:var(--muted);font-size:12.5px;margin-top:3px}
+  .node.cdn{border-color:var(--blue2);background:linear-gradient(180deg,#eaf6ff,#fff)}
+  .node.origin{border-color:#c7d3de}
+  .node.down{border-color:var(--bad);background:repeating-linear-gradient(45deg,#fff,#fff 8px,#fde8e8 8px,#fde8e8 16px);color:var(--bad)}
+  .arrow{font-size:26px;color:var(--blue);margin:0 12px;font-weight:800}
+  .arrow.bad{color:var(--bad)}
+  .arrow.good{color:var(--good)}
+  .cross{color:var(--bad);font-weight:900}
+  .pill{display:inline-flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--line);border-radius:999px;padding:8px 15px;font-weight:700;font-size:15px}
+  .dot{width:10px;height:10px;border-radius:50%}
+  .dot.g{background:var(--good)}.dot.r{background:var(--bad)}.dot.b{background:var(--blue2)}.dot.w{background:var(--warn)}
+  table.cache{width:100%;border-collapse:collapse;font-size:16px;margin-top:6px}
+  table.cache th,table.cache td{text-align:left;padding:13px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.cache th{font-size:13px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted)}
+  table.cache code{background:#eef4fa;padding:2px 7px;border-radius:6px;font-size:14px}
+  .center{align-items:center;text-align:center}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:22px}
+  .stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:26px;text-align:center}
+  .stat .num{font-size:44px;font-weight:800;color:var(--blue);letter-spacing:-.02em}
+  .stat .lbl{font-size:16px;color:var(--muted);margin-top:6px;line-height:1.4}
+  .note{margin-top:18px;background:rgba(232,163,61,.10);border:1px solid rgba(232,163,61,.35);border-radius:14px;padding:16px 20px;font-size:16px;color:#8a5a12;display:flex;gap:12px}
+  .note b{color:#6b4610}
+  .hint{position:absolute;bottom:26px;right:50%;transform:translateX(50%);font-size:13px;color:var(--muted);opacity:.8}
+  .browser{display:inline-flex;flex-direction:column;align-items:center;gap:6px}
+  .win{width:150px;height:96px;border:2px solid var(--line);border-radius:12px;background:#fff;position:relative;overflow:hidden}
+  .win .bar{height:20px;background:#eef4fa;border-bottom:1px solid var(--line)}
+  .win .bubble{position:absolute;right:10px;bottom:10px;width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--blue2),var(--blue))}
+  .win.empty .bubble{display:none}
+  .win.empty::after{content:"no bubble";position:absolute;inset:20px 0 0;display:flex;align-items:center;justify-content:center;color:var(--bad);font-size:13px;font-weight:700}
+  .title-wrap{display:flex;flex-direction:column;justify-content:center;height:100%}
+  .badge{display:inline-flex;gap:10px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:999px;padding:9px 16px;font-weight:700;color:var(--blue);width:max-content;font-size:15px}
+  .tickets{margin-top:26px;display:flex;gap:12px}
+  .ticket{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 18px;font-weight:700;font-size:16px}
+  .ticket small{display:block;color:var(--muted);font-weight:600;font-size:13px;margin-top:2px}
+</style>
+</head>
+<body>
+<div id="deck">
+
+<!-- 1 TITLE -->
+<section class="slide active center">
+  <div class="title-wrap center" style="align-items:center">
+    <div class="badge">🛡️ Omni Chatbot 3.0.6 · Feature Grilling</div>
+    <h1 style="margin-top:22px;max-width:20ch;text-align:center">Keeping the Chatbot Alive During Server Upgrades</h1>
+    <p class="lead" style="text-align:center;margin-inline:auto">CDN Boot Resilience — how we make the chat bubble load on customer websites even while Krista is restarting.</p>
+    <div class="tickets" style="justify-content:center">
+      <div class="ticket">KR-21091<small>CDN caching / boot resilience</small></div>
+    </div>
+  </div>
+</section>
+
+<!-- 2 PROBLEM -->
+<section class="slide">
+  <div class="kicker">The Problem</div>
+  <h2>Every upgrade made the chatbot vanish</h2>
+  <div class="fill">
+    <div class="row">
+      <div class="col card">
+        <h3><span class="tag before">Before</span> What customers saw</h3>
+        <ul class="big x">
+          <li>We upgrade / restart an invoker (routine).</li>
+          <li>During that window the chatbot's <b>config request</b> has nowhere to go.</li>
+          <li>The bubble <b>fails to load</b> on the customer's live website.</li>
+          <li>Proxy logs flooded with <b>499 errors</b> (browser gave up waiting).</li>
+        </ul>
+      </div>
+      <div class="col card center" style="justify-content:center">
+        <div class="row" style="align-items:center;justify-content:center;gap:20px">
+          <div class="browser">
+            <div class="win"><div class="bar"></div><div class="bubble"></div></div>
+            <span class="pill"><span class="dot g"></span>Healthy</span>
+          </div>
+          <div class="arrow bad">➜</div>
+          <div class="browser">
+            <div class="win empty"><div class="bar"></div></div>
+            <span class="pill"><span class="dot r"></span>During upgrade</span>
+          </div>
+        </div>
+        <p class="lead" style="font-size:17px;margin-top:22px">A real production incident on a customer site (Adani) — the bubble disappeared every time we deployed.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 3 WHY -->
+<section class="slide">
+  <div class="kicker">Why It Happened</div>
+  <h2>The browser asked the origin server <span class="mini">…every single time</span></h2>
+  <div class="fill">
+    <div class="card center" style="padding:44px">
+      <div class="flow">
+        <div class="node">Customer<br>Browser<small>needs config to boot</small></div>
+        <div class="arrow">→</div>
+        <div class="node origin down">Krista Origin<small>restarting ✕</small></div>
+      </div>
+      <p class="lead" style="text-align:center;margin:26px auto 0">
+        To draw the bubble, the browser first fetches <code style="font-size:16px">/chatbot/config</code>.
+        That request went <b>straight to the origin server</b> on every page load.
+        When the origin is down for an upgrade, the request times out → <b>no bubble</b>.
+      </p>
+      <div class="note" style="max-width:760px;margin-inline:auto">
+        <span>💡</span><div><b>Key insight:</b> config rarely changes (it's just the bot's theme, logo, welcome text). There is no reason to ask a live server for it on every single visit.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4 THE IDEA -->
+<section class="slide">
+  <div class="kicker">The Idea</div>
+  <h2>Put a CDN cache in front of the config</h2>
+  <div class="fill">
+    <div class="card center" style="padding:40px">
+      <div class="flow">
+        <div class="node">Customer<br>Browser</div>
+        <div class="arrow good">→</div>
+        <div class="node cdn">CDN Edge<br><small>(CloudFront)</small><small>keeps a copy 30 min</small></div>
+        <div class="arrow">→</div>
+        <div class="node origin down">Krista Origin<small>restarting ✕</small></div>
+      </div>
+      <p class="lead" style="text-align:center;margin:24px auto 0">
+        The CDN sits between the browser and the origin. Once it has a copy of the config,
+        it can <b>answer the browser itself</b> — even when the origin behind it is down.
+      </p>
+      <div class="row" style="margin-top:24px;gap:16px;max-width:820px;margin-inline:auto">
+        <span class="pill"><span class="dot b"></span>Think: a nearby shop with the item in stock…</span>
+        <span class="pill"><span class="dot g"></span>…so you don't drive to the faraway warehouse each time.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 BEFORE/AFTER -->
+<section class="slide">
+  <div class="kicker">Before vs After</div>
+  <h2>Same upgrade, very different outcome</h2>
+  <div class="fill">
+    <div class="row">
+      <div class="col card">
+        <h3><span class="tag before">Before</span></h3>
+        <div class="flow" style="justify-content:flex-start;margin:10px 0 18px">
+          <div class="node" style="min-width:92px">Browser</div>
+          <div class="arrow bad">→</div>
+          <div class="node origin down" style="min-width:92px">Origin ✕</div>
+        </div>
+        <ul class="big x">
+          <li>Config fetch dies with the origin</li>
+          <li>Bubble never appears</li>
+          <li>499 error storm</li>
+        </ul>
+      </div>
+      <div class="col card">
+        <h3><span class="tag after">After</span></h3>
+        <div class="flow" style="justify-content:flex-start;margin:10px 0 18px">
+          <div class="node" style="min-width:80px">Browser</div>
+          <div class="arrow good">→</div>
+          <div class="node cdn" style="min-width:80px">CDN ✓</div>
+          <div class="arrow">⇢</div>
+          <div class="node origin down" style="min-width:80px">Origin ✕</div>
+        </div>
+        <ul class="big ok">
+          <li>CDN serves last-good config</li>
+          <li>Bubble loads normally</li>
+          <li>Origin shielded — no 499 storm</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 HOW: headers -->
+<section class="slide">
+  <div class="kicker">How It Works — 1 of 3</div>
+  <h2>We tell each response how long it may be cached</h2>
+  <div class="fill">
+    <div class="card">
+      <table class="cache">
+        <tr><th>What</th><th>Cache rule (plain English)</th><th>Why</th></tr>
+        <tr><td><code>config</code>, <code>launcher-file</code>, <code>supportedLanguages</code></td>
+            <td>Browser &amp; CDN keep it <b>30 min</b>; serve last-good for up to <b>24 h</b> if origin is down</td>
+            <td>Rarely changes; must survive upgrades</td></tr>
+        <tr><td><code>launcher.js</code> / <code>.css</code></td>
+            <td><b>CDN</b> keeps 30 min; browser always re-checks the edge</td>
+            <td>Edge-served, but updates propagate fast</td></tr>
+        <tr><td>Hashed UI files <code>/ui/…</code></td>
+            <td>Cache <b>1 year</b> (filename changes when content changes)</td>
+            <td>Safe forever — new build = new name</td></tr>
+        <tr><td><b>Everything else</b><br>(messages, session, login)</td>
+            <td><b style="color:var(--bad)">Never cached</b> — default-deny</td>
+            <td>Private, per-user data</td></tr>
+      </table>
+    </div>
+    <div class="note"><span>🔒</span><div><b>Default-deny:</b> anything that doesn't explicitly ask to be cached is stamped "do not store." Caching is opt-in, so private data can never leak into a shared cache by accident.</div></div>
+  </div>
+</section>
+
+<!-- 7 HOW: versioned -->
+<section class="slide">
+  <div class="kicker">How It Works — 2 of 3</div>
+  <h2>A version number in the URL <span class="mini">gives the CDN a clean cache key</span></h2>
+  <div class="fill">
+    <div class="card center" style="padding:38px">
+      <div class="flow">
+        <div class="node">Browser asks<br><small>/chatbot/<b>0</b>/config</small></div>
+        <div class="arrow good">→</div>
+        <div class="node cdn">CDN caches<br>by that URL<small>version 0 → copy A</small></div>
+        <div class="arrow">→</div>
+        <div class="node origin">Origin strips<br>the version<small>same handler as before</small></div>
+      </div>
+      <p class="lead" style="text-align:center;margin:24px auto 0">
+        The version segment (<code style="font-size:16px">/0/</code>) is added by the app and removed by the server —
+        <b>backend routing is unchanged</b>. When we ship a new config shape, we bump the number and the CDN
+        naturally starts a fresh cache entry. No manual cache purge needed.
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- 8 HOW: freshness / preview -->
+<section class="slide">
+  <div class="kicker">How It Works — 3 of 3</div>
+  <h2>But admins must see edits <em>instantly</em></h2>
+  <div class="fill">
+    <div class="row">
+      <div class="col card">
+        <h3>The tension</h3>
+        <ul class="big">
+          <li>Customers want <b>cached</b> config (fast, resilient).</li>
+          <li>Admins previewing changes want <b>fresh</b> config (no 30-min wait).</li>
+        </ul>
+        <p class="lead" style="font-size:17px;margin-top:14px">Same data, two opposite needs.</p>
+      </div>
+      <div class="col card">
+        <h3>The solution — a separate door</h3>
+        <div class="flow" style="justify-content:flex-start;gap:0;flex-direction:column;align-items:flex-start;gap:14px">
+          <span class="pill"><span class="dot g"></span>Customers → <code>/config</code> &nbsp;(cached 30 min)</span>
+          <span class="pill"><span class="dot w"></span>Preview → <code>/config/preview</code> &nbsp;(never cached)</span>
+        </div>
+        <p class="lead" style="font-size:16px;margin-top:16px">
+          "Try It Live" flips a preview flag → the chatbot fetches the uncached door.
+          Admins see saved changes immediately; customers keep the fast cached path.
+        </p>
+      </div>
+    </div>
+    <div class="note"><span>🚪</span><div>A separate <b>URL path</b> (not a query parameter) — because CDNs may ignore query strings when caching, which would silently serve the stale copy.</div></div>
+  </div>
+</section>
+
+<!-- 9 SAFETY -->
+<section class="slide">
+  <div class="kicker">Safety First</div>
+  <h2>What is cached — and what is never touched</h2>
+  <div class="fill">
+    <div class="row">
+      <div class="col card">
+        <h3 style="color:var(--good)">✓ Safe to cache</h3>
+        <ul class="big ok">
+          <li>Config — bot theme, logo, welcome text</li>
+          <li>Launcher scripts &amp; styles</li>
+          <li>Hashed UI asset files</li>
+        </ul>
+        <p class="lead" style="font-size:16px;margin-top:10px">All <b>public, user-independent</b> data.</p>
+      </div>
+      <div class="col card">
+        <h3 style="color:var(--bad)">✕ Never cached</h3>
+        <ul class="big x">
+          <li>Chat <b>messages</b></li>
+          <li><b>Session</b> &amp; authentication</li>
+          <li>Anything user-specific</li>
+        </ul>
+        <p class="lead" style="font-size:16px;margin-top:10px">Guaranteed by the <b>default-deny</b> rule — no accidental exposure.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 10 DEVOPS PREREQ -->
+<section class="slide">
+  <div class="kicker">One Thing DevOps Must Set</div>
+  <h2>CloudFront must obey our rules <span class="mini">Min TTL = 0, Default TTL = 0</span></h2>
+  <div class="fill">
+    <p class="lead">Our code sends the correct instructions — but the CDN only <b>honors</b> them if it's configured to. Two traps if it isn't:</p>
+    <div class="row" style="margin-top:18px">
+      <div class="col card">
+        <h3><span class="dot r" style="display:inline-block"></span> Min TTL &gt; 0</h3>
+        <p class="lead" style="font-size:17px">CloudFront caches for at least that long <b>even when we say "never cache."</b> Private messages could get stored → one guest could see another's chat.</p>
+      </div>
+      <div class="col card">
+        <h3><span class="dot r" style="display:inline-block"></span> Default TTL &gt; 0</h3>
+        <p class="lead" style="font-size:17px">Applies to responses with <b>no</b> cache header. Older invoker versions send none on messages/session → their responses could get cached.</p>
+      </div>
+    </div>
+    <div class="note" style="background:rgba(26,162,81,.10);border-color:rgba(26,162,81,.35);color:#106b34"><span>✅</span><div><b>Both = 0:</b> "never cache" is honored, header-less responses stay private, and our opt-in cacheable endpoints still cache normally. <b>Go-live gate.</b></div></div>
+  </div>
+</section>
+
+<!-- 11 IMPACT -->
+<section class="slide">
+  <div class="kicker">Impact</div>
+  <h2>What the audience should remember</h2>
+  <div class="fill">
+    <div class="grid3">
+      <div class="stat"><div class="num">~0</div><div class="lbl">499 errors on config during an upgrade</div></div>
+      <div class="stat"><div class="num">30&nbsp;min</div><div class="lbl">config served from cache — origin shielded</div></div>
+      <div class="stat"><div class="num">−1</div><div class="lbl">network round-trip per boot (preflight removed)</div></div>
+    </div>
+    <div class="card" style="margin-top:24px">
+      <ul class="big ok">
+        <li>Chat bubble keeps loading on customer sites <b>during our upgrades</b>.</li>
+        <li>Faster boot for returning visitors; less load on the origin.</li>
+        <li>Private data is <b>provably never cached</b> (default-deny).</li>
+      </ul>
+    </div>
+    <div class="note"><span>🎯</span><div><b>Scope note:</b> this protects the <b>boot / bubble</b>. A live, in-progress conversation still needs the origin — the complete fix there is zero-downtime invoker upgrades (separate track).</div></div>
+  </div>
+</section>
+
+<!-- 12 THANKS -->
+<section class="slide center">
+  <div class="title-wrap center" style="align-items:center">
+    <div class="badge">Questions &amp; Discussion</div>
+    <h1 style="margin-top:22px;text-align:center;max-width:18ch">The chatbot survives our upgrades — quietly.</h1>
+    <p class="lead" style="text-align:center;margin-inline:auto">CDN Boot Resilience · KR-21091 · Omni Chatbot 3.0.6</p>
+    <div class="tickets" style="justify-content:center">
+      <div class="ticket">Full detail<small>docs/grilling-session-3.0.6.md</small></div>
+    </div>
+  </div>
+</section>
+
+</div>
+
+<div class="progress" id="bar"></div>
+<div class="hint">← → or Space to navigate · F for full screen</div>
+
+<script>
+  const slides=[...document.querySelectorAll('.slide')];
+  let i=0;
+  const bar=document.getElementById('bar');
+  function show(n){
+    i=Math.max(0,Math.min(slides.length-1,n));
+    slides.forEach((s,k)=>s.classList.toggle('active',k===i));
+    bar.style.width=((i+1)/slides.length*100)+'%';
+    addFoot();
+  }
+  function addFoot(){
+    document.querySelectorAll('.foot').forEach(f=>f.remove());
+    if(i===0||i===slides.length-1)return;
+    const f=document.createElement('div');
+    f.className='foot';
+    f.innerHTML='<span class="brand">Krista · Omni Chatbot</span><span class="pg">'+(i+1)+' / '+slides.length+'</span>';
+    slides[i].appendChild(f);
+  }
+  document.addEventListener('keydown',e=>{
+    if(['ArrowRight','ArrowDown',' ','PageDown'].includes(e.key)){e.preventDefault();show(i+1)}
+    else if(['ArrowLeft','ArrowUp','PageUp'].includes(e.key)){e.preventDefault();show(i-1)}
+    else if(e.key==='Home')show(0);
+    else if(e.key==='End')show(slides.length-1);
+    else if(e.key.toLowerCase()==='f'){document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen()}
+  });
+  document.addEventListener('click',e=>{if(e.clientX>window.innerWidth*0.5)show(i+1);else show(i-1)});
+  show(0);
+</script>
+</body>
+</html>

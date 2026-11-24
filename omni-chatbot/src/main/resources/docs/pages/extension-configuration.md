@@ -11,14 +11,14 @@ Before configuring the Chatbot Extension, ensure you have:
 - ✅ Workspace administrator rights
 - ✅ Access to the Krista Catalog
 - ✅ Guest Authentication Extension installed and configured
-- ✅ At least one welcome conversation created in live mode
+- ✅ *(Optional)* A welcome conversation created in live mode — if you don't use one, the chatbot greets users with the **Welcome Message** instead
 - ✅ A fallback conversation created in live mode
 
 ## Configuration Parameters
 
 | Parameter                   | Type      | Required | Description                                                                | Example                         |
 |-----------------------------|-----------|----------|----------------------------------------------------------------------------|---------------------------------|
-| Welcome Conversation        | Text      | Yes      | The conversation that initiates when users first interact with the chatbot | "Welcome to Krista"             |
+| Welcome Conversation        | Text      | No       | The conversation that initiates when users first interact with the chatbot. Leave it empty to greet users with the **Welcome Message** instead | "Welcome to Krista"             |
 | Fallback Conversation       | Text      | No       | Conversation triggered when user input is not recognized                   | "Fallback Handler"              |
 | Authentication Dependency   | Extension | Yes      | Guest Authentication extension binding                                     | Guest Authentication            |
 | Access Point                | Security  | No       | Security access point serving this extension                               | Default Access Point            |
@@ -54,9 +54,14 @@ Before configuring the Chatbot Extension, ensure you have:
 
    ![Chatbot Extension Setup Page](../_media/ExtensionConfiguration_ChatbotConfig.png)
 
-### Step 3: Configure Welcome Conversation
+### Step 3: Configure Welcome Conversation *(optional)*
 
-The Welcome Conversation is the initial dialogue that greets users when they start interacting with the chatbot.
+The Welcome Conversation is the initial dialogue that greets users when they start interacting with the chatbot. It is **optional**:
+
+- **If you set one**, it runs automatically when the chat opens and provides the greeting.
+- **If you leave it empty**, the chatbot instead shows the **Welcome Message** — a simple greeting you set in the **Basic Settings** section of Integration Settings. If that is also empty, a built-in default greeting is shown, so users are never met with a blank chat.
+
+To configure one:
 
 1. Navigate to the Chatbot Extension **Setup** page
 2. In the **Welcome Conversation** field, enter the name of your welcome conversation
@@ -64,6 +69,7 @@ The Welcome Conversation is the initial dialogue that greets users when they sta
 4. Ensure **Welcome Conversation** must be unique across the workspace
 
 **Best Practices:**
+- Use a Welcome Conversation when the greeting needs logic (for example, branching on who the user is); use the Welcome Message when a simple fixed greeting is enough
 - Create a friendly, engaging welcome message
 - Include clear instructions on how to interact with the chatbot
 - Personalize the greeting based on your use case
@@ -73,7 +79,7 @@ The Welcome Conversation is the initial dialogue that greets users when they sta
 The chatbot's appearance and behavior are configured using the **Integration Settings** custom tab, which provides a user-friendly form-based interface.
 
 > **Guidelines**:
-> - First, validate and save all required configuration parameters in the **Setup** page (Welcome Conversation, Dependencies, Security settings)
+> - First, validate and save all required configuration parameters in the **Setup** page (Dependencies, Security settings — plus the optional Welcome Conversation)
 > - Then, configure the chatbot UI settings from the **Integration Settings** tab
 
 #### Accessing the Integration Settings Tab
@@ -228,11 +234,12 @@ Link the Guest Authentication extension as a dependency.
 
 ### Welcome Conversation Doesn't Trigger
 
-**Cause**: Conversation not in live mode or incorrect name
+**Cause**: Conversation not in live mode, incorrect name, or the **Welcome Conversation** field is empty
 **Resolution**:
 1. Verify the conversation name matches exactly
 2. Ensure the conversation is published and in live mode
 3. Check conversation has no errors
+4. If the field is empty, this is expected — the chatbot greets with the **Welcome Message** instead. Set a Welcome Conversation if you need a conversation to run.
 
 ### UI Customization Not Applied
 

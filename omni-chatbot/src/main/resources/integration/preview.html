@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>Krista AI Chatbot — Live Preview</title>
+    <link rel="icon" type="image/svg+xml" href="_basePath_ui/assets/images/krista-icon.svg">
+
+    <!--
+      Security meta tags — applied to this preview page only.
+      The chat iframe is a separate document served by the server with its own
+      response headers, so these directives do NOT restrict the chatbot internals
+      (WebSocket, API calls, Angular lazy chunks, etc.).
+
+      Why 'unsafe-inline' for script/style:
+        - script: the inline <script> IIFE below + onclick on the dismiss button
+        - style:  the <style> block + el.style.* calls in the spotlight JS
+      Nonce-based CSP would require server-side nonce injection into this template;
+      'unsafe-inline' is acceptable here since the page is noindex and admin-only.
+    -->
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src  'self' 'unsafe-inline';
+        style-src   'self' 'unsafe-inline';
+        img-src     'self' data:;
+        connect-src 'self';
+        frame-src   'self';
+        font-src    'self';
+        object-src  'none';
+        base-uri    'self';
+        form-action 'none';
+    ">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Roboto', 'Helvetica', Arial, sans-serif;
+            background: #f0f7ff;
+            color: #212121;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── Admin info banner — subtle, dismissible, not visible to prospects ── */
+        .banner {
+            background: #f5f5f5;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 7px 16px;
+            font-size: 12px;
+            color: #9e9e9e;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+        .banner-dismiss {
+            cursor: pointer;
+            font-size: 16px;
+            line-height: 1;
+            color: #bdbdbd;
+            background: none;
+            border: none;
+            padding: 0 4px;
+            flex-shrink: 0;
+        }
+        .banner-dismiss:hover { color: #757575; }
+
+        /* ── Header ── */
+        .site-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 40px;
+            background: #fff;
+            border-bottom: 1px solid rgba(0,0,0,0.07);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            flex-shrink: 0;
+        }
+        .site-logo { height: 28px; }
+        .demo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #0177C6, #42a5f5);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            padding: 5px 14px;
+            border-radius: 20px;
+        }
+        .demo-badge svg { flex-shrink: 0; }
+
+        /* ── Main content ── */
+        .main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 64px 32px 48px;
+        }
+        .eyebrow {
+            font-size: 12px;
+            font-weight: 700;
+            color: #0177C6;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 18px;
+        }
+        .main h1 {
+            font-size: 46px;
+            font-weight: 700;
+            line-height: 1.15;
+            color: #1a1a2e;
+            margin-bottom: 18px;
+        }
+        .main h1 em {
+            font-style: normal;
+            color: #0177C6;
+        }
+        .subtitle {
+            font-size: 17px;
+            color: #607080;
+            line-height: 1.7;
+            max-width: 520px;
+            margin-bottom: 40px;
+        }
+
+        /* ── Pulsing CTA pill ── */
+        .cta-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: #0177C6;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 600;
+            border-radius: 50px;
+            padding: 14px 28px;
+            cursor: default;
+            animation: pill-pulse 2.5s ease-in-out infinite;
+            margin-bottom: 40px;
+        }
+        @keyframes pill-pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(1,119,198,0.4); }
+            50%       { box-shadow: 0 0 0 14px rgba(1,119,198,0); }
+        }
+        .cta-pill svg { flex-shrink: 0; }
+
+        /* ── Feature chips ── */
+        .chips {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .chip {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #fff;
+            border: 1px solid rgba(1,119,198,0.2);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 13px;
+            color: #0177C6;
+            font-weight: 500;
+        }
+        .chip svg { width: 14px; height: 14px; fill: #0177C6; flex-shrink: 0; }
+
+        /* ── Bubble spotlight ──
+           All three elements start hidden. JS (MutationObserver on .chat-bubble)
+           reads getBoundingClientRect() and positions them at runtime, so they
+           work regardless of bubble position (bottomRight / bottomLeft / etc.)
+           or bubble width (text label makes it wider). */
+        .bubble-glow {
+            position: fixed;
+            display: none;
+            width: 220px;
+            height: 220px;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .bubble-ring {
+            position: fixed;
+            display: none;
+            width: 110px;
+            height: 110px;
+            border-radius: 50%;
+            border: 2px solid rgba(1,119,198,0.55);
+            animation: ring-expand 2.5s ease-out infinite;
+            pointer-events: none;
+            z-index: 2;
+        }
+        .bubble-ring.delay {
+            animation-delay: 1.2s;
+            border-color: rgba(1,119,198,0.3);
+        }
+        @keyframes ring-expand {
+            0%   { transform: scale(0.85); opacity: 0.9; }
+            100% { transform: scale(1.6);  opacity: 0; }
+        }
+        .bubble-label {
+            position: fixed;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            pointer-events: none;
+            z-index: 3;
+        }
+        .bubble-label-badge {
+            background: #0177C6;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 700;
+            padding: 5px 14px;
+            border-radius: 20px;
+            white-space: nowrap;
+            box-shadow: 0 2px 10px rgba(1,119,198,0.4);
+        }
+        .bubble-label-arrow {
+            font-size: 20px;
+            line-height: 1;
+            color: #0177C6;
+        }
+
+        /* ── Footer ── */
+        .site-footer {
+            text-align: center;
+            padding: 14px;
+            font-size: 12px;
+            color: #aab;
+            flex-shrink: 0;
+        }
+        .site-footer a { color: #0177C6; text-decoration: none; font-weight: 500; }
+        .site-footer a:hover { text-decoration: underline; }
+
+        @media (max-width: 600px) {
+            .main h1 { font-size: 32px; }
+            .site-header { padding: 14px 20px; }
+            .main { padding: 48px 20px 40px; }
+            .bubble-label { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Admin-only info banner — intentionally understated so it doesn't distract prospects -->
+<div class="banner" id="adminBanner">
+    <span>Admin preview — chatting here creates a real session with your saved configuration.</span>
+    <button class="banner-dismiss" onclick="document.getElementById('adminBanner').style.display='none'" title="Dismiss">×</button>
+</div>
+
+<!-- Header: logo + Live Demo badge -->
+<header class="site-header">
+    <img class="site-logo" src="_basePath_ui/assets/images/krista-logo.svg" alt="Krista" onerror="this.style.display='none'">
+    <span class="demo-badge">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="6"/></svg>
+        Live Demo
+    </span>
+</header>
+
+<!-- Main centred content -->
+<main class="main">
+    <div class="eyebrow">Krista AI Chatbot</div>
+    <h1>Your AI Chatbot,<br><em>Live &amp; Interactive</em></h1>
+    <p class="subtitle">Experience AI-powered conversations — exactly as your customers will. Intelligent, instant, and always available.</p>
+    <div class="cta-pill">
+        <span id="ctaText">Click the chat bubble to get started</span>
+    </div>
+    <div class="chips">
+        <div class="chip">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            24/7 Available
+        </div>
+        <div class="chip">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            No-code workflows
+        </div>
+        <div class="chip">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            Multilingual
+        </div>
+        <div class="chip">
+            <svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>
+            Enterprise-ready
+        </div>
+    </div>
+</main>
+
+<!-- Bubble spotlight: positioned by JS once .chat-bubble is in the DOM -->
+<div class="bubble-glow" id="bubbleGlow"></div>
+<div class="bubble-ring" id="bubbleRing1"></div>
+<div class="bubble-ring delay" id="bubbleRing2"></div>
+<div class="bubble-label" id="bubbleLabel">
+    <span class="bubble-label-badge" id="bubbleLabelBadge">Try it now</span>
+    <span class="bubble-label-arrow" id="bubbleLabelArrow">↓</span>
+</div>
+
+<!-- Footer -->
+<footer class="site-footer">
+    Powered by <a href="https://krista.ai" target="_blank" rel="noopener">Krista AI</a>
+</footer>
+<script>
+    // Freshness guarantee: this page is served with Cache-Control: no-store
+    // (default-deny CacheControlResponseFilter), so the page itself is always
+    // fresh. Config freshness comes from PREVIEW MODE: the flag below makes
+    // launcher-core fetch the dedicated /chatbot/preview-config endpoint
+    // (Cache-Control: no-store — never cached by browser or CDN) instead of the
+    // customer-embed /config (browser + CDN cached 30 min), and pass
+    // chatbotPreview=1 to the chat iframe so its config fetch does the same.
+    // No cache priming or cache:'reload' tricks needed — every preview load hits
+    // the origin directly. supportedLanguages needs no special handling: the
+    // config response inlines the language list.
+    window.__chatbotPreviewMode = true;
+    (function() {
+        function loadLauncher() {
+            var script = document.createElement('script');
+            script.src = '_basePath_ui/launcher.js';
+            document.body.appendChild(script);
+        }
+
+        // Spotlight: watch for launcher-core to render .chat-bubble into the DOM,
+        // then read its exact getBoundingClientRect() to position the rings, glow,
+        // and label — works for any bubble position or width.
+        function initSpotlight() {
+            var glow   = document.getElementById('bubbleGlow');
+            var ring1  = document.getElementById('bubbleRing1');
+            var ring2  = document.getElementById('bubbleRing2');
+            var label  = document.getElementById('bubbleLabel');
+            var badge  = document.getElementById('bubbleLabelBadge');
+            var arrow  = document.getElementById('bubbleLabelArrow');
+            var ctaTxt = document.getElementById('ctaText');
+            var RING   = 110;
+
+            function apply(bubble) {
+                var rect     = bubble.getBoundingClientRect();
+                var cx       = rect.left + rect.width  / 2;
+                var cy       = rect.top  + rect.height / 2;
+                var isRight  = cx > window.innerWidth  / 2;
+                // Center positions (centerLeft / centerRight) sit at top:50% with
+                // translateY(-50%), so cy ≈ innerHeight/2. Use a ±15% band to detect them.
+                var isCenter = cy >= window.innerHeight * 0.35 && cy <= window.innerHeight * 0.65;
+                var isBottom = !isCenter && cy > window.innerHeight / 2;
+
+                // Rings: always centered on the bubble's geometric center
+                [ring1, ring2].forEach(function(el) {
+                    if (!el) return;
+                    el.style.left    = (cx - RING / 2) + 'px';
+                    el.style.top     = (cy - RING / 2) + 'px';
+                    el.style.display = 'block';
+                });
+
+                // Glow: 220×220px square anchored to the nearest edge/corner
+                if (glow) {
+                    glow.style.left   = isRight  ? 'auto' : '0';
+                    glow.style.right  = isRight  ? '0'    : 'auto';
+                    if (isCenter) {
+                        // Float alongside the bubble vertically
+                        glow.style.top    = (cy - 110) + 'px';
+                        glow.style.bottom = 'auto';
+                    } else {
+                        glow.style.top    = isBottom ? 'auto' : '0';
+                        glow.style.bottom = isBottom ? '0'    : 'auto';
+                    }
+                    var gx = isRight  ? '90%' : '10%';
+                    var gy = isCenter ? '50%' : isBottom ? '90%' : '10%';
+                    glow.style.background = 'radial-gradient(circle at ' + gx + ' ' + gy +
+                        ', rgba(1,119,198,0.18) 0%, rgba(1,119,198,0.06) 40%, transparent 70%)';
+                    glow.style.display = 'block';
+                }
+
+                // Label: vertical (column) for top/bottom positions,
+                //        horizontal (row) for center positions — placed to the side.
+                if (label) {
+                    var GAP     = 12;
+                    var LABEL_H = 52; // badge (~26px) + gap (4px) + arrow (~22px)
+                    label.style.display = 'flex';
+                    label.style.right   = 'auto'; // reset in case previous call set it
+
+                    if (isCenter) {
+                        // Vertically centre the label badge on the bubble
+                        label.style.top       = (cy - 13) + 'px';
+                        label.style.transform = 'none';
+                        if (isRight) {
+                            // centerRight: label sits to the LEFT of the bubble  [→ Try it now]
+                            label.style.left          = 'auto';
+                            label.style.right         = (window.innerWidth - rect.left + GAP) + 'px';
+                            label.style.flexDirection = 'row-reverse'; // arrow → on left, badge on right
+                            if (arrow) arrow.textContent = '→';
+                        } else {
+                            // centerLeft: label sits to the RIGHT of the bubble  [Try it now ←]
+                            label.style.left          = (rect.right + GAP) + 'px';
+                            label.style.flexDirection = 'row'; // badge on left, arrow ← on right
+                            if (arrow) arrow.textContent = '←';
+                        }
+                    } else {
+                        label.style.left      = cx + 'px';
+                        label.style.transform = 'translateX(-50%)';
+                        if (isBottom) {
+                            // Bubble at bottom: label above, arrow ↓ pointing down to bubble
+                            label.style.top           = (cy - rect.height / 2 - LABEL_H - GAP) + 'px';
+                            label.style.flexDirection = 'column';
+                            if (arrow) arrow.textContent = '↓';
+                        } else {
+                            // Bubble at top: label below, arrow ↑ pointing up to bubble
+                            label.style.top           = (cy + rect.height / 2 + GAP) + 'px';
+                            label.style.flexDirection = 'column-reverse';
+                            if (arrow) arrow.textContent = '↑';
+                        }
+                    }
+                }
+
+                // CTA pill: directional arrow matching bubble position
+                if (ctaTxt) {
+                    var dir = isCenter
+                            ? (isRight ? '→' : '←')
+                            : isRight && isBottom  ? '↘'
+                            : !isRight && isBottom ? '↙'
+                            : isRight              ? '↗'
+                            :                        '↖';
+                    ctaTxt.textContent = 'Click the chat bubble ' + dir + ' to get started';
+                }
+            }
+
+            // Place the spotlight only once the bubble is BOTH positioned (a
+            // position class has set a non-auto offset) AND rendered (non-zero
+            // size). Measuring at first DOM-insertion returns the un-positioned
+            // top-left / zero rect — the launcher's base .chat-bubble is
+            // position:fixed with all offsets 'auto' until applyChatbotConfig adds
+            // the bottomRight/etc. class — which dropped the spotlight in the wrong
+            // corner. Re-query each frame so a launcher re-render (node
+            // replacement) is handled too.
+            function applyWhenReady(framesLeft) {
+                var bubble = document.querySelector('.chat-bubble');
+                if (bubble) {
+                    var rect = bubble.getBoundingClientRect();
+                    var cs = window.getComputedStyle(bubble);
+                    var positioned = cs.top !== 'auto' || cs.bottom !== 'auto'
+                                  || cs.left !== 'auto' || cs.right !== 'auto';
+                    if (positioned && rect.width > 0 && rect.height > 0) {
+                        apply(bubble);
+                        return;
+                    }
+                }
+                if (framesLeft > 0) {
+                    requestAnimationFrame(function() { applyWhenReady(framesLeft - 1); });
+                }
+            }
+
+            function reapply() {
+                var bubble = document.querySelector('.chat-bubble');
+                if (bubble) apply(bubble);
+            }
+
+            // Observe body until launcher-core injects .chat-bubble
+            var observer = new MutationObserver(function() {
+                if (!document.querySelector('.chat-bubble')) return;
+                observer.disconnect();
+                applyWhenReady(180); // settle over ~3s of frames, then place
+                // Track the bubble's final spot after launcher-core's async
+                // config-driven re-render/reposition, and on viewport resize.
+                [400, 1000, 2000].forEach(function(ms) { setTimeout(reapply, ms); });
+                window.addEventListener('resize', reapply);
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        }
+
+        initSpotlight();
+        loadLauncher();
+    })();
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<div class="entity-selector-field">
+  <!-- Readonly display -->
+  <div *ngIf="isFieldReadOnly()" class="readonly-field">
+    <label class="field-label" [attr.id]="'entity-label-' + field.name">
+      {{ field.displayName || field.name }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+    <!-- Only show readonly value if there are selected entities -->
+    <div *ngIf="selectedEntities.length > 0"
+         class="readonly-value"
+         role="status"
+         [attr.aria-labelledby]="'entity-label-' + field.name">
+      {{ getDisplayValue() }}
+    </div>
+
+  </div>
+
+  <!-- Editable mode -->
+  <div *ngIf="!isFieldReadOnly()" class="custom-form-field" [class.has-error]="config.hasError">
+    <label class="field-label"
+           [attr.id]="'entity-label-edit-' + field.name"
+           [attr.for]="'entity-input-' + field.name">
+      {{ field.displayName || field.name }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+
+    <div class="input-wrapper">
+      <input
+        type="text"
+        class="custom-input"
+        [attr.id]="'entity-input-' + field.name"
+        [value]="getDisplayValue()"
+        [readonly]="true"
+        [placeholder]="getPlaceholder()"
+        [class.error]="config.hasError"
+        [attr.aria-invalid]="config.hasError"
+        [attr.aria-required]="isFieldRequired()"
+        [attr.aria-describedby]="config.hasError ? 'entity-error-edit-' + field.name : null"
+        (click)="openEntitySearchModal()"
+        (keydown.enter)="openEntitySearchModal()"
+        (keydown.space)="openEntitySearchModal(); $event.preventDefault()">
+
+      <button
+        type="button"
+        class="search-button"
+        (click)="openEntitySearchModal()"
+        [attr.aria-label]="'Search ' + (config.entitySelectorMeta?.entityName || 'entity')"
+        [title]="'Search ' + (config.entitySelectorMeta?.entityName || 'entity')">
+        <svg viewBox="0 0 24 24" class="search-icon" aria-hidden="true" focusable="false">
+          <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Error message -->
+    <div class="field-error-message"
+         [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+         role="alert"
+         [attr.id]="'entity-error-edit-' + field.name">
+      {{ config.errorMessage }}
+    </div>
+  </div>
+
+  <!-- Selected Entities Table -->
+  <div *ngIf="selectedEntities.length > 0 && config.entitySelectorMeta && tableInput"
+       class="selected-entities-table-wrapper"
+       role="region"
+       [attr.aria-label]="'Selected ' + (config.entitySelectorMeta.entityName || 'entities')">
+    <app-new-table [tableInput]="tableInput"></app-new-table>
+  </div>
+
+  <!-- Entity Search Modal (Inline) -->
+  <div *ngIf="isModalOpen"
+       class="modal-overlay"
+       (click)="closeEntitySearchModal()"
+       role="dialog"
+       aria-modal="true"
+       [attr.aria-label]="'Search ' + (config.entitySelectorMeta?.entityName || 'entity')">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <app-entity-search-modal
+        [field]="field"
+        [entitySelectorMeta]="config.entitySelectorMeta!"
+        [currentValue]="field.value"
+        (close)="closeEntitySearchModal()"
+        (save)="onModalSave($event)">
+      </app-entity-search-modal>
+    </div>
+  </div>
+</div>
+

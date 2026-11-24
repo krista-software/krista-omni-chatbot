@@ -1,0 +1,111 @@
+/* Date Time Range Field Styling - Imports shared styles */
+@import '../shared-field-styles.css';
+
+/* Date Time Range Field Specific Styling */
+.date-time-range-field {
+  width: 100%;
+}
+
+.date-time-range-field .field-container {
+}
+
+/* .field-label intentionally not overridden here — see shared-field-styles.css. */
+
+/* Date Time Range Input Wrapper - Bottom border only */
+.date-time-range-input-wrapper {
+  display: flex;
+  align-items: center;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  border-radius: 0;
+  background-color: transparent;
+  cursor: pointer;
+  padding: 12px 0;
+  height: 48px;
+}
+
+.date-time-range-input-wrapper.has-error {
+  border-bottom-color: #f44336;
+}
+
+.date-time-range-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--kr-font-size-sm);
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  cursor: pointer;
+  padding: 0;
+}
+
+.date-time-range-input::placeholder {
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  opacity: 0.6;
+}
+
+.calendar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  opacity: 0.6;
+  margin-left: 8px;
+}
+
+.calendar-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Help text */
+.help-text {
+  font-size: 0.75rem;
+  color: var(--krista-text-secondary, rgba(0, 0, 0, 0.6));
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* Error message styling */
+.field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+  margin-top: 4px;
+}
+
+/* Required asterisk */
+.required-asterisk {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+/* Timezone caption */
+.timezone-caption {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--krista-text-secondary, rgba(0, 0, 0, 0.6));
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+/* Readonly field styling */
+.readonly-datetime-range {
+}
+
+.readonly-value {
+  font-size: 1rem;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  min-height: 20px;
+}
+
+/* Date picker dialog styling */
+::ng-deep .date-picker-dialog {
+  .mat-mdc-dialog-container {
+    padding: 0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}
+
+/* Responsive: scales naturally via max-width: 100% on parent. */

@@ -1,0 +1,37 @@
+.paths-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 100%;
+  gap: 5px;
+  /*margin-top: 6px;*/
+}
+
+.path-button {
+  border: 1px solid var(--krista-divider, rgba(0, 0, 0, 0.23)) !important;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87)) !important;
+  background-color: #fff;
+  font-weight: 400;
+  font-size: var(--kr-font-size-sm);
+  padding: 6px 16px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  --mat-mdc-button-persistent-ripple-color: var(--krista-primary, #0177C6);
+  --mat-mdc-button-ripple-color: color-mix(in srgb, var(--krista-primary, #0177C6) 20%, transparent);
+}
+
+.path-button:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--krista-primary, #0177C6) 50%, transparent) !important;
+  border-color: var(--krista-primary, #0177C6);
+}
+
+.path-button:active:not(:disabled) {
+  transform: scale(0.95);
+  background-color: color-mix(in srgb, var(--krista-primary, #0177C6) 50%, transparent) !important;
+  border-color: var(--krista-primary, #0177C6);
+}
+
+.path-button:disabled {
+  cursor: not-allowed;
+}
+

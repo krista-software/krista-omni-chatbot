@@ -13,14 +13,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.utils;
 
-import app.krista.extension.executor.Invoker;
 import app.krista.extensions.essentials.collaboration.omnichatbot.ChatBotExtension;
-import app.krista.extensions.essentials.collaboration.omnichatbot.contants.Constants;
 import app.krista.model.field.util.GsonJsonMapper;
 
 import java.util.Map;
@@ -62,27 +60,14 @@ public final class ChatBotUtil {
     }
 
     /**
-     * Gets the UI config JSON from cache (preferred) or database.
-     * This method uses the in-memory cache for better performance.
+     * Gets the UI config JSON from the in-memory cache (mirrors the KeyValueStore,
+     * the single source of truth populated on invoker load and on every save).
      *
-     * @param invoker The invoker instance
      * @param chatBotExtension The ChatBotExtension instance that holds the cache
      * @return The UI config JSON string, or "{}" if not found
      */
-    public static String getJsonConfig(Invoker invoker, ChatBotExtension chatBotExtension) {
-        // First try to get from cache (fastest)
+    public static String getJsonConfig(ChatBotExtension chatBotExtension) {
         String result = chatBotExtension.getCachedUiConfig();
-
-        // If not found in cache, fall back to keyValueStore
-//        if (result == null) {
-//            result = (String) chatBotExtension.keyValueStore.get(Constants.UI_CONFIG_JSON);
-//        }
-
-        // If not found, fall back to attributes (for backward compatibility)
-        if (result == null) {
-            result = (String) invoker.getAttributes().get(Constants.UI_CONFIG_JSON);
-        }
-
         return result != null ? result : "{}";
     }
 }

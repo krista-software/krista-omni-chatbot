@@ -13,11 +13,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.resource.dto;
 
+import java.util.List;
 import java.util.Map;
 
 public class Configuration {
@@ -27,13 +28,19 @@ public class Configuration {
     private final String icon;
     private final boolean isMultilingualEnabled;
     private final String kristaAccountId;
+    // Inlined supported-languages list — populated alongside isMultilingualEnabled
+    // so the chatbot can avoid a separate GET /chatbot/supportedLanguages
+    // round-trip on every page load. Each entry has keys "code" and "name".
+    private final List<Map<String, String>> supportedLanguages;
 
-    public Configuration(Map<String, Object> config, String workspaceId, String nodeName, String icon, boolean isMultilingualEnabled, String kristaAccountId) {
+    public Configuration(Map<String, Object> config, String workspaceId, String nodeName, String icon,
+            boolean isMultilingualEnabled, String kristaAccountId, List<Map<String, String>> supportedLanguages) {
         this.config = config;
         this.workspaceId = workspaceId;
         this.nodeName = nodeName;
         this.icon = icon;
         this.isMultilingualEnabled = isMultilingualEnabled;
         this.kristaAccountId = kristaAccountId;
+        this.supportedLanguages = supportedLanguages;
     }
 }

@@ -1,0 +1,246 @@
+/* File Field Styling */
+.file-field .field-container {
+}
+
+/* .field-label intentionally not overridden here — see shared-field-styles.css. */
+
+/* File input area */
+.file-input-area {
+  border: 2px dashed #ccc;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.file-input-area:not(.disabled):hover {
+  border-color: #1976d2;
+  background-color: rgba(25, 118, 210, 0.04);
+}
+
+.file-input-area.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* File upload zone */
+.file-upload-zone {
+  position: relative;
+}
+
+.file-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.upload-content {
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.upload-content:hover:not(.disabled) {
+  background-color: rgba(25, 118, 210, 0.04);
+}
+
+.upload-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.upload-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.primary-text {
+  font-size: var(--kr-font-size-sm);
+  color: rgba(0, 0, 0, 0.87);
+  font-weight: 500;
+}
+
+.secondary-text {
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* File upload loading */
+.file-upload-loading {
+  padding: 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  background-color: rgba(25, 118, 210, 0.04);
+}
+
+.file-upload-loading .upload-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-upload-loading .primary-text {
+  color: #1976d2;
+  font-weight: 500;
+}
+
+/* File preview */
+.file-preview {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f5f5f5;
+}
+
+.file-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.file-icon {
+  color: #666;
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+}
+
+.file-details {
+  flex: 1;
+}
+
+.file-name {
+  font-size: var(--kr-font-size-sm);
+  color: rgba(0, 0, 0, 0.87);
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.file-size {
+  font-size: 0.75rem;
+  color: rgba(0, 0, 0, 0.6);
+  margin-top: 2px;
+}
+
+.remove-file-button {
+  color: #666;
+  transition: color 0.2s ease;
+}
+
+.remove-file-button:hover {
+  color: #f44336;
+}
+
+.download-file-button {
+  color: #666;
+  transition: color 0.2s ease;
+}
+
+.download-file-button:hover {
+  color: #2196f3;
+}
+
+/* Error message styling */
+.field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+  margin-top: 4px;
+}
+
+/* Required asterisk */
+.required-asterisk {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+/* Responsive: scales naturally via max-width: 100% on parent. */
+
+/* Compact mode for table cells - make file field much smaller */
+.file-field.compact {
+  max-width: 150px; /* Limit overall width for table cells */
+}
+
+.file-field.compact .upload-content {
+  padding: 4px 6px;
+  min-height: 36px; /* Smaller height for table cells */
+}
+
+.file-field.compact .upload-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  margin-bottom: 2px;
+}
+
+.file-field.compact .primary-text {
+  font-size: 0.625rem; /* 10px */
+  line-height: 1.2;
+}
+
+.file-field.compact .secondary-text {
+  font-size: 0.5625rem; /* 9px */
+  line-height: 1.2;
+  display: none; /* Hide secondary text to save space */
+}
+
+.file-field.compact .file-upload-loading {
+  padding: 4px 6px;
+  gap: 4px;
+  min-height: 36px;
+}
+
+.file-field.compact .file-upload-loading .mat-mdc-progress-spinner {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.file-field.compact .file-preview {
+  padding: 4px 6px;
+  min-height: 36px;
+}
+
+.file-field.compact .file-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}
+
+.file-field.compact .file-info {
+  gap: 6px;
+}
+
+.file-field.compact .file-name {
+  font-size: 0.625rem; /* 10px */
+  max-width: 80px; /* Truncate long names */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-field.compact .file-size {
+  font-size: 0.5625rem; /* 9px */
+}
+
+.file-field.compact .remove-file-button,
+.file-field.compact .download-file-button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+}
+
+.file-field.compact .remove-file-button mat-icon,
+.file-field.compact .download-file-button mat-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+}

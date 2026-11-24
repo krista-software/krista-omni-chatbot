@@ -1,0 +1,114 @@
+<div class="location-picker-dialog">
+  <!-- Dialog Header -->
+  <div class="dialog-header">
+    <h2 class="dialog-title">{{ data.readOnly ? 'View Location' : 'Select Location' }}</h2>
+    <button mat-icon-button (click)="handleClose()" class="close-button">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <!-- Dialog Content -->
+  <div class="dialog-content">
+    <!-- Loading Indicator -->
+    <div *ngIf="fetching" class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+      <p>Fetching your location...</p>
+    </div>
+
+    <!-- Search Box (only in editable mode) -->
+    <div *ngIf="!data.readOnly && !fetching" class="search-container">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>Search for a location</mat-label>
+        <input
+          matInput
+          type="text"
+          [(ngModel)]="searchQuery"
+          (input)="onSearchInput($event)"
+          placeholder="Enter address or place name">
+        <mat-icon matIconPrefix>search</mat-icon>
+        <button
+          *ngIf="searchQuery"
+          mat-icon-button
+          matIconSuffix
+          (click)="handleClearSearch()"
+          type="button">
+          <mat-icon>clear</mat-icon>
+        </button>
+      </mat-form-field>
+
+      <!-- Search Results -->
+      <div *ngIf="showSuggestions && searchResults.length > 0" class="search-results">
+        <div
+          *ngFor="let place of searchResults; trackBy: trackByPlace"
+          class="search-result-item"
+          (click)="selectPlace(place)">
+          <div class="result-name">{{ place.name }}</div>
+          <div class="result-address">{{ place.formatted_address }}</div>
+        </div>
+      </div>
+
+      <!-- No Results -->
+      <div *ngIf="showSuggestions && searchResults.length === 0 && !isSearching" class="no-results">
+        No results found
+      </div>
+    </div>
+
+    <!-- Google Map -->
+    <div class="map-container" *ngIf="!fetching">
+      <google-map
+        [center]="center"
+        [zoom]="zoom"
+        [options]="mapOptions"
+        (mapClick)="onMapClick($event)"
+        width="100%"
+        height="100%">
+        <map-marker
+          *ngIf="location"
+          [position]="location"
+          [options]="markerOptions"
+          (mapDragend)="onMarkerDragEnd($event)">
+        </map-marker>
+      </google-map>
+    </div>
+  </div>
+
+  <!-- Dialog Actions -->
+  <div class="dialog-actions">
+    <button
+      mat-button
+      (click)="handleClose()"
+      class="cancel-button">
+      Cancel
+    </button>
+    <button
+      *ngIf="!data.readOnly"
+      mat-raised-button
+      color="primary"
+      (click)="handleSet()"
+      [disabled]="!location"
+      class="set-button">
+      Set Location
+    </button>
+  </div>
+</div>
+
+<!-- Error Dialog -->
+<div *ngIf="locationError" class="error-overlay">
+  <div class="error-dialog">
+    <div class="error-header">
+      <h3>Location Error</h3>
+      <button mat-icon-button (click)="closeErrorDialog()">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <div class="error-content">
+      <p>{{ locationError }}</p>
+    </div>
+    <div class="error-actions">
+      <button mat-raised-button color="primary" (click)="closeErrorDialog()">
+        OK
+      </button>
+    </div>
+  </div>
+</div>
+

@@ -1,0 +1,21 @@
+<!-- Calculation Field Component (Always Readonly) -->
+<div class="calculation-field">
+  <!-- Readonly Display -->
+  <div class="readonly-field">
+    <!-- Field Label -->
+    <div class="readonly-label"
+         *ngIf="field.name"
+         [attr.id]="'calc-label-' + field.name">
+      <span [title]="getTooltip()">{{ getDisplayLabel() }}</span>
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </div>
+
+    <!-- Calculated Value -->
+    <div class="readonly-value calculation-value"
+         role="status"
+         [attr.aria-labelledby]="'calc-label-' + field.name"
+         [attr.aria-live]="'polite'">
+      {{ isSecured() && getFormattedValue() ? '••••••••' : getFormattedValue() }}
+    </div>
+  </div>
+</div>

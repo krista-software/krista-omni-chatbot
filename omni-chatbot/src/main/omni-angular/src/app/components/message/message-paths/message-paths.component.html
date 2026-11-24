@@ -1,0 +1,11 @@
+<div class="paths-container">
+  <button
+    *ngFor="let path of paths; trackBy: trackByPath"
+    mat-stroked-button
+    [disabled]="isPathDisabled(path)"
+    [style.opacity]="getPathOpacity(path)"
+    (click)="onPathClick(path)"
+    class="path-button">
+    {{ path }}
+  </button>
+</div>

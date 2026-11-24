@@ -10,7 +10,7 @@ Before testing the chatbot, ensure you have:
 
 - ✅ Chatbot Extension installed and configured
 - ✅ Guest Authentication Extension configured
-- ✅ At least one welcome conversation in live mode
+- ✅ *(Optional)* A welcome conversation in live mode — without one, the chatbot greets with the **Welcome Message**
 - ✅ Fallback conversation configured
 - ✅ Workspace administrator rights
 
@@ -71,7 +71,7 @@ Once the preview loads, test the following functionality:
 - [ ] **Chatbot Loads** - Verify the chatbot widget appears on the page
 - [ ] **Bubble Display** - Check if the chat bubble displays correctly (if `startAsBubble: true`)
 - [ ] **Open Chatbot** - Click the bubble to open the chat window
-- [ ] **Welcome Message** - Verify the welcome conversation triggers automatically
+- [ ] **Welcome Message** - Verify the greeting appears automatically (the Welcome Conversation runs, or the Welcome Message is shown when no conversation is configured)
 - [ ] **UI Customization** - Confirm theme, colors, and branding match your configuration
 - [ ] **Message Input** - Test typing and sending messages
 - [ ] **Bot Responses** - Verify the bot responds appropriately
@@ -132,7 +132,7 @@ After validating with the Hosted Extension, test the chatbot on your actual webs
 
 ### Step 1: Get Integration Script
 
-Use the [Get Script Element](pages/get-script-element.md) catalog request to generate the integration script for your website.
+Use the [Get Integration Information](get-integration-script.md) catalog request to get the integration script for your website, and a direct chatbot link.
 
 ### Step 2: Embed on Test Page
 
@@ -230,12 +230,13 @@ If you're passing context data:
 
 ### Welcome Conversation Doesn't Trigger
 
-**Cause**: Conversation not in live mode or incorrect name
+**Cause**: Conversation not in live mode, incorrect name, or the **Welcome Conversation** field is empty
 **Resolution**:
 1. Verify welcome conversation name matches configuration
 2. Ensure the conversation is published and in live mode
 3. Check conversation has no errors
 4. Test conversation independently first
+5. If the field is empty, this is expected — the chatbot shows the **Welcome Message** instead
 
 ### UI Customization Not Applied
 
@@ -272,7 +273,7 @@ Use this checklist to ensure comprehensive testing:
 ### Configuration Testing
 - [ ] Extension installed and configured
 - [ ] Authentication dependency set
-- [ ] Welcome conversation configured
+- [ ] Welcome conversation configured *(optional — otherwise the Welcome Message is used)*
 - [ ] Fallback conversation configured
 - [ ] UI configuration completed in Integration tab
 
@@ -357,5 +358,5 @@ Once testing is complete and successful:
 
 - [Extension Configuration](pages/extension-configuration.md) - Configure the chatbot
 - [Context Data Passing](pages/context-data-passing.md) - Pass context data
-- [Get Script Element](pages/get-script-element.md) - Generate integration script
+- [Get Integration Information](get-integration-script.md) - Embed script and direct chatbot link
 - [Get Session Id for Active User](pages/get-session-id-for-active-user.md) - Session management

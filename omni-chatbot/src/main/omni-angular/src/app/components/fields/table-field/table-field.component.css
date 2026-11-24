@@ -1,0 +1,412 @@
+/* Import shared field styles */
+@import '../shared-field-styles.css';
+
+.table-field {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Field Label */
+.field-label-container {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.field-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--krista-text-primary, #333);
+  margin: 0;
+}
+
+.required-asterisk {
+  color: var(--krista-error, #d32f2f);
+  margin-left: 2px;
+}
+
+/* Readonly Empty State */
+.readonly-empty {
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+.no-data-message {
+  color: #666;
+  font-size: 13px;
+}
+
+/* Table Actions */
+.table-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 0;
+}
+
+.action-button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--kr-color-border, rgba(0, 0, 0, 0.2));
+  border-radius: 4px;
+  background-color: white;
+  color: #333;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.action-button:hover:not(:disabled) {
+  background-color: #f5f5f5;
+  border-color: var(--kr-color-border, rgba(0, 0, 0, 0.3));
+}
+
+.action-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-button mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+.search-button:hover:not(:disabled) {
+  background-color: #e3f2fd;
+  border-color: #1976d2;
+  color: #1565c0;
+}
+
+.add-button:hover:not(:disabled) {
+  background-color: #e8f5e9;
+  border-color: #4caf50;
+  color: #2e7d32;
+}
+
+.delete-button:hover:not(:disabled) {
+  background-color: #ffebee;
+  border-color: #f44336;
+  color: #c62828;
+}
+
+.deleted-button {
+  background-color: #fff3e0;
+  border-color: #ff9800;
+}
+
+.restore-button:hover:not(:disabled) {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+  color: #1565c0;
+}
+
+.back-button:hover:not(:disabled) {
+  background-color: #f5f5f5;
+  border-color: #999;
+}
+
+/* Table Container */
+.table-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  border: 1px solid var(--kr-color-border, rgba(0, 0, 0, 0.2));
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.table-scroll-wrapper {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 600px;
+}
+
+/* Table Styles */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.data-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #f5f5f5;
+}
+
+/* Add borders to all table cells (matching original implementation) */
+.data-table th,
+.data-table td {
+  border: 1px solid var(--kr-color-border, rgba(0, 0, 0, 0.2));
+  padding: 8px;
+}
+
+.data-table th {
+  text-align: left;
+  font-weight: 600;
+  color: #333;
+  white-space: nowrap;
+}
+
+.data-table td {
+  font-size: 13px;
+}
+
+.selection-header {
+  width: 48px;
+  text-align: center;
+}
+
+.data-cell {
+  min-width: 150px;
+  max-width: 400px;
+  vertical-align: top; /* Align to top to accommodate error messages */
+}
+
+/* Table cell field wrapper - ensure errors display properly */
+::ng-deep .data-cell .table-cell-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  width: 100%;
+}
+
+/* Error messages in table cells - match original FieldErrorMessage styling */
+::ng-deep .data-cell .fallback-error-message,
+::ng-deep .data-cell .field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  margin-top: 2px;
+  margin-bottom: 0;
+  padding-left: 0;
+  line-height: 1.2;
+}
+
+.empty-row {
+  background-color: #fafafa;
+}
+
+.empty-cell {
+  padding: 24px;
+  text-align: center;
+}
+
+/* Pagination */
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-top: 1px solid var(--kr-color-border, rgba(0, 0, 0, 0.2));
+}
+
+.pagination-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--kr-color-border, rgba(0, 0, 0, 0.2));
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+}
+
+.pagination-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pagination-button mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Aggregate Rows (Header totals, Footer totals, etc.) */
+.aggregate-row {
+  background-color: #fafafa;
+}
+
+.aggregate-row td.aggregate-cell {
+  padding: 6px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  vertical-align: middle;
+}
+
+.header-aggregate-row {
+  background-color: #f0f0f0;
+}
+
+.footer-aggregate-row {
+  background-color: #f5f5f5;
+  border-top: 2px solid var(--kr-color-border, rgba(0, 0, 0, 0.3));
+}
+
+/* Hide labels inside aggregate cells */
+::ng-deep .aggregate-cell {
+  app-text-field .field-label,
+  app-number-field .field-label,
+  app-date-field .field-label,
+  app-time-field .field-label {
+    display: none !important;
+  }
+
+  .field-container {
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+  }
+
+  .field-error-message {
+    display: none !important;
+  }
+}
+
+/* Footer styling (not sticky - matches original implementation) */
+.data-table tfoot {
+  background-color: #f5f5f5;
+}
+
+/* Error Message */
+.field-error-message {
+  color: var(--krista-error, #d32f2f);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Open Complex Field Button (for MultiField/Composite/EntityReference in cells) */
+.open-complex-field-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: #1976d2;
+}
+
+.open-complex-field-button:hover {
+  background-color: rgba(25, 118, 210, 0.08);
+}
+
+.open-complex-field-button:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+.open-complex-field-button mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Validation error for complex fields (List/Table) in table cells */
+.cell-error-message {
+  color: var(--krista-error, #f44336);
+  font-size: 0.75rem;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+/* Hide field labels and errors inside table cells */
+::ng-deep .data-cell {
+  /* Hide labels from nested field components */
+  app-text-field .field-label,
+  app-number-field .field-label,
+  app-date-field .field-label,
+  app-time-field .field-label,
+  app-pick-one-field .field-label,
+  app-pick-many-field .field-label,
+  app-switch-field .field-label,
+  app-rating-field .field-label,
+  app-file-field .field-label,
+  app-location-field .field-label,
+  app-rich-text-field .field-label {
+    display: none !important;
+  }
+
+  /* Hide error messages from nested field components (shown at table level) */
+  app-text-field .field-error-message,
+  app-number-field .field-error-message,
+  app-date-field .field-error-message,
+  app-time-field .field-error-message,
+  app-pick-one-field .field-error-message,
+  app-pick-many-field .field-error-message,
+  app-switch-field .field-error-message,
+  app-rating-field .field-error-message,
+  app-file-field .field-error-message,
+  app-location-field .field-error-message,
+  app-rich-text-field .field-error-message {
+    display: none !important;
+  }
+
+  /* Compact field containers */
+  .field-container {
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Compact input fields */
+  input,
+  textarea,
+  select,
+  .mat-mdc-form-field {
+    font-size: 13px !important;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .table-scroll-wrapper {
+    max-height: 400px;
+  }
+
+  .action-button .button-text {
+    display: none;
+  }
+
+  .action-button {
+    padding: 6px;
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 6px 4px;
+    font-size: 12px;
+  }
+
+  .column-header {
+    min-width: 120px;
+  }
+
+  .data-cell {
+    min-width: 120px;
+  }
+}
+

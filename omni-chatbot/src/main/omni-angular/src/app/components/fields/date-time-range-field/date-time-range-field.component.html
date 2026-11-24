@@ -1,0 +1,87 @@
+<div class="date-time-range-field">
+  <div class="field-container">
+    <label class="field-label"
+           [attr.id]="'datetime-range-label-' + field.name"
+           [attr.for]="isFieldReadOnly() ? null : 'datetime-range-input-' + field.name">
+      {{ getFieldLabel() }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+
+    <!-- Readonly display: Plain text without date/time pickers -->
+    <div *ngIf="isFieldReadOnly()" class="readonly-datetime-range">
+      <div class="readonly-value"
+           role="status"
+           [attr.aria-labelledby]="'datetime-range-label-' + field.name">
+        {{ isSecured() && getFormattedDateTimeRangeValue() ? '••••••••' : (getFormattedDateTimeRangeValue() || 'No date/time range selected') }}
+      </div>
+
+      <span *ngIf="getTimezone()" class="timezone-caption">{{ getTimezone() }}</span>
+
+      <!-- Help text for readonly -->
+      <div *ngIf="getHelpText()" class="help-text" [attr.id]="'datetime-range-help-' + field.name">
+        {{ getHelpText() }}
+      </div>
+
+    </div>
+
+    <!-- Editable display: Custom date-time range picker input -->
+    <div *ngIf="!isFieldReadOnly()">
+      <div class="date-time-range-input-wrapper"
+           [class.has-error]="config.hasError"
+           (click)="openDateTimeRangePicker()"
+           (keydown.enter)="openDateTimeRangePicker()"
+           (keydown.space)="openDateTimeRangePicker(); $event.preventDefault()">
+        <input
+          type="text"
+          class="date-time-range-input"
+          [attr.id]="'datetime-range-input-' + field.name"
+          [value]="isSecured() && getFormattedDateTimeRangeValue() ? '••••••••' : getFormattedDateTimeRangeValue()"
+          placeholder="Select date and time range"
+          readonly
+          [attr.aria-invalid]="config.hasError"
+          [attr.aria-required]="isFieldRequired()"
+          [attr.aria-describedby]="(config.hasError ? 'datetime-range-error-edit-' + field.name + ' ' : '') + (getHelpText() ? 'datetime-range-help-edit-' + field.name : '')"
+          [attr.aria-label]="'Select date and time range for ' + (field.displayName || field.name)">
+
+        <!-- Clear button (shown when date-time range is selected) -->
+        <button *ngIf="hasDateTimeRangeValue()"
+                type="button"
+                class="clear-button"
+                (click)="clearDateTimeRange($event)"
+                (keydown.enter)="clearDateTimeRange($event)"
+                (keydown.space)="clearDateTimeRange($event)"
+                [attr.aria-label]="'Clear date and time range for ' + (field.displayName || field.name)"
+                tabindex="0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
+        <span class="calendar-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </span>
+      </div>
+
+      <span *ngIf="getTimezone()" class="timezone-caption">{{ getTimezone() }}</span>
+
+      <!-- Help text for editable -->
+      <div *ngIf="getHelpText()" class="help-text" [attr.id]="'datetime-range-help-edit-' + field.name">
+        {{ getHelpText() }}
+      </div>
+
+      <!-- Error message for editable -->
+      <div class="fallback-error-message"
+           [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+           role="alert"
+           [attr.id]="'datetime-range-error-edit-' + field.name">
+        {{ config.errorMessage }}
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,47 @@
+/* Dynamic Field Component Styles */
+
+.label-field {
+}
+
+.label-content {
+  font-size: 14px;
+  line-height: 1.5;
+  color: #333;
+}
+
+/* Image-mode label. width/height/object-fit are bound inline from the image
+   attributes; alignment mirrors the toolkit's image--left/center/right. */
+.label-image {
+  max-width: 100%;
+}
+
+.image--left {
+  display: block;
+  margin-left: 0;
+}
+
+.image--center {
+  display: block;
+  margin: 0 auto;
+}
+
+.image--right {
+  display: block;
+  margin-left: auto;
+  margin-right: 0;
+}
+
+.unknown-field {
+  padding: 12px;
+  background-color: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 4px;
+  color: #856404;
+  font-size: 14px;
+}
+
+.unknown-field em {
+  font-style: italic;
+}
+
+/* Responsive: scales naturally via max-width: 100% on parent. */

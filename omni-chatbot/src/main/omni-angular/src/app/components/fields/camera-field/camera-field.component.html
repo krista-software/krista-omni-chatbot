@@ -1,0 +1,103 @@
+<!-- Camera Field Component (Image Files Only) -->
+<div class="camera-field">
+  <!-- Field Label -->
+  <div class="field-label"
+       *ngIf="field.name"
+       [attr.id]="'camera-label-' + field.name">
+    {{ field.displayName || field.name }}
+    <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+  </div>
+
+  <!-- Editable Mode -->
+  <div *ngIf="!isFieldReadOnly()" class="editable-mode">
+    <!-- Hidden file input -->
+    <input
+      #fileInput
+      type="file"
+      [attr.id]="'camera-input-' + field.name"
+      [accept]="getAcceptedTypes()"
+      [attr.aria-labelledby]="'camera-label-' + field.name"
+      [attr.aria-describedby]="hasError ? 'camera-error-' + field.name : null"
+      [attr.aria-required]="isFieldRequired()"
+      multiple
+      style="display: none"
+      (change)="onFileSelect($event)">
+
+    <!-- File selection area -->
+    <div class="file-drop-zone"
+         (click)="triggerFileInput()"
+         (keydown.enter)="triggerFileInput()"
+         (keydown.space)="triggerFileInput(); $event.preventDefault()"
+         role="button"
+         tabindex="0"
+         [attr.aria-label]="'Select images for ' + (field.displayName || field.name)">
+      <div class="drop-zone-content">
+        <mat-icon class="upload-icon" aria-hidden="true">camera_alt</mat-icon>
+        <p class="drop-zone-text">Click to select images</p>
+        <p class="drop-zone-subtext">Supports: JPG, PNG, GIF, WebP, BMP, SVG</p>
+      </div>
+    </div>
+
+    <!-- Selected files preview -->
+    <div class="selected-files" *ngIf="selectedFiles.length > 0" role="list" aria-label="Selected images">
+      <div class="file-preview" *ngFor="let file of selectedFiles; let i = index; trackBy: trackByFile" role="listitem">
+        <div class="image-preview">
+          <img [src]="previewUrls[i]" [alt]="file.name" class="preview-image">
+          <button
+            mat-icon-button
+            color="primary"
+            type="button"
+            class="remove-file-btn"
+            (click)="removeFile(i)"
+            [attr.aria-label]="'Remove image ' + file.name"
+            title="Remove image">
+            <mat-icon aria-hidden="true">close</mat-icon>
+          </button>
+        </div>
+        <div class="file-info">
+          <div class="file-name">{{ file.name }}</div>
+          <div class="file-size">{{ file.size | fileSize }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Error message -->
+    <div class="error-message"
+         *ngIf="hasError && errorMessage"
+         role="alert"
+         [attr.id]="'camera-error-' + field.name">
+      {{ errorMessage }}
+    </div>
+  </div>
+
+  <!-- Readonly Mode -->
+  <div *ngIf="isFieldReadOnly()" class="readonly-mode">
+    <div class="readonly-value" role="status" [attr.aria-labelledby]="'camera-label-' + field.name">
+      {{ isSecured() ? '••••••••' : getFormattedReadOnlyValue() }}
+    </div>
+
+    <!-- Readonly file previews -->
+    <div class="readonly-files" *ngIf="!isSecured() && selectedFiles.length > 0" role="list" aria-label="Uploaded images">
+      <div class="readonly-file-preview" *ngFor="let file of selectedFiles; let i = index; trackBy: trackByFile" role="listitem">
+        <img [src]="previewUrls[i]" [alt]="file.name" class="readonly-preview-image">
+        <div class="readonly-file-info">
+          <div class="file-name">{{ file.name }}</div>
+          <div class="file-size">{{ file.size | fileSize }}</div>
+        </div>
+
+        <!-- Download button for readonly files -->
+        <button
+          *ngIf="canDownload()"
+          mat-icon-button
+          color="primary"
+          type="button"
+          (click)="downloadFile()"
+          class="download-file-button"
+          aria-label="Download image"
+          title="Download image">
+          <mat-icon aria-hidden="true">download</mat-icon>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

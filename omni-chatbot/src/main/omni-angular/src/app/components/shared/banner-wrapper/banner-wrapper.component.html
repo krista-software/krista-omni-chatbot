@@ -1,0 +1,6 @@
+<div class="banner-wrapper" *ngIf="showDate || showUnread">
+  <div class="message-banner">
+    <span class="banner-text" *ngIf="showDate">{{ dateText }}</span>
+    <span class="unread-text" *ngIf="showUnread">{{ 'banner.unread' | translate }}</span>
+  </div>
+</div>

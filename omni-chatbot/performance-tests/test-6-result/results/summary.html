@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Chatbot Load Test — Summary</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,'Segoe UI',sans-serif;background:#f1f5f9;color:#0f172a;padding:32px 20px;line-height:1.5}
+.wrap{max-width:920px;margin:0 auto}
+h1{font-size:20px;margin-bottom:4px}
+.meta{font-size:13px;color:#64748b;margin-bottom:24px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:18px}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px 20px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.card-lbl{font-size:12px;font-weight:600;color:#64748b;text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px}
+.card-val{font-size:30px;font-weight:700}
+.card-of{font-size:15px;font-weight:400;color:#94a3b8}
+.bar{height:6px;background:#e2e8f0;border-radius:3px;margin:10px 0 6px;overflow:hidden}
+.bar-fill{height:100%;border-radius:3px}
+.card-pct{font-size:13px;font-weight:600}
+.poolbar{font-size:13px;color:#475569;margin-bottom:24px}
+.sec{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:20px 22px;margin-bottom:20px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.sec h2{font-size:15px;margin-bottom:14px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:right;padding:7px 10px;border-bottom:1px solid #eef2f7}
+th:first-child,td:first-child{text-align:left}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:#64748b}
+tr:last-child td{border-bottom:none}
+.barcell{width:55%}
+.dbar{height:14px;background:#3b82f6;border-radius:3px}
+.footer{text-align:center;font-size:12px;color:#94a3b8;margin-top:8px}
+</style></head><body><div class="wrap">
+<h1>Chatbot Load Test — Summary</h1>
+<div class="meta">Host: extension.us-prod-01.krista.app &nbsp;·&nbsp; Type: Chatbot EP (Extension Proxy) &nbsp;·&nbsp; Total users: <b>1000</b> &nbsp;·&nbsp; Concurrent users: <b>100</b><br>Test window: 2026-06-12 10:30:11 → 2026-06-12 10:49:14 (19m 3s) &nbsp;·&nbsp; Generated 2026-06-12 10:49:37</div>
+
+<div class="cards">
+        <div class="card">
+          <div class="card-lbl">Auth Success</div>
+          <div class="card-val">995<span class="card-of"> / 1000</span></div>
+          <div class="bar"><div class="bar-fill" style="width:99.5%;background:#10b981"></div></div>
+          <div class="card-pct" style="color:#10b981">99.5%</div>
+        </div>
+        <div class="card">
+          <div class="card-lbl">Session Created</div>
+          <div class="card-val">995<span class="card-of"> / 1000</span></div>
+          <div class="bar"><div class="bar-fill" style="width:99.5%;background:#10b981"></div></div>
+          <div class="card-pct" style="color:#10b981">99.5%</div>
+        </div>
+        <div class="card">
+          <div class="card-lbl">WebSocket Established</div>
+          <div class="card-val">995<span class="card-of"> / 1000</span></div>
+          <div class="bar"><div class="bar-fill" style="width:99.5%;background:#10b981"></div></div>
+          <div class="card-pct" style="color:#10b981">99.5%</div>
+        </div>
+        <div class="card">
+          <div class="card-lbl">Conversation Reached</div>
+          <div class="card-val">995<span class="card-of"> / 1000</span></div>
+          <div class="bar"><div class="bar-fill" style="width:99.5%;background:#10b981"></div></div>
+          <div class="card-pct" style="color:#10b981">99.5%</div>
+        </div></div>
+<div class="poolbar">Auth path &nbsp;·&nbsp; pool: <b>1000</b> &nbsp; fallback: <b>0</b></div>
+
+<div class="sec">
+  <h2>Stage Timings (seconds)</h2>
+  <table>
+    <thead><tr><th>Stage</th><th>Count</th><th>Min</th><th>Avg</th><th>P50</th><th>P90</th><th>P95</th><th>Max</th></tr></thead>
+    <tbody><tr><td>Full Boot (UI + Auth)</td><td>1000</td><td>0.36</td><td>2.223</td><td>1.87</td><td>3.861</td><td>4.96</td><td>7.49</td></tr><tr><td>WebSocket Open</td><td>995</td><td>0.77</td><td>0.889</td><td>0.82</td><td>1.03</td><td>1.306</td><td>1.9</td></tr><tr><td>WebSocket Established</td><td>995</td><td>0.0</td><td>0.136</td><td>0.01</td><td>0.026</td><td>0.05</td><td>60.02</td></tr></tbody>
+  </table>
+</div>
+
+<div class="sec">
+  <h2>Chatbot Message Response Times (seconds)</h2>
+  <table>
+    <thead><tr><th>Message</th><th>Count</th><th>Min</th><th>Avg</th><th>P50</th><th>P90</th><th>P95</th><th>Max</th></tr></thead>
+    <tbody><tr><td>Bot Reply 1</td><td>995</td><td>0.0</td><td>0.256</td><td>0.17</td><td>0.54</td><td>0.693</td><td>10.0</td></tr><tr><td>Bot Reply 2</td><td>53</td><td>0.56</td><td>0.959</td><td>0.79</td><td>1.608</td><td>1.624</td><td>1.68</td></tr><tr><td>Bot Reply 3</td><td>53</td><td>5.36</td><td>7.068</td><td>6.89</td><td>8.816</td><td>9.04</td><td>9.16</td></tr></tbody>
+  </table>
+</div>
+
+<div class="sec">
+  <h2>Asset &amp; Boot-API Load Times (seconds)</h2>
+  <table>
+    <thead><tr><th>Asset / API</th><th>Count</th><th>Min</th><th>Avg</th><th>P50</th><th>P90</th><th>P95</th><th>Max</th></tr></thead>
+    <tbody><tr><td>UI HTML (index)</td><td>1000</td><td>0.323</td><td>0.572</td><td>0.46</td><td>0.912</td><td>0.994</td><td>1.488</td></tr><tr><td>styles-DUYLOU4O.css</td><td>996</td><td>0.025</td><td>0.077</td><td>0.045</td><td>0.159</td><td>0.227</td><td>0.458</td></tr><tr><td>main-UOLQXA7C.js</td><td>996</td><td>0.137</td><td>0.737</td><td>0.399</td><td>1.889</td><td>2.48</td><td>5.097</td></tr><tr><td>polyfills-B6TNHZQ6.js</td><td>996</td><td>0.025</td><td>0.082</td><td>0.047</td><td>0.161</td><td>0.249</td><td>0.493</td></tr><tr><td>i18n (en.json)</td><td>995</td><td>0.263</td><td>0.413</td><td>0.301</td><td>0.762</td><td>0.801</td><td>1.148</td></tr><tr><td>Config API</td><td>996</td><td>0.272</td><td>0.383</td><td>0.325</td><td>0.587</td><td>0.771</td><td>0.944</td></tr><tr><td>Pool-entry API</td><td>996</td><td>0.268</td><td>0.375</td><td>0.306</td><td>0.657</td><td>0.754</td><td>1.086</td></tr></tbody>
+  </table>
+</div>
+
+<div class="sec">
+  <h2>Drop-offs</h2>
+  <table><tbody><tr><td>Auth failures</td><td>5</td></tr><tr><td>WS-establish failures</td><td>0</td></tr></tbody></table>
+</div>
+
+<div class="sec">
+  <h2>Messages Received per User</h2>
+  <table><tbody><tr><td>0 msgs</td><td>5</td><td class='barcell'><div class='dbar' style='width:0.5%'></div></td></tr><tr><td>1 msgs</td><td>1</td><td class='barcell'><div class='dbar' style='width:0.1%'></div></td></tr><tr><td>2 msgs</td><td>11</td><td class='barcell'><div class='dbar' style='width:1.1%'></div></td></tr><tr><td>3 msgs</td><td>6</td><td class='barcell'><div class='dbar' style='width:0.6%'></div></td></tr><tr><td>4 msgs</td><td>977</td><td class='barcell'><div class='dbar' style='width:97.7%'></div></td></tr></tbody></table>
+</div>
+
+<div class="footer">1000 threads · minimal summary report</div>
+</div></body></html>

@@ -1,0 +1,40 @@
+<div class="rating-field">
+  <div class="field-container">
+    <label *ngIf="shouldShowLabel() && getFieldLabel()"
+           class="field-label"
+           [attr.id]="'rating-label-' + field.name">
+      {{ getFieldLabel() }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+
+    <!-- Secured mode: show masked value -->
+    <div *ngIf="isSecured()" class="secured-value" role="status">••••••••</div>
+
+    <div *ngIf="!isSecured()" class="star-rating"
+         role="radiogroup"
+         [attr.aria-labelledby]="'rating-label-' + field.name"
+         [attr.aria-describedby]="config.hasError ? 'rating-error-' + field.name : null"
+         [attr.aria-required]="isFieldRequired()">
+      <button
+        *ngFor="let star of stars; let i = index; trackBy: trackByStar"
+        type="button"
+        class="star-button"
+        role="radio"
+        [class.filled]="isStarFilled(star)"
+        [disabled]="isFieldReadOnly()"
+        [attr.aria-checked]="field.value === star"
+        [attr.aria-label]="star + ' star' + (star > 1 ? 's' : '')"
+        (click)="onStarClick(star)">
+        <mat-icon aria-hidden="true">{{ isStarFilled(star) ? 'star' : 'star_border' }}</mat-icon>
+      </button>
+    </div>
+
+    <!-- Error message -->
+    <div *ngIf="!isFieldReadOnly()" class="field-error-message"
+         [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+         role="alert"
+         [attr.id]="'rating-error-' + field.name">
+      {{ config.errorMessage }}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,159 @@
+/* Modern Chatbot Footer Styling */
+.footer-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: #ffffff;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+/* When hideSendMessage is true, reduce footer height to just show branding */
+.footer-container:has(.message-input-area) {
+  min-height: 100px;
+}
+
+.footer-container:not(:has(.message-input-area)) {
+  height: auto;
+}
+
+.message-input-area {
+  padding: 12px 16px 8px;
+}
+
+.input-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8f9fa;
+  border-radius: 24px;
+  padding: 8px 8px 8px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.input-container:focus-within {
+  border-color: var(--krista-primary);
+  box-shadow: 0 0 0 3px rgba(1, 119, 198, 0.1);
+  background: #ffffff;
+}
+
+.send-button {
+  padding: 0 !important;
+  width: 40px !important;
+  height: 40px !important;
+  min-width: 40px !important;
+  border-radius: 50% !important;
+  background: var(--krista-primary) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease !important;
+  flex-shrink: 0;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.send-button:hover:not(:disabled) {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  filter: brightness(1.1);
+}
+
+.send-button:active:not(:disabled) {
+  transform: scale(0.95);
+}
+
+.send-button:disabled {
+  background: #e0e0e0 !important;
+  color: #9e9e9e !important;
+  box-shadow: none;
+}
+
+.send-icon {
+  width: 18px;
+  height: 18px;
+  color: #ffffff;
+  transition: transform 0.2s ease;
+}
+
+.send-icon.disabled {
+  color: #9e9e9e;
+}
+
+.footer-branding {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.branding-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-height: 32px;
+  position: relative;
+}
+
+.powered-by-container {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  justify-content: center;
+  /* Centered in the middle */
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.terms-container {
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+}
+
+.powered-by-text {
+  font-size: 11px;
+  line-height: 16px;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+
+.krista-logo {
+  max-width: 40px;
+  height: auto;
+}
+
+.terms-link {
+  font-size: 11px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  text-decoration: underline;
+  color: #259de1;
+}
+
+.terms-link:hover {
+  color: #259de1;
+  opacity: 0.8;
+}
+
+/* Text Input Area Styling */
+app-text-input-area {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Material Button Overrides */
+.send-button.mat-mdc-icon-button {
+  width: 40px;
+  height: 40px;
+  padding: 0 !important;
+}
+
+/* Responsive: scales naturally via max-width: 100% on parent. */

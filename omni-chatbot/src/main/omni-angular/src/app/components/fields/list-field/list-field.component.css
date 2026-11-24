@@ -1,0 +1,539 @@
+.list-field {
+  display: block;
+  width: 100%;
+}
+
+/* Field Label */
+.field-label-container {
+  margin-bottom: 8px;
+}
+
+.field-label {
+  font-size: var(--kr-font-size-sm);
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.87);
+  display: block;
+}
+
+.required-asterisk {
+  color: #d32f2f;
+  margin-left: 2px;
+}
+
+/* Readonly Empty State */
+.readonly-empty {
+  padding: 12px 0;
+}
+
+.no-data-message {
+  font-style: italic;
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Table Container */
+.list-table-container {
+  margin-bottom: 12px;
+  overflow: auto;
+}
+
+/* Table Scroll Wrapper for horizontal scrolling */
+.table-scroll-wrapper {
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+/* Entity List Table (multi-column for EntityReference fields) */
+.entity-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e0e0e0;
+  background-color: #fff;
+  min-width: 600px;
+}
+
+.entity-list-table thead {
+  background-color: #f5f5f5;
+}
+
+.entity-list-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.87);
+  border: 1px solid #e0e0e0;
+  white-space: nowrap;
+}
+
+.entity-list-table th.action-header {
+  width: 50px;
+  text-align: center;
+}
+
+.entity-list-table tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.entity-list-table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.entity-list-table tbody tr:hover {
+  background-color: rgba(56, 113, 224, 0.04);
+}
+
+.entity-list-table td {
+  padding: 8px 12px;
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.87);
+  border: 1px solid #e0e0e0;
+  vertical-align: middle;
+}
+
+.entity-list-table td.row-number {
+  text-align: center;
+  width: 40px;
+  color: rgba(0, 0, 0, 0.54);
+  font-weight: 500;
+}
+
+.entity-list-table td.cell-value {
+  word-break: break-word;
+}
+
+/* Readonly cell value styling */
+.readonly-cell-value {
+  display: block;
+  font-size: var(--kr-font-size-sm);
+  color: rgba(0, 0, 0, 0.87);
+  line-height: 1.5;
+  padding: 4px 0;
+}
+
+/* Hide labels and errors for fields rendered inside entity table cells */
+.entity-list-table td.cell-value ::ng-deep app-dynamic-field {
+  /* Hide ALL field labels - covers every field type component */
+  .field-label-container,
+  .field-label,
+  label,
+  .readonly-field label,
+  .text-field label,
+  .time-field label,
+  .date-field label,
+  .date-range-field label,
+  .date-time-range-field label,
+  .number-field label,
+  .switch-field label,
+  .pick-one-field label,
+  .pick-many-field label,
+  .rating-field label,
+  .location-field label,
+  .address-field label,
+  mat-label,
+  [class*="-field"] > label,
+  [class*="-field"] > .field-label-container {
+    display: none !important;
+  }
+
+  /* Hide error messages */
+  .field-error-message,
+  mat-error,
+  .fallback-error-message {
+    display: none !important;
+  }
+
+  /* Hide "No value entered" message in readonly cells */
+  .readonly-value:empty::after {
+    content: '' !important;
+  }
+
+  /* Compact field container */
+  .field-container {
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Remove margins from multi-field */
+  app-multi-field {
+    .multi-field-container {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .field-row {
+      margin-bottom: 8px !important;
+    }
+
+    .field-row:last-child {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  /* Compact readonly fields */
+  .readonly-field {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+.entity-list-table td.row-actions {
+  text-align: center;
+  vertical-align: middle;
+  width: 50px;
+  padding: 8px;
+}
+
+.entity-list-table td.empty-message {
+  text-align: center;
+  padding: 24px 16px;
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Simple List Table (single column for non-EntityReference fields) */
+.simple-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #e0e0e0;
+  background-color: #fff;
+}
+
+.simple-list-table thead {
+  background-color: #f5f5f5;
+}
+
+.simple-list-table th {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.87);
+  border: 1px solid #e0e0e0;
+}
+
+.simple-list-table th.action-header {
+  width: 60px;
+  text-align: center;
+}
+
+.simple-list-table tbody tr {
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.simple-list-table tbody tr:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.simple-list-table tbody tr:hover {
+  background-color: rgba(56, 113, 224, 0.04);
+}
+
+.simple-list-table td {
+  padding: 8px 12px;
+  font-size: 0.8125rem;
+  color: rgba(0, 0, 0, 0.87);
+  border: 1px solid #e0e0e0;
+}
+
+.simple-list-table td.row-value {
+  word-break: break-word;
+}
+
+/* Entity reference value styling */
+.entity-reference-value {
+  font-size: var(--kr-font-size-sm);
+  color: #333;
+  line-height: 1.5;
+}
+
+/* Hide labels and errors for fields rendered inside list rows */
+.simple-list-table td.row-value ::ng-deep app-dynamic-field {
+  /* Hide ALL field labels - covers every field type component */
+  .field-label-container,
+  .field-label,
+  label,
+  .readonly-field label,
+  .text-field label,
+  .time-field label,
+  .date-field label,
+  .date-range-field label,
+  .date-time-range-field label,
+  .number-field label,
+  .switch-field label,
+  .pick-one-field label,
+  .pick-many-field label,
+  .rating-field label,
+  .location-field label,
+  .address-field label,
+  mat-label,
+  [class*="-field"] > label,
+  [class*="-field"] > .field-label-container {
+    display: none !important;
+  }
+
+  /* Hide error messages */
+  .field-error-message,
+  mat-error,
+  .fallback-error-message {
+    display: none !important;
+  }
+
+  /* Hide "No value entered" message in readonly cells */
+  .readonly-value:empty::after {
+    content: '' !important;
+  }
+
+  /* Compact field container */
+  .field-container {
+    margin-bottom: 0 !important;
+    padding: 0 !important;
+  }
+
+  /* Remove margins from multi-field */
+  app-multi-field {
+    .multi-field-container {
+      margin: 0 !important;
+      padding: 0 !important;
+    }
+
+    .field-row {
+      margin-bottom: 8px !important;
+    }
+
+    .field-row:last-child {
+      margin-bottom: 0 !important;
+    }
+  }
+
+  /* Compact readonly fields */
+  .readonly-field {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+}
+
+.simple-list-table td.row-actions {
+  text-align: center;
+  vertical-align: middle;
+  width: 80px;
+  padding: 8px;
+}
+
+.simple-list-table td.empty-message {
+  text-align: center;
+  padding: 24px 16px;
+  font-style: italic;
+  color: rgba(0, 0, 0, 0.6);
+}
+
+/* Column type-specific minimum widths */
+.col-type-time {
+  min-width: 130px;
+  white-space: nowrap;
+}
+
+.col-type-date {
+  min-width: 130px;
+  white-space: nowrap;
+}
+
+.col-type-datetime {
+  min-width: 180px;
+  white-space: nowrap;
+}
+
+.col-type-daterange {
+  min-width: 200px;
+}
+
+.col-type-number {
+  min-width: 100px;
+}
+
+/* Delete Row Button */
+.delete-row-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 0;
+  background-color: transparent;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.54);
+  font-weight: normal;
+  line-height: 1;
+  transition: all 0.2s ease;
+  text-align: center;
+}
+
+.delete-row-button mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  color: inherit;
+}
+
+.delete-row-button:hover {
+  background-color: rgba(244, 67, 54, 0.12);
+  color: #f44336;
+}
+
+.delete-row-button:active {
+  background-color: rgba(244, 67, 54, 0.2);
+}
+
+/* Add Row Button */
+.add-row-container {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 8px;
+}
+
+.add-row-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  font-size: var(--kr-font-size-sm);
+  font-weight: 500;
+  color: #3871E0;
+  background-color: transparent;
+  border: 1px solid #3871E0;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-row-button:hover:not(:disabled) {
+  background-color: rgba(56, 113, 224, 0.04);
+}
+
+.add-row-button:active:not(:disabled) {
+  background-color: rgba(56, 113, 224, 0.12);
+}
+
+.add-row-button:disabled {
+  color: rgba(0, 0, 0, 0.26);
+  border-color: rgba(0, 0, 0, 0.12);
+  cursor: not-allowed;
+}
+
+.add-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Pagination */
+.pagination-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px;
+  background-color: #f5f5f5;
+  border-top: 1px solid var(--kr-color-border, rgba(0, 0, 0, 0.2));
+}
+
+.pagination-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid var(--kr-color-border, rgba(0, 0, 0, 0.2));
+  border-radius: 4px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pagination-button:hover:not(:disabled) {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+}
+
+.pagination-button:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.pagination-button mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: #666;
+  font-weight: 500;
+}
+
+/* Open Complex Field Button (for nested List/Table) */
+.open-complex-field-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+  color: #1976d2;
+}
+
+.open-complex-field-button:hover {
+  background-color: rgba(25, 118, 210, 0.08);
+}
+
+.open-complex-field-button:focus {
+  outline: 2px solid #1976d2;
+  outline-offset: 2px;
+}
+
+.open-complex-field-button mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Rich text cell - render HTML content properly */
+.rich-text-cell {
+  display: block;
+  word-break: break-word;
+}
+
+.rich-text-cell p {
+  margin: 0 0 0.5em 0;
+}
+
+.rich-text-cell p:last-child {
+  margin-bottom: 0;
+}
+
+/* Validation error for nested complex fields (List/Table) in list rows */
+.cell-error-message {
+  color: var(--krista-error, #f44336);
+  font-size: 0.75rem;
+  margin-top: 2px;
+  line-height: 1.2;
+}
+
+/* Error Message */
+.field-error-message {
+  color: #d32f2f;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  min-height: 18px;
+}
+
+/* Responsive: fields scale naturally via max-width: 100% on parent. */

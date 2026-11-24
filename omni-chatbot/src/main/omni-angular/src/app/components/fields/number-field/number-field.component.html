@@ -1,0 +1,61 @@
+<div class="number-field">
+  <!-- Readonly display: Plain text without input styling -->
+  <div *ngIf="isFieldReadOnly()" class="readonly-field">
+    <label *ngIf="shouldShowLabel() && getFieldLabel()"
+           class="field-label"
+           [attr.id]="'number-label-' + field.name">
+      {{ getFieldLabel() }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+    <div class="readonly-value numeric"
+         role="status"
+         [attr.aria-labelledby]="'number-label-' + field.name">
+      {{ isSecured() && getDisplayValue() ? '••••••••' : getDisplayValue() }}
+    </div>
+
+  </div>
+
+  <!-- Editable display: Material form field with input -->
+  <mat-form-field *ngIf="!isFieldReadOnly()" appearance="fill" class="full-width krista-field numeric-field" [class.mat-form-field-invalid]="config.hasError">
+    <mat-label *ngIf="shouldShowLabel() && getFieldLabel()">
+      {{ getFieldLabel() }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </mat-label>
+
+    <!-- Numeric input (always single-line) -->
+    <input
+      matInput
+      [type]="getInputType()"
+      [attr.id]="'number-input-' + field.name"
+      [value]="getDisplayValue()"
+      [placeholder]="getPlaceholder()"
+      [attr.aria-invalid]="config.hasError"
+      [attr.aria-required]="isFieldRequired()"
+      [attr.aria-describedby]="config.hasError ? 'number-error-edit-' + field.name : null"
+      inputmode="decimal"
+      (input)="onValueChange($any($event.target).value)"
+      (blur)="onBlur($any($event.target).value)"
+      (focus)="onFocus()"
+      (keypress)="onKeyPress($event)"
+      (paste)="onPaste($event)"
+      [class.error]="config.hasError"
+      [class.ng-invalid]="config.hasError"
+      [class.ng-touched]="config.hasError"
+      class="numeric-input">
+
+    <!-- Error message using mat-error (inside form field) -->
+    <mat-error *ngIf="config.hasError && config.errorMessage" [attr.id]="'number-error-edit-' + field.name">
+      {{ config.errorMessage }}
+    </mat-error>
+  </mat-form-field>
+
+  <!-- Fallback error message outside form field for editable -->
+  <div *ngIf="!isFieldReadOnly()"
+       class="fallback-error-message"
+       [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+       role="alert"
+       [attr.id]="'number-error-fallback-' + field.name">
+    {{ config.errorMessage }}
+  </div>
+</div>
+

@@ -1,0 +1,471 @@
+// @import "main"; // Removed - not available in omni-angular
+
+.main-container {
+  height: 100%;
+  flex: 1;
+  overflow: auto;
+}
+
+.readonly-table {
+  // In readonly mode, table headers should have same background as cells (white)
+  table th {
+    background-color: #a3c1e0  !important;
+  }
+
+  // Main container max height in readonly mode
+  .main-container {
+    max-height: 400px;
+  }
+
+  // Selected cell data area should have same background as table cells in readonly mode
+  .selected-cell-data {
+    background-color: #a3c1e0 !important;
+  }
+}
+
+.removeBtn-top{
+  margin-right: 1rem;
+  height: unset;
+  // Ensure button stays within viewport bounds
+  max-width: calc(100vw - 32px);
+  box-sizing: border-box;
+}
+
+.mat-mdc-table {
+  max-height: 100%;
+  width: auto;
+  min-width: 100%;
+  table-layout: auto;
+}
+
+table {
+
+  th {
+    background-color: #f9f9f9 !important;
+    height: 33px;
+    font-size: 12px !important;
+    width: auto;
+    position: sticky;
+    top: 0;
+  }
+
+  tr {
+    height: 44px !important;
+    font-size: 12px !important;
+  }
+
+  th, td {
+    border: 1px solid var(--kr-color-border) !important;
+    font-size: 12px !important;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    max-width: 750px !important; /* Set maximum width */
+  }
+
+  td {
+    cursor: pointer;
+  }
+
+  td:hover {
+    background-color: #EAF2FA;
+    transition: background-color 0.3ms ease;
+  }
+}
+
+.selected-cell-container {
+  min-height: 48px;
+  max-height: 96px;
+
+  .selected-cell-data {
+    min-height: 48px;
+    max-height: 96px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+
+    .selected-cell {
+      padding: 8px 8px 8px 16px;
+      max-height: 80px;
+      overflow-y: auto;
+      display: -webkit-box;
+      -webkit-line-clamp: 3; /* Limit to 3 lines */
+      -webkit-box-orient: vertical;
+      text-overflow: ellipsis;
+      word-break: break-word;
+    }
+
+    .color-light {
+      color: var(--kr-text-color-light);
+    }
+  }
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 400;
+
+  img.icon {
+    width: 18px;
+    height: 18px;
+    object-fit: cover;
+  }
+}
+
+.selected-cell-highlight {
+  background-color: #EAF2FA;
+}
+
+.color-light {
+  color: var(--kr-text-color-light);
+}
+
+
+.removeBtn {
+  border-color: #e4e4e4 !important;
+  color: #e4e4e4 !important;
+}
+.paginator-container {
+  display: flex;
+  align-items: center;
+  flex-grow: 0;
+  flex-shrink: 0;
+  visibility: visible;
+  border-top: 1px solid var(--kr-color-border);
+  border-bottom: 1px solid var(--kr-color-border);
+  position: sticky;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  z-index: 10;
+  background: #fff;
+  height: 48px !important;
+  overflow: hidden; // Prevent any scrollbars
+}
+
+th.select-column {
+  z-index: 3; /* Higher z-index for the header */
+}
+
+.select-column {
+  width: 73px;
+  text-align: center;
+  position: sticky;
+  left: 0;
+  z-index: 2; /* Ensure it stays above other rows */
+  background: #fff; /* Background color to prevent overlap with table rows */
+}
+
+mat-select {
+  width: 3.25rem;
+  font-size: 12px;
+  border-radius: 4px;
+  padding: 0 8px;
+  background-color: var(--kr-color-border);
+}
+
+
+//Pagination start hear
+.pagination-selector {
+  color: #434343;
+  background-color: #e4e4e4;
+  padding: 5px;
+  border-radius: 9px;
+  font-size: 12px;
+}
+
+.pagination-selector option {
+  background-color: #e4e4e4;
+  color: #434343;
+}
+
+.new-table-page-footer {
+  padding-top: 4px;
+  padding-bottom: 4px;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  max-height: 48px;
+
+  .gap {
+    height: 100%;
+    width: 10px;
+  }
+
+  .page-text {
+    white-space: nowrap;
+    color: #434343;
+    font-size: 12px;
+  }
+
+  .page-input {
+    border-radius: 6px;
+    background: #F5F5F5;
+    --width: 20px;
+    width: 20px;
+  }
+
+  .page-info {
+    display: flex;
+    padding-left: 1.5rem;
+    flex: 1;
+    align-content: flex-start;
+    align-items: center;
+  }
+
+  .page-navigation {
+    display: flex;
+    flex: 1;
+    justify-content: center;
+    align-items: center;
+
+    p {
+      margin: 0;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+    }
+  }
+
+  .dummy {
+    flex: 1;
+  }
+}
+
+.button-disabled {
+  opacity: 0.5 !important;
+}
+
+.show-border {
+  background-color: #FFFFFF;
+  border-top: 1px solid var(--kr-color-border);
+  border-left: 1px solid var(--kr-color-border);
+  border-right: 1px solid var(--kr-color-border);
+}
+
+//Pagination End hear
+
+// Table Cell Components Styling
+.table-cell-component {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+
+  // Override field component styles for table display
+  // Use ::ng-deep to penetrate component encapsulation
+  ::ng-deep {
+    app-switch-field,
+    app-rating-field,
+    app-date-field,
+    app-pick-many-field {
+      width: 100%;
+
+      // Hide field labels in table cells (but NOT checkbox option labels)
+      > .pick-many-field > .field-container > .field-label,
+      > .field-container > .field-label,
+      .field-label,
+      .rating-field > label,
+      .switch-field > label,
+      .date-field > label,
+      .readonly-field > label {
+        display: none !important;
+      }
+
+      // Hide error messages in table cells
+      .field-error-message,
+      mat-error,
+      .fallback-error-message {
+        display: none !important;
+      }
+
+      // Compact field container
+      .field-container {
+        margin-bottom: 0 !important;
+        padding: 0 !important;
+      }
+
+      // Hide labels in readonly field
+      .readonly-field {
+        padding: 0 !important;
+        margin: 0 !important;
+
+        label {
+          display: none !important;
+        }
+      }
+    }
+
+    // Specific adjustments for switch field
+    app-switch-field {
+      .custom-toggle {
+        cursor: not-allowed;
+      }
+    }
+
+    // Specific adjustments for rating field
+    app-rating-field {
+      .star-rating {
+        gap: 2px;
+
+        .star-button {
+          mat-icon {
+            font-size: 16px;
+            width: 16px;
+            height: 16px;
+          }
+        }
+      }
+    }
+
+    // Specific adjustments for date field
+    app-date-field {
+      // Hide the date picker input, show only formatted text
+      mat-form-field {
+        display: none;
+      }
+
+      // Hide mat-label specifically
+      mat-label,
+      .mat-mdc-form-field-label,
+      .mat-mdc-form-field-label-wrapper {
+        display: none !important;
+      }
+
+      .readonly-display {
+        font-size: 12px;
+      }
+
+      .readonly-value {
+        padding: 0;
+        margin: 0;
+      }
+    }
+
+    // Specific adjustments for pick-many field
+    app-pick-many-field {
+      .checkbox-group {
+        gap: 4px;
+
+        mat-checkbox {
+          font-size: 11px;
+        }
+      }
+    }
+  }
+}
+
+// File/Camera field display in table cells
+.table-cell-file {
+  display: flex;
+  align-items: center;
+  padding: 4px 0;
+
+  .file-display {
+    font-size: 12px;
+    color: #333;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+
+/* Responsive Design - Mobile First (350px+) */
+
+/* Extra Extra Small Devices (350px - 450px) - Very small mobile phones */
+@media (max-width: 450px) {
+  // Remove button - Extra small screens, keep within table bounds
+  .removeBtn-top {
+    right: 40px !important;
+    height: 24px !important;
+    width: 54px !important;
+    min-width: 54px !important;
+    max-width: 54px !important;
+    font-size: 8px !important;
+    padding: 3px 4px !important;
+    margin-right: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.2;
+  }
+
+  // Paginator container - Match table width without scrollbar
+  .paginator-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: hidden;
+    box-sizing: border-box;
+  }
+
+  .paginator-container.show-border {
+    border-left: 1px solid var(--kr-color-border);
+    border-right: 1px solid var(--kr-color-border);
+  }
+
+  // Main container - Ensure proper width
+  .main-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: auto;
+  }
+
+  // Table - Ensure proper width
+  .mat-mdc-table {
+    width: 100%;
+    min-width: 100%;
+  }
+}
+
+/* Extra Small Devices (451px - 480px) - Mobile phones */
+@media (min-width: 451px) and (max-width: 480px) {
+  // Remove button - Smaller and better positioned on mobile
+  .removeBtn-top {
+    right: 12px !important;
+    height: 26px !important;
+    width: 60px !important;
+    min-width: 60px !important;
+    max-width: 60px !important;
+    font-size: 9px !important;
+    padding: 4px 6px !important;
+    margin-right: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  // Paginator container - Match table width without scrollbar
+  .paginator-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
+
+  .paginator-container.show-border {
+    border-left: 1px solid var(--kr-color-border);
+    border-right: 1px solid var(--kr-color-border);
+  }
+}
+
+/* Small Devices (481px - 768px) - Tablets portrait */
+@media (min-width: 481px) and (max-width: 768px) {
+  // Remove button - Tablet size
+  .removeBtn-top {
+    right: 8px !important;
+    height: 28px !important;
+    width: 68px !important;
+    font-size: 10px !important;
+    padding: 5px 8px !important;
+  }
+
+  // Paginator container - Match table width
+  .paginator-container.show-border {
+    border-left: 1px solid var(--kr-color-border);
+    border-right: 1px solid var(--kr-color-border);
+  }
+}

@@ -1,0 +1,51 @@
+/**
+ * MessageSidebars Component Styles
+ * 
+ * Mirrors original MUI styling from MessageSidebars.tsx:
+ * - flexDirection: "row"
+ * - flexWrap: "wrap"
+ * - maxWidth: "100%"
+ * - gap: "5px"
+ * - marginTop: "6px"
+ */
+
+.sidebars-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  max-width: 100%;
+  gap: 5px;
+  margin-top: 6px;
+}
+
+/**
+ * Sidebar button styling
+ * Mirrors original MUI Button styling:
+ * - borderColor: "divider"
+ * - color: "text.primary"
+ * - backgroundColor: "#fff"
+ * - fontWeight: 400
+ */
+.sidebar-button {
+  border: 1px solid var(--krista-divider, rgba(0, 0, 0, 0.23)) !important;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87)) !important;
+  background-color: #fff;
+  font-weight: 400;
+  font-size: var(--kr-font-size-sm);
+  padding: 6px 16px;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  --mat-mdc-button-persistent-ripple-color: var(--krista-primary, #0177C6);
+  --mat-mdc-button-ripple-color: color-mix(in srgb, var(--krista-primary, #0177C6) 20%, transparent);
+}
+
+.sidebar-button:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--krista-primary, #0177C6) 12%, transparent) !important;
+  border-color: var(--krista-primary, #0177C6);
+}
+
+.sidebar-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+

@@ -1,0 +1,139 @@
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+}
+
+.loading-small {
+  padding: 6px;
+}
+
+.loading-medium {
+  padding: 12px;
+}
+
+.loading-large {
+  padding: 18px;
+}
+
+/* Spinner Loading */
+.spinner-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Dots Loading (similar to original app) */
+.dots-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.dots-container {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #1976d2;
+  animation: dots-pulse 1.4s infinite ease-in-out;
+}
+
+.dot-1 {
+  animation-delay: -0.32s;
+}
+
+.dot-2 {
+  animation-delay: -0.16s;
+}
+
+.dot-3 {
+  animation-delay: 0s;
+}
+
+@keyframes dots-pulse {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.5;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* App Logo Loading */
+.applogo-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.logo-image {
+  width: 48px;
+  height: 48px;
+  object-fit: contain;
+}
+
+.logo-placeholder {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.logo-placeholder mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  color: #1976d2;
+}
+
+/* Text Loading */
+.text-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Loading Message */
+.loading-message {
+  margin: 0;
+  font-size: 14px;
+  color: rgba(0, 0, 0, 0.6);
+  text-align: center;
+  font-weight: 400;
+}
+
+/* Size variations for loading message */
+.loading-small .loading-message {
+  font-size: 12px;
+}
+
+.loading-medium .loading-message {
+  font-size: 14px;
+}
+
+.loading-large .loading-message {
+  font-size: 16px;
+}

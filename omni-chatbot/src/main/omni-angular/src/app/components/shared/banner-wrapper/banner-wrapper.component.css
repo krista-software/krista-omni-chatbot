@@ -1,0 +1,37 @@
+.banner-wrapper {
+  width: 100%;
+  margin: 8px 0;
+}
+
+.message-banner {
+  padding: 32px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Separator lines (matching original app) */
+.message-banner::before,
+.message-banner::after {
+  content: "";
+  height: 1px;
+  background: #e1e1e1;
+  flex-grow: 1;
+}
+
+.banner-text {
+  font-size: 0.75rem;
+  color: var(--krista-text-secondary, rgba(0, 0, 0, 0.6));
+  letter-spacing: initial;
+  font-weight: 400;
+}
+
+.unread-text {
+  font-size: 0.75rem;
+  color: var(--krista-text-secondary, rgba(0, 0, 0, 0.6));
+  letter-spacing: initial;
+  font-weight: 400;
+  margin-left: 1rem;
+}
+

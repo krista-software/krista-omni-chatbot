@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px"
+     y="0px"
+     viewBox="0 0 512 512" xml:space="preserve">
+<g id="XMLID_1_">
+	<polygon id="XMLID_3_" points="287.7,224.3 496.2,224.3 416.1,144.3 512,48.4 463.6,0 367.7,95.9 287.7,15.8 	"/>
+    <polygon id="XMLID_4_"
+             points="287.7,287.7 287.7,496.2 367.7,416.1 463.6,512 512,463.6 416.1,367.7 496.2,287.7 	"/>
+    <polygon id="XMLID_5_" points="224.3,287.7 15.8,287.7 95.9,367.7 0,463.6 48.4,512 144.3,416.1 224.3,496.2 	"/>
+    <polygon id="XMLID_6_" points="224.3,224.3 224.3,15.8 144.3,95.9 48.4,0 0,48.4 95.9,144.3 15.8,224.3 	"/>
+</g>
+</svg>

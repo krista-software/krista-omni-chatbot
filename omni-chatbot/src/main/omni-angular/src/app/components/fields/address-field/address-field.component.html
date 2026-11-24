@@ -1,0 +1,114 @@
+<!-- Address Field Component (Compound Field) - Matches MultiField structure -->
+<div class="address-field" role="group" [attr.aria-labelledby]="'address-label-' + field.name">
+  <!-- Field Label -->
+  <div class="field-label"
+       *ngIf="shouldShowLabel() && getFieldLabel()"
+       [attr.id]="'address-label-' + field.name">
+    {{ getFieldLabel() }}
+    <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+  </div>
+
+  <!-- Address content container with left padding - matches MultiField -->
+  <div class="address-content" *ngIf="!isFieldReadOnly()">
+    <!-- Editable Mode - Using reusable text-field component -->
+    <div class="editable-mode">
+    <!-- Street Address -->
+    <app-text-field
+      [field]="getSubFieldDefinition('street')"
+      [config]="getSubFieldConfig('street')"
+      (valueChange)="onSubFieldChange('street', $event)"
+      (blur)="onSubFieldBlur('street', $event)"
+      (focus)="onSubFieldFocus('street')"
+      (keyPress)="onKeyPress($event)">
+    </app-text-field>
+
+    <!-- Street Address Line 2 -->
+    <app-text-field
+      [field]="getSubFieldDefinition('street2')"
+      [config]="getSubFieldConfig('street2')"
+      (valueChange)="onSubFieldChange('street2', $event)"
+      (blur)="onSubFieldBlur('street2', $event)"
+      (focus)="onSubFieldFocus('street2')"
+      (keyPress)="onKeyPress($event)">
+    </app-text-field>
+
+    <!-- City and State Row -->
+    <div class="address-row">
+      <div class="city-field">
+        <app-text-field
+          [field]="getSubFieldDefinition('city')"
+          [config]="getSubFieldConfig('city')"
+          (valueChange)="onSubFieldChange('city', $event)"
+          (blur)="onSubFieldBlur('city', $event)"
+          (focus)="onSubFieldFocus('city')"
+          (keyPress)="onKeyPress($event)">
+        </app-text-field>
+      </div>
+
+      <div class="state-field">
+        <app-text-field
+          [field]="getSubFieldDefinition('state')"
+          [config]="getSubFieldConfig('state')"
+          (valueChange)="onSubFieldChange('state', $event)"
+          (blur)="onSubFieldBlur('state', $event)"
+          (focus)="onSubFieldFocus('state')"
+          (keyPress)="onKeyPress($event)">
+        </app-text-field>
+      </div>
+    </div>
+
+    <!-- Postal Code and Country Row -->
+    <div class="address-row">
+      <div class="postal-field">
+        <app-text-field
+          [field]="getSubFieldDefinition('postalCode')"
+          [config]="getSubFieldConfig('postalCode')"
+          (valueChange)="onSubFieldChange('postalCode', $event)"
+          (blur)="onSubFieldBlur('postalCode', $event)"
+          (focus)="onSubFieldFocus('postalCode')"
+          (keyPress)="onKeyPress($event)">
+        </app-text-field>
+      </div>
+
+      <div class="country-field">
+        <app-text-field
+          [field]="getSubFieldDefinition('country')"
+          [config]="getSubFieldConfig('country')"
+          (valueChange)="onSubFieldChange('country', $event)"
+          (blur)="onSubFieldBlur('country', $event)"
+          (focus)="onSubFieldFocus('country')"
+          (keyPress)="onKeyPress($event)">
+        </app-text-field>
+      </div>
+    </div>
+    </div>
+  </div>
+
+  <!-- Readonly Mode - Each field on its own line -->
+  <div *ngIf="isFieldReadOnly()" class="readonly-mode" role="status" [attr.aria-labelledby]="'address-label-' + field.name">
+    <div class="readonly-subfield" *ngIf="getSubFieldDisplayValue('street')">
+      <div class="readonly-subfield-label">Street</div>
+      <div class="readonly-subfield-value">{{ isSecured() ? '••••••••' : getSubFieldDisplayValue('street') }}</div>
+    </div>
+    <div class="readonly-subfield" *ngIf="getSubFieldDisplayValue('street2')">
+      <div class="readonly-subfield-label">Street2</div>
+      <div class="readonly-subfield-value">{{ isSecured() ? '••••••••' : getSubFieldDisplayValue('street2') }}</div>
+    </div>
+    <div class="readonly-subfield" *ngIf="getSubFieldDisplayValue('city')">
+      <div class="readonly-subfield-label">City</div>
+      <div class="readonly-subfield-value">{{ isSecured() ? '••••••••' : getSubFieldDisplayValue('city') }}</div>
+    </div>
+    <div class="readonly-subfield" *ngIf="getSubFieldDisplayValue('state')">
+      <div class="readonly-subfield-label">State</div>
+      <div class="readonly-subfield-value">{{ isSecured() ? '••••••••' : getSubFieldDisplayValue('state') }}</div>
+    </div>
+    <div class="readonly-subfield" *ngIf="getSubFieldDisplayValue('postalCode')">
+      <div class="readonly-subfield-label">Postal Code</div>
+      <div class="readonly-subfield-value">{{ isSecured() ? '••••••••' : getSubFieldDisplayValue('postalCode') }}</div>
+    </div>
+    <div class="readonly-subfield" *ngIf="getSubFieldDisplayValue('country')">
+      <div class="readonly-subfield-label">Country</div>
+      <div class="readonly-subfield-value">{{ isSecured() ? '••••••••' : getSubFieldDisplayValue('country') }}</div>
+    </div>
+  </div>
+</div>

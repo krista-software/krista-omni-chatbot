@@ -1,0 +1,52 @@
+<!-- App Layout -->
+<div class="root-container" role="application" aria-label="Krista Chatbot">
+  <!-- Concurrency: Waiting screen (queued for a slot) -->
+  <div *ngIf="isQueued" class="layout-container">
+    <app-waiting-screen
+      [position]="admissionState.position"
+      [estimatedWaitMs]="admissionState.estimatedWaitMs"
+      (close)="onCloseChatWindow()">
+    </app-waiting-screen>
+  </div>
+
+  <!-- Normal chat UI (shown when not queued) -->
+  <div *ngIf="showChatUI" class="layout-container" [ngClass]="{'hide-header': hideHeader, 'hide-send-message': hideSendMessage}">
+    <!-- Header Component (conditionally shown) -->
+    <app-header *ngIf="!hideHeader"></app-header>
+
+    <!-- Main Content Area -->
+    <main id="main-content" class="content-container" role="main" aria-label="Chat conversation">
+      <app-timeline-view
+        [topicId]="topicId"
+        [messages]="messages"
+        [isLoading]="isLoading"
+        [unreadMessageId]="unreadMessageId"
+        (sidebarClick)="onSidebarClick($event)">
+      </app-timeline-view>
+    </main>
+
+    <!-- Footer Component -->
+    <app-footer></app-footer>
+  </div>
+
+  <!-- Concurrency: Idle warning overlay (rendered on top of chat UI while warning is active) -->
+  <app-idle-warning-modal
+    *ngIf="showIdleWarning"
+    [countdownSeconds]="idleState.warningCountdownSeconds"
+    (stillHere)="onIdleStillHere()">
+  </app-idle-warning-modal>
+
+  <!-- Concurrency: Inactivity-disconnected modal (rendered on top of the dimmed chat) -->
+  <app-inactivity-disconnected
+    *ngIf="isDisconnectedDueToInactivity"
+    (reconnect)="onReconnectAfterInactivity()"
+    (close)="onCloseChatWindow()">
+  </app-inactivity-disconnected>
+
+  <!-- Boot failure: the chat never started (login or session creation failed) -->
+  <app-boot-failed
+    *ngIf="isBootFailed"
+    (retry)="onRetryBoot()"
+    (close)="onCloseChatWindow()">
+  </app-boot-failed>
+</div>

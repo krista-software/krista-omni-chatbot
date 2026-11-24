@@ -1,0 +1,191 @@
+{
+  "general": {
+    "defaultApiErrorMessage": "कुछ गलत हो गया। कृपया बाद में पुन: प्रयास करें।",
+    "retry": "पुन: प्रयास करें",
+    "close": "बंद करना"
+  },
+  "footer": {
+    "sendMessage": "संदेश भेजें",
+    "poweredBy": "द्वारा संचालित",
+    "termsAndConditions": "नियम और शर्तें"
+  },
+  "authProvider": {
+    "failedToLogin": "लॉगिन में विफलता। और सहायता के लिए, सहायता टीम से संपर्क करें।"
+  },
+  "loginCallback": {
+    "loginFailed": "लॉगिन विफल। पुनः प्रयास करें। अगर बनी रहती है तो सपोर्ट टीम से संपर्क करें।",
+    "loginProgress": "लॉगिन प्रक्रिया में है। कृपया प्रतीक्षा करें..."
+  },
+  "initializerProvider": {
+    "fetching": "कॉन्फ़िगरेशन लाया जा रहा है।",
+    "initializing": "प्रारंभ कर रहा है।",
+    "initFail": "चैटबॉट की प्रारंभिकीकरण में विफल. कृपया पुन: प्रयास करें. अगर समस्या बरकर रहती है, तो हमारे समर्थन टीम से संपर्क करें।",
+    "reason": "कारण: {{errorMessage}}",
+    "loadingConfiguration": "कॉन्फ़िगरेशन लोड हो रहा है...",
+    "authenticating": "प्रमाणीकरण हो रहा है...",
+    "creatingSession": "सत्र बनाया जा रहा है...",
+    "loadingConversationHistory": "वार्तालाप इतिहास लोड हो रहा है..."
+  },
+  "unknownMessageComponent": {
+    "message": "अज्ञात संदेश प्रकार"
+  },
+  "responseAckCompRenderer": {
+    "unnamed": "अनाम उपयोगकर्ता",
+    "responseAck": "{{_responseCount}} प्रतिक्रिया।. {{_contactName}} ने {{_conversationName}} को {{_time}} पर प्रतिसाद दिया",
+    "loading": "लोड हो रहा है..."
+  },
+  "banner": {
+    "unread": "अपठित संदेश"
+  },
+  "newMessagesBtn": {
+    "newMessages": "नए संदेश"
+  },
+  "agent": {
+    "joined": "{{name}} शामिल हुए",
+    "left": "{{name}} शेष"
+  },
+  "placeholder": {
+    "enter": "दर्ज करें {{fieldName}}",
+    "select": "चुनें {{fieldName}}",
+    "set": "सेट {{fieldName}}"
+  },
+  "fields": {
+    "stream": {
+      "pauseStreaming": "स्ट्रीमिंग को विराम दें",
+      "resumeStreaming": "स्ट्रीमिंग फिर से शुरू करें"
+    },
+    "location": {
+      "selectLocationPlaceholder": "स्थान खोजें..."
+    }
+  },
+  "concurrency": {
+    "waiting": {
+      "ariaLabel": "चैट स्लॉट की प्रतीक्षा",
+      "title": "आप कतार में हैं",
+      "message": "सभी चैट एजेंट अभी अन्य ग्राहकों की सहायता कर रहे हैं। एजेंट उपलब्ध होते ही हम आपको स्वचालित रूप से कनेक्ट कर देंगे।",
+      "positionLabel": "कतार में स्थिति",
+      "estimatedWaitLabel": "अनुमानित प्रतीक्षा:",
+      "estimatedWaitValue": "~{{minutes}} मिनट",
+      "closeBtn": "बंद करें",
+      "closeBtnAria": "चैट विंडो बंद करें"
+    },
+    "idleWarning": {
+      "title": "सत्र समाप्त हो रहा है",
+      "message": "आपकी बातचीत निष्क्रिय रही है। इसे सक्रिय रखने के लिए \"सत्र जारी रखें\" चुनें — अन्यथा यह स्वतः समाप्त हो जाएगी।",
+      "secondsLabel": "सेकंड",
+      "stillHereBtn": "सत्र जारी रखें",
+      "stillHereBtnAria": "बातचीत सक्रिय रखने के लिए अपना सत्र जारी रखें"
+    },
+    "disconnected": {
+      "title": "सत्र समाप्त",
+      "message": "निष्क्रियता के कारण आपकी बातचीत समाप्त हो गई।",
+      "reconnectBtn": "नया सत्र शुरू करें",
+      "reconnectBtnAria": "नया चैट सत्र शुरू करें",
+      "closeBtn": "बंद करें",
+      "closeBtnAria": "चैट विंडो बंद करें"
+    }
+  },
+  "krista": {
+    "general": {
+      "defaultErrorMessage": "कुछ गलत हो गया। कृपया बाद में पुन: प्रयास करें।",
+      "ok": "ठीक",
+      "search": "खोज",
+      "cancel": "रद्द करना",
+      "clear": "साफ़",
+      "remove": "निकालना",
+      "delete": "हटाएं",
+      "save": "सहेजें",
+      "noResults": "कोई प्रविष्टियाँ नहीं मिलीं",
+      "selectAll": "सबका चयन करें",
+      "unknownField": "अज्ञात फ़ील्ड",
+      "enterCorrectValues": "सुनिश्चित करें कि आप उचित मान दर्ज करें"
+    },
+    "address": {
+      "street": "गली",
+      "street2": "गली # 2",
+      "city": "शहर",
+      "state": "राज्य",
+      "country": "देश",
+      "postalCode": "डाक कोड"
+    },
+    "table": {
+      "deletedRows": "हटाई गई पंक्तियाँ",
+      "selectedRows": "चयनित पंक्तियाँ:",
+      "rowsPerPage": "प्रति पृष्ठ पंक्तियाँ:",
+      "noData": "प्रदर्शित करने के लिए कोई पंक्तियाँ उपलब्ध नहीं हैं.",
+      "confirmDelete": "क्या आप वाकई स्थायी रूप से हटाना चाहते हैं?"
+    },
+    "entity": {
+      "authRequired": "प्रमाणीकरण आवश्यक। जारी रखने के लिए नीचे 'प्रमाणित करें' पर क्लिक करें।",
+      "searchAgainAfterAuth": "प्रमाणीकरण पूर्ण होने के बाद, इस विंडो पर वापस आएं। परिणाम देखने के लिए फिर से खोजें।",
+      "authenticate": "प्रमाणित करें",
+      "selectAllHelpText": "इस पृष्ठ पर सभी विकल्पों का चयन करें",
+      "selected": "चयनित"
+    },
+    "file": {
+      "atLeastOneUploadOption": "फ़ाइल सेटिंग्स में कम से कम एक अपलोड विकल्प चयनित होना चाहिए।",
+      "unknownFormat": "{{filename}} अपलोड नहीं किया जा सका. अज्ञात फ़ाइल स्वरूप.",
+      "unknownFileFormat": "फ़ाइल अपलोड नहीं हो सकी. अज्ञात फ़ाइल स्वरूप.",
+      "notSupported": "{{filename}} अपलोड नहीं किया जा सका। फ़ाइल प्रारूप समर्थित नहीं है, इसे एक ZIP फ़ाइल में संकुचित करें और पुनः अपलोड करें।",
+      "typeNotSupported": "{{filename}} अपलोड नहीं किया जा सका। फ़ाइल प्रकार समर्थित नहीं है।",
+      "minSize": "{{filename}} अपलोड नहीं किया जा सका. फ़ाइल का आकार {{size}} से अधिक होना चाहिए.",
+      "maxSize": "{{filename}} अपलोड नहीं किया जा सका। फ़ाइल का आकार {{size}} से कम होना चाहिए",
+      "uploadInProgress": "फ़ाइल अपलोड प्रगति पर है."
+    },
+    "location": {
+      "grantPermission": "स्थान की अनुमति प्रदान करें",
+      "selectLocation": "स्थान चुनें",
+      "selectedLocation": "चयनित स्थान",
+      "searchPlaceholder": "स्थान खोजें..."
+    },
+    "date": {
+      "selectAfter": "{{date}} के बाद की तारीख चुनें",
+      "selectOnOrAfter": "{{date}} को या उसके बाद की तारीख चुनें",
+      "select": "चुनना {{date}}",
+      "selectBefore": "{{date}} से पहले की तारीख चुनें",
+      "selectOnOrBefore": "{{date}} को या उससे पहले की तारीख चुनें",
+      "selectBeforeOrAfterDate": "{{date}} से पहले या बाद की तारीख चुनें",
+      "selectBeforeDateOrAfterDate": "{{before}} से पहले या {{after}} के बाद की तारीख चुनें",
+      "selectBetween": "{{min}} और {{max}} के बीच की तारीख चुनें"
+    },
+    "dateRange": {
+      "selectBetween": "{{min}} और {{max}} के बीच एक दिनांक सीमा चुनें",
+      "selectOnOrAfter": "{{min}} को या उसके बाद की तारीख सीमा चुनें",
+      "selectOnOrBefore": "{{max}} पर या उससे पहले एक तिथि सीमा चुनें",
+      "selectMaxDays": "अधिकतम {{days}} दिन चुनें",
+      "selectMaxHours": "अधिकतम {{hours}} घंटे चुनें",
+      "rulesConflict": "चयनित नियम विरोधित हैं, कृपया एक वैध तारीख रेंज को अनुमति देने के लिए समायोजित करें।"
+    },
+    "radio": {
+      "noSelection": "कोई विकल्प चयनित नहीं.",
+      "noOptions": "विकल्प उपलब्ध नहीं हैं."
+    },
+    "validators": {
+      "required": "यह फ़ील्ड आवश्यक है.",
+      "noSelection": "कोई विकल्प चयनित नहीं.",
+      "noOptions": "विकल्प उपलब्ध नहीं हैं.",
+      "invalidEmail": "अवैध ईमेल पता।",
+      "invalidPhoneNumber": "अवैध फोन नंबर।",
+      "enterCorrectValues": "कृपया सही मान दर्ज करें।",
+      "minLength": "लंबाई {{length}} से अधिक या उसके बराबर होनी चाहिए।",
+      "maxLength": "लंबाई {{length}} से कम या उसके बराबर होनी चाहिए.",
+      "minValue": "मान {{min}} से अधिक या उसके बराबर होना चाहिए।",
+      "maxValue": "मान {{max}} से कम या उसके बराबर होना चाहिए।",
+      "minSelection": "कम से कम {{count}} विकल्प चुनें।",
+      "maxSelection": "{{count}} से अधिक विकल्पों का चयन नहीं किया जा सकता।",
+      "pattern": "मान आवश्यक पैटर्न से मेल नहीं खा रहा है: {{pattern}}",
+      "allowedEmailDomains": "अनुमत डोमेन: {{domains}}.",
+      "startDateLessThanEndDate": "आरंभ तिथि अंतिम तिथि से कम होनी चाहिए.",
+      "maxDateRangeInDays": "सीमा {{days}} दिन से अधिक नहीं होनी चाहिए।",
+      "maxDateRangeInHours": "सीमा {{hours}} घंटे से अधिक नहीं होनी चाहिए।"
+    }
+  },
+  "bootFailed": {
+    "title": "चैट उपलब्ध नहीं है",
+    "message": "हम चैट प्रारंभ नहीं कर सके। कृपया पुनः प्रयास करें।",
+    "retryBtn": "पुनः प्रयास करें",
+    "retryBtnAria": "चैट पुनः प्रारंभ करने का प्रयास करें",
+    "closeBtn": "बंद करें",
+    "closeBtnAria": "चैट विंडो बंद करें"
+  }
+}

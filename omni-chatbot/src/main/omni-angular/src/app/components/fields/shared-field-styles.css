@@ -1,0 +1,306 @@
+/**
+ * Shared Field Styles
+ * Common CSS patterns used across all field components.
+ * Import this file in individual field component CSS files to reduce duplication.
+ */
+
+/* ============================================
+   FIELD LABEL STYLES
+   ============================================ */
+
+.field-label {
+  display: block;
+  font-size: var(--kr-font-size-sm);
+  font-weight: 500;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  margin-bottom: 8px;
+  word-break: break-word;
+}
+
+/* User message (outgoing) - use theme textColor to match original app */
+:host-context(.user-message) .field-label {
+  color: var(--krista-text-primary, #212121) !important;
+}
+
+/* Required asterisk indicator */
+.required-asterisk {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+/* User message (outgoing) - white asterisk */
+:host-context(.user-message) .required-asterisk {
+  color: #ffcccc !important;
+}
+
+/* ============================================
+   READONLY VALUE STYLES
+   ============================================ */
+
+.readonly-value {
+  font-size: 1rem;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  min-height: 20px;
+  word-wrap: break-word;
+  white-space: pre-line;
+  line-height: 1.5;
+}
+
+
+.readonly-value.numeric {
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ============================================
+   ERROR MESSAGE STYLES
+   ============================================ */
+
+.field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+  margin-top: 4px;
+  min-height: 1.05rem;
+}
+
+.fallback-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+  line-height: 1.4;
+  min-height: 1.05rem;
+}
+
+.custom-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+  line-height: 1.4;
+}
+
+/* ============================================
+   MATERIAL FORM FIELD OVERRIDES
+   ============================================ */
+
+/* Full width form field */
+.full-width {
+  width: 100%;
+}
+
+/* Hide mat-form-field subscript wrapper completely
+   mat-error inside mat-form-field doesn't work without FormControl/ngModel,
+   so we hide the subscript wrapper and use fallback-error-message instead */
+::ng-deep .mat-mdc-form-field-subscript-wrapper {
+  display: none !important;
+}
+
+/* Reduce bottom margin of the form field */
+::ng-deep .mat-mdc-form-field {
+  margin-bottom: 4px !important;
+}
+
+/* Remove default MDC text field horizontal padding */
+::ng-deep .mdc-text-field {
+  padding: 0 !important;
+}
+
+/* ============================================
+   COMMON INPUT & PLACEHOLDER STYLES
+   ============================================ */
+
+/* Common input text styling */
+::ng-deep input.mat-mdc-input-element,
+::ng-deep textarea.mat-mdc-input-element {
+  font-size: 1rem !important;
+}
+
+/* Common placeholder styling - consistent across all fields */
+::ng-deep input.mat-mdc-input-element::placeholder,
+::ng-deep textarea.mat-mdc-input-element::placeholder {
+  font-size: 0.75rem !important;
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* User message (outgoing) - white placeholders */
+:host-context(.user-message) ::ng-deep input.mat-mdc-input-element::placeholder,
+:host-context(.user-message) ::ng-deep textarea.mat-mdc-input-element::placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* Common mat-select styling */
+::ng-deep .mat-mdc-select-value-text {
+  font-size: 1rem !important;
+}
+
+::ng-deep .mat-mdc-select-placeholder {
+  font-size: 0.75rem !important;
+  color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* User message (outgoing) - white select text */
+:host-context(.user-message) ::ng-deep .mat-mdc-select-value-text {
+  color: #ffffff !important;
+}
+
+:host-context(.user-message) ::ng-deep .mat-mdc-select-placeholder {
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
+/* ============================================
+   USER MESSAGE (OUTGOING) - WHITE THEME
+   Matches original app's outgoingBubbleTheme
+   ============================================ */
+
+/* White input text */
+:host-context(.user-message) ::ng-deep input.mat-mdc-input-element,
+:host-context(.user-message) ::ng-deep textarea.mat-mdc-input-element {
+  color: #ffffff !important;
+}
+
+/* Form field labels - use theme textColor */
+:host-context(.user-message) ::ng-deep .mat-mdc-form-field-label,
+:host-context(.user-message) ::ng-deep .mdc-floating-label {
+  color: var(--krista-text-primary, #212121) !important;
+  opacity: 0.9;
+}
+
+/* Form field underline/border - use theme textColor */
+:host-context(.user-message) ::ng-deep .mat-mdc-form-field-underline,
+:host-context(.user-message) ::ng-deep .mdc-line-ripple::before {
+  border-bottom-color: var(--krista-text-primary, #212121) !important;
+  opacity: 0.5;
+}
+
+/* Checkbox - use theme textColor */
+:host-context(.user-message) ::ng-deep .mat-mdc-checkbox-label {
+  color: var(--krista-text-primary, #212121) !important;
+}
+
+:host-context(.user-message) ::ng-deep .mdc-checkbox__background {
+  border-color: var(--krista-text-primary, #212121) !important;
+  opacity: 0.7;
+}
+
+:host-context(.user-message) ::ng-deep .mat-mdc-checkbox-checked .mdc-checkbox__background {
+  background-color: var(--krista-text-primary, #212121) !important;
+  border-color: var(--krista-text-primary, #212121) !important;
+}
+
+:host-context(.user-message) ::ng-deep .mat-mdc-checkbox-checked .mdc-checkbox__checkmark {
+  color: var(--krista-primary, #0177C6) !important;
+}
+
+/* Radio button - use theme textColor */
+:host-context(.user-message) ::ng-deep .mat-mdc-radio-button-label {
+  color: var(--krista-text-primary, #212121) !important;
+}
+
+:host-context(.user-message) ::ng-deep .mdc-radio__outer-circle {
+  border-color: var(--krista-text-primary, #212121) !important;
+  opacity: 0.7;
+}
+
+:host-context(.user-message) ::ng-deep .mat-mdc-radio-checked .mdc-radio__outer-circle,
+:host-context(.user-message) ::ng-deep .mat-mdc-radio-checked .mdc-radio__inner-circle {
+  border-color: var(--krista-text-primary, #212121) !important;
+  background-color: var(--krista-text-primary, #212121) !important;
+}
+
+/* Slide toggle - use theme textColor */
+:host-context(.user-message) ::ng-deep .mat-mdc-slide-toggle-label {
+  color: var(--krista-text-primary, #212121) !important;
+}
+
+:host-context(.user-message) ::ng-deep .mdc-switch__track {
+  background-color: var(--krista-text-primary, #212121) !important;
+  opacity: 0.3;
+  border-color: var(--krista-text-primary, #212121) !important;
+}
+
+:host-context(.user-message) ::ng-deep .mat-mdc-slide-toggle-checked .mdc-switch__track {
+  background-color: var(--krista-text-primary, #212121) !important;
+  opacity: 0.7;
+  border-color: var(--krista-text-primary, #212121) !important;
+}
+
+:host-context(.user-message) ::ng-deep .mdc-switch__handle-track .mdc-switch__handle::after {
+  background-color: var(--krista-text-primary, #212121) !important;
+}
+
+/* Select arrow icon - use theme textColor */
+:host-context(.user-message) ::ng-deep .mat-mdc-select-arrow {
+  color: var(--krista-text-primary, #212121) !important;
+  opacity: 0.7;
+}
+
+/* Readonly values - use theme textColor */
+:host-context(.user-message) .readonly-value {
+  color: var(--krista-text-primary, #212121) !important;
+}
+
+/* ============================================
+   SECURED FIELD STYLES
+   ============================================ */
+
+.secured-value {
+  font-size: var(--kr-font-size-sm);
+  color: rgba(0, 0, 0, 0.6);
+  padding: 4px 0;
+  letter-spacing: 2px;
+}
+
+:host-context(.user-message) .secured-value {
+  color: var(--krista-text-primary, #212121);
+}
+
+/* ============================================
+   RESPONSIVE DESIGN - 480px BREAKPOINT
+   ============================================ */
+
+/* Responsive: fields scale naturally via max-width: 100% on parent.
+   Font sizes remain consistent — no abrupt breakpoint changes. */
+
+/* ============================================
+   CLEAR BUTTON STYLES
+   Common clear button for date/time fields
+   ============================================ */
+
+.clear-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 4px;
+  color: rgba(0, 0, 0, 0.54);
+  opacity: 0.6;
+  transition: opacity 0.2s ease;
+  border-radius: 50%;
+}
+
+.clear-button:hover {
+  opacity: 1;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.clear-button:focus {
+  outline: 2px solid var(--kr-color-primary, #0169BE);
+  outline-offset: 2px;
+}
+
+.clear-button svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* User message (outgoing) - white clear button */
+:host-context(.user-message) .clear-button {
+  color: var(--krista-text-primary, #212121);
+}
+
+:host-context(.user-message) .clear-button:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}

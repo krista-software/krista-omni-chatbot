@@ -1,0 +1,79 @@
+/* Date Field Styling - Imports shared styles */
+@import '../shared-field-styles.css';
+
+/* Date Field Specific Styling */
+.date-field {
+  width: 100%;
+}
+
+/* Date Input Container */
+.date-input-container {
+  width: 100%;
+}
+
+/* Bottom border only */
+.date-input-wrapper {
+  display: flex;
+  align-items: center;
+  border: none;
+  border-bottom: 1px solid #e0e0e0;
+  border-radius: 0;
+  background-color: transparent;
+  cursor: pointer;
+  padding: 12px 0;
+  height: 48px;
+}
+
+.date-input-wrapper.has-error {
+  border-bottom-color: #f44336;
+}
+
+.date-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: var(--kr-font-size-sm);
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  cursor: pointer;
+  padding: 0;
+}
+
+.date-input::placeholder {
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  opacity: 0.6;
+}
+
+.calendar-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  opacity: 0.6;
+  margin-left: 8px;
+}
+
+.calendar-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+/* Timezone caption - matches original Typography variant="caption" color="text.secondary" */
+.timezone-caption {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--krista-text-secondary, rgba(0, 0, 0, 0.6));
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+/* Date picker dialog styling */
+::ng-deep .date-picker-dialog {
+  .mat-mdc-dialog-container {
+    padding: 0;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+}
+
+/* Responsive: scales naturally via max-width: 100% on parent. */

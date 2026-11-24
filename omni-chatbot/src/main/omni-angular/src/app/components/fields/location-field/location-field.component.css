@@ -1,0 +1,103 @@
+/* Location Field Styling */
+.location-field {
+}
+
+.location-field .mat-mdc-form-field {
+  width: 100%;
+}
+
+/* Readonly mode styling */
+.readonly-location {
+}
+
+.field-label {
+  display: block;
+  font-size: var(--kr-font-size-sm);
+  font-weight: 500;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  margin-bottom: 8px;
+}
+
+.readonly-value {
+  font-size: 1rem;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  font-family: "Roboto", "Helvetica", Arial, sans-serif;
+  line-height: 1.5;
+}
+
+/* Plain text styling for readonly location */
+.readonly-value.readonly-text {
+  cursor: default;
+  text-decoration: none;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+}
+
+/* Location button styling */
+.location-button {
+  color: var(--kr-text-color-secondary, rgba(0, 0, 0, 0.6));
+  transition: color 0.2s ease;
+}
+
+.location-button:hover {
+  color: var(--kr-color-primary, #0169BE);
+}
+
+/* Loading indicator */
+.loading-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+  color: var(--kr-text-color-secondary, rgba(0, 0, 0, 0.6));
+  font-size: var(--kr-font-size-sm);
+}
+
+/* Error message */
+.error-message {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+  padding: 8px 12px;
+  background-color: #ffebee;
+  border-left: 3px solid var(--kr-accent-color-error, #f44336);
+  color: var(--kr-accent-color-error, #f44336);
+  font-size: var(--kr-font-size-sm);
+  border-radius: 4px;
+}
+
+.close-error {
+  color: var(--kr-accent-color-error, #f44336);
+  width: 20px;
+  height: 20px;
+}
+
+.close-error mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Custom mat-error styling to match design */
+.location-field ::ng-deep .mat-mdc-form-field-error {
+  color: var(--kr-accent-color-error, #f44336);
+  font-size: 0.75rem;
+  letter-spacing: initial;
+}
+
+/* Required asterisk */
+.required-asterisk {
+  color: var(--kr-accent-color-error, #f44336);
+  margin-left: 2px;
+}
+
+/* Field validation error message */
+.field-error-message {
+  color: var(--kr-accent-color-error, #f44336);
+  font-size: 0.75rem;
+  margin-top: 4px;
+  margin-left: 14px;
+  line-height: 1.2;
+}
+
+/* Responsive: scales naturally via max-width: 100% on parent. */

@@ -1,0 +1,11 @@
+<div class="sidebars-container">
+  <button
+    *ngFor="let sidebar of sidebars; trackBy: trackBySidebar"
+    mat-stroked-button
+    [disabled]="isDisabled(sidebar)"
+    (click)="onSidebarClick(sidebar)"
+    class="sidebar-button">
+    {{ sidebar }}
+  </button>
+</div>
+

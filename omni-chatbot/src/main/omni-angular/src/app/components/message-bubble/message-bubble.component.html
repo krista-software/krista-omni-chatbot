@@ -1,0 +1,91 @@
+<!-- Message Bubble - hidden when there's no visible content -->
+<article class="message-bubble"
+         *ngIf="hasVisibleContent"
+         [ngClass]="{'user-message': isUserMessage, 'bot-message': isBotMessage, 'welcome-message': isWelcomeMessage}"
+         [attr.aria-label]="(isUserMessage ? 'Your message' : 'Bot message') + ' at ' + (messageTime | fullDateTime)">
+  <!-- Sender Name for incoming messages (like original app) -->
+
+    <div class="message-wrapper">
+
+        <!-- HEADER -->
+        <div class="top-container">
+            <div *ngIf="showSenderName" class="sender-name" aria-hidden="true">
+                {{ senderName }}
+            </div>
+
+            <time class="header-time"
+                  [attr.datetime]="messageTime | date:'yyyy-MM-ddTHH:mm:ss'"
+                  [matTooltip]="messageTime | fullDateTime"
+                  matTooltipPosition="above">
+                {{ messageTime | date:'hh:mm a' }}
+            </time>
+        </div>
+
+
+        <div class="message-content">
+    <!-- Form Message Content -->
+    <div *ngIf="hasForm; else regularMessage" class="form-message-wrapper">
+      <app-form-message
+        [message]="message"
+        [errorFields]="errorFields"
+        [errorMessages]="errorMessages"
+        [isWelcomeMessage]="isWelcomeMessage"
+        (sendFormData)="onSendFormData($event.submitType, $event.submitValue)">
+      </app-form-message>
+    </div>
+
+    <!-- Regular Message Content -->
+    <ng-template #regularMessage>
+      <!-- Authentication Message -->
+      <div *ngIf="isAuthenticationMessage" class="authentication-message" role="alert">
+        <div class="auth-content">
+          <h4>Authentication Required</h4>
+          <p>{{ message.authentication?.systemName || 'System' }} authentication is required.</p>
+          <button
+            mat-raised-button
+            color="primary"
+            type="button"
+            *ngIf="message.authentication?.authUrl"
+            (click)="handleAuthClick()"
+            [attr.aria-label]="'Authenticate with ' + (message.authentication?.systemName || 'System')">
+            Authenticate
+          </button>
+        </div>
+      </div>
+
+      <!-- Response Acknowledgment Message -->
+      <div *ngIf="isResponseAckMessage" class="response-ack-message" role="status">
+        <div class="response-content">
+          <h4>Response Received</h4>
+          <p>Your response has been acknowledged.</p>
+          <div *ngIf="message.responder" class="responder-info">
+            <small>Handled by: {{ message.responder.name || 'Support Team' }}</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- System Event Message -->
+      <div *ngIf="isSystemEventMessage" class="system-event-message" role="status">
+        <div class="system-content">
+          <span>{{ systemEventText }}</span>
+        </div>
+      </div>
+
+      <!-- Text Message (default) - WhatsApp style with inline timestamp -->
+      <div *ngIf="isTextMessage" class="message-text-wrapper">
+        <app-message-text-renderer [message]="messageContent"></app-message-text-renderer>
+      </div>
+    </ng-template>
+  </div>
+
+        <!-- Message Sidebars (shown at message-bubble level, outside form-message) -->
+        <!-- Matches original: {formContent && !formContent.hideForm && formContent.sidebars.length > 0 ? <MessageSidebars /> : null} -->
+        <app-message-sidebars
+          *ngIf="showSidebars"
+          [readOnly]="sidebarReadOnly"
+          [sidebars]="sidebars"
+          [disabledSidebar]="disabledSidebar"
+          (sidebarClick)="onSidebarClick($event)">
+        </app-message-sidebars>
+    </div>
+</article>

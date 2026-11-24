@@ -13,15 +13,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.impl;
 
 import app.krista.extension.request.protos.ws.WsEvent;
 import app.krista.extension.request.protos.ws.WsTextMessageReceived;
-import app.krista.extensions.essentials.collaboration.omnichatbot.service.impl.WsConnectionStore;
+import app.krista.extensions.essentials.collaboration.omnichatbot.audit.AuditService;
+import app.krista.extensions.essentials.collaboration.omnichatbot.concurrency.ConcurrencyManager;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.WsEventHandler;
+import app.krista.extensions.essentials.collaboration.omnichatbot.store.ConnectionStore;
 import app.krista.ksdk.context.AuthorizationContext;
 import app.krista.model.field.util.GsonJsonMapper;
 import app.krista.omni.sdk.spi.util.GsonJsonMapperImpl;
@@ -39,17 +41,39 @@ import java.io.IOException;
  */
 public class WsConnectionPingHandler implements WsEventHandler {
     private final GsonJsonMapper gsonJsonMapper;
+    private final ConcurrencyManager concurrencyManager;
     private static final Logger LOGGER = LoggerFactory.getLogger(WsConnectionPingHandler.class);
 
-    public WsConnectionPingHandler() {
+    private final ConnectionStore connectionStore;
+    private final AuditService auditService;
+
+    public WsConnectionPingHandler(ConcurrencyManager concurrencyManager, ConnectionStore connectionStore,
+            AuditService auditService) {
         this.gsonJsonMapper = GsonJsonMapperImpl.getInstance();
+        this.concurrencyManager = concurrencyManager;
+        this.connectionStore = connectionStore;
+        this.auditService = auditService;
     }
 
     /**
-     * Handles ping messages by responding with a pong.
+     * Handles ping messages by responding with a pong for authenticated
+     * connections.
      *
      * <p>Modifies the incoming ping message to change the signal to "pong"
      * and adds a timestamp to the payload before sending the response.
+     *
+     * <p>Unauthenticated pings do NOT get a pong: no identity is resolvable for
+     * the connection, locally or via the distributed reverse index (see
+     * {@link WsAuthorizationRecovery}), so the account behind it no longer
+     * exists — typically deleted after a session timeout whose notice the
+     * client never received. Answering pong would keep that dead session
+     * looking healthy forever. Instead the connection is closed with 1012
+     * (service restart — deliberately NOT in the frontend's
+     * STOP_RECONNECT_CODES) so the client auto-reconnects: a transient auth
+     * glitch heals through the fresh handshake, while a truly deleted account
+     * fails the open-authentication and receives a definitive 1008 close from
+     * WsConnectionOpenedHandler — which triggers the frontend's session-timeout
+     * fallback notice.
      *
      * @param authorizationContext the authorization context containing user credentials
      * @param wsEvent the WebSocket ping event
@@ -58,9 +82,18 @@ public class WsConnectionPingHandler implements WsEventHandler {
     @Override
     public void handle(AuthorizationContext authorizationContext, WsEvent wsEvent) throws IOException {
         if (authorizationContext.isAuthenticated()) {
-            LOGGER.warn("Received ping request for accountId: {} over the connectionId: {}", authorizationContext.getAuthorizedAccount().getAccountId(), wsEvent.getConnection().getConnectionId());
+            String accountId = authorizationContext.getAuthorizedAccount().getAccountId();
+            // Refresh the concurrency slot heartbeat so the reaper keeps this active
+            // user's slot alive. No-op unless the feature flag is enabled.
+            concurrencyManager.onWsPing(accountId);
+            // Refresh the audit live-presence heartbeat so "active now" stays accurate
+            // and self-heals: a dropped connection stops pinging and falls out of the count.
+            auditService.recordPresence(accountId);
         } else {
-            LOGGER.warn("Received ping request for unauthenticated connectionId: {}", wsEvent.getConnection().getConnectionId());
+            LOGGER.warn("Received ping request for unauthenticated connectionId: {}; closing so the client re-handshakes",
+                    wsEvent.getConnection().getConnectionId());
+            wsEvent.getConnection().close(1012, "Re-authentication required");
+            return;
         }
 
         try {
@@ -85,6 +118,6 @@ public class WsConnectionPingHandler implements WsEventHandler {
      */
     @Override
     public String authenticate(String accountId, WsEvent wsEvent) throws IOException {
-        return WsConnectionStore.getAccountIdByWsConnectionId(wsEvent.getConnection().getConnectionId());
+        return WsAuthorizationRecovery.resolveAccountId(connectionStore, wsEvent);
     }
 }

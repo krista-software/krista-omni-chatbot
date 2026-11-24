@@ -1,0 +1,231 @@
+// Custom Angular Material Theme to match React app
+@use '@angular/material' as mat;
+
+// Define the React app's color palette
+$krista-primary-palette: (
+  50: #e3f2fd,
+  100: #bbdefb,
+  200: #90caf9,
+  300: #64b5f6,
+  400: #42a5f5,
+  500: #0177C6, // Main brand color from React app
+  600: #016bb3,
+  700: #015da0,
+  800: #014f8d,
+  900: #01417a,
+  A100: #82b1ff,
+  A200: #448aff,
+  A400: #2979ff,
+  A700: #2962ff,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: white, // Contrast text for main color
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: white,
+    A400: white,
+    A700: white,
+  )
+);
+
+$krista-accent-palette: (
+  50: #e8f4fd,
+  100: #c5e4fa,
+  200: #9fd2f7,
+  300: #79c0f4,
+  400: #5cb2f2,
+  500: #259de1, // Link color from React app
+  600: #2195d9,
+  700: #1b8bcf,
+  800: #1681c5,
+  900: #0d6fb5,
+  A100: #ffffff,
+  A200: #d6ecff,
+  A400: #a3d9ff,
+  A700: #8ad1ff,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: rgba(black, 0.87),
+    A700: rgba(black, 0.87),
+  )
+);
+
+$krista-warn-palette: (
+  50: #fdf2f2,
+  100: #fce4e4,
+  200: #fac6c6,
+  300: #f7a8a8,
+  400: #f58a8a,
+  500: #ec4d4d, // Error color from React app
+  600: #ea3535,
+  700: #e71d1d,
+  800: #e50505,
+  900: #c20000,
+  A100: #ffffff,
+  A200: #ffe6e6,
+  A400: #ffb3b3,
+  A700: #ff9999,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: rgba(black, 0.87),
+    A700: rgba(black, 0.87),
+  )
+);
+
+// Create the theme
+$krista-primary: mat.define-palette($krista-primary-palette);
+$krista-accent: mat.define-palette($krista-accent-palette);
+$krista-warn: mat.define-palette($krista-warn-palette);
+
+// Create the theme object
+$krista-theme: mat.define-light-theme((
+  color: (
+    primary: $krista-primary,
+    accent: $krista-accent,
+    warn: $krista-warn,
+  ),
+  typography: mat.define-typography-config(
+    $font-family: '"Roboto", "Helvetica", Arial, sans-serif',
+    $body-1: mat.define-typography-level(0.875rem, 1.5, 400),
+    $body-2: mat.define-typography-level(0.75rem, 1.5, 400),
+    $caption: mat.define-typography-level(0.75rem, 1.66, 400),
+    $button: mat.define-typography-level(0.875rem, 1.75, 500),
+  ),
+  density: 0,
+));
+
+// Include theme styles for core and each component used in your app
+@include mat.core();
+@include mat.all-component-themes($krista-theme);
+
+// Custom overrides to match React app exactly
+.mat-mdc-button.mat-primary {
+  --mdc-text-button-label-text-color: #{mat.get-color-from-palette($krista-primary, 500)};
+}
+
+.mat-mdc-raised-button.mat-primary {
+  --mdc-filled-button-container-color: #{mat.get-color-from-palette($krista-primary, 500)};
+  --mdc-filled-button-label-text-color: white;
+}
+
+.mat-mdc-fab.mat-primary {
+  --mdc-fab-container-color: #{mat.get-color-from-palette($krista-primary, 500)};
+  --mdc-fab-label-text-color: white;
+}
+
+.mat-mdc-icon-button.mat-primary {
+  --mdc-icon-button-icon-color: #{mat.get-color-from-palette($krista-primary, 500)};
+}
+
+// Typography overrides to match React app
+.mat-mdc-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-mdc-unelevated-button {
+  text-transform: unset !important; // Matches React app button.textTransform: "unset"
+  font-family: "Roboto", "Helvetica", Arial, sans-serif !important;
+  font-size: 0.875rem !important;
+  line-height: 1.75 !important;
+}
+
+// Form field typography
+.mat-mdc-form-field {
+  font-family: "Roboto", "Helvetica", Arial, sans-serif !important;
+
+  .mat-mdc-form-field-label {
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+  }
+
+  .mat-mdc-input-element {
+    font-size: 0.875rem !important;
+    line-height: 1.5 !important;
+    font-family: "Roboto", "Helvetica", Arial, sans-serif !important;
+  }
+}
+
+// Form field customizations
+.mat-mdc-form-field.mat-focused .mat-mdc-form-field-focus-overlay {
+  background-color: transparent;
+}
+
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__leading,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__notch,
+.mat-mdc-form-field.mat-focused .mdc-notched-outline__trailing {
+  border-color: #{mat.get-color-from-palette($krista-primary, 500)} !important;
+}
+
+// Card customizations
+.mat-mdc-card {
+  background-color: var(--krista-background-paper);
+  color: var(--krista-text-primary);
+}
+
+// Chip customizations
+.mat-mdc-chip.mat-primary {
+  --mdc-chip-elevated-container-color: #{mat.get-color-from-palette($krista-primary, 500)};
+  --mdc-chip-label-text-color: white;
+}
+
+// Progress spinner
+.mat-mdc-progress-spinner.mat-primary {
+  --mdc-circular-progress-active-indicator-color: #{mat.get-color-from-palette($krista-primary, 500)};
+}
+
+// Divider
+.mat-divider {
+  border-top-color: var(--krista-divider);
+}
+
+// Select dropdown
+.mat-mdc-select-value {
+  color: var(--krista-text-primary);
+}
+
+.mat-mdc-option.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+  background-color: rgba(1, 119, 198, 0.12);
+}
+
+// Toolbar/Header
+.mat-toolbar {
+  background-color: var(--krista-background-paper);
+  color: var(--krista-text-primary);
+}
+
+// Button hover states
+.mat-mdc-button:hover {
+  background-color: rgba(1, 119, 198, 0.04);
+}
+
+.mat-mdc-icon-button:hover {
+  background-color: rgba(1, 119, 198, 0.04);
+}

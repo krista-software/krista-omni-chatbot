@@ -1,0 +1,89 @@
+<div class="time-field">
+  <!-- Readonly display: Plain text without time picker -->
+  <div *ngIf="isFieldReadOnly()" class="readonly-field">
+    <label class="field-label" [attr.id]="'time-label-' + field.name">
+      {{ getFieldLabel() }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+    <div class="readonly-value"
+         role="status"
+         [attr.aria-labelledby]="'time-label-' + field.name">
+      {{ isSecured() && getDisplayTimeValue() ? '••••••••' : (getDisplayTimeValue() || 'No time selected') }}
+    </div>
+
+    <span *ngIf="getTimezone()" class="timezone-caption">{{ getTimezone() }}</span>
+
+  </div>
+
+  <!-- Editable display: Custom Time picker -->
+  <div *ngIf="!isFieldReadOnly()" class="time-picker-container" [class.has-error]="config.hasError">
+    <label class="field-label" [attr.id]="'time-label-edit-' + field.name">
+      {{ getFieldLabel() }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+
+    <div class="time-input-wrapper"
+         (click)="picker.open()"
+         (keydown.enter)="picker.open()"
+         (keydown.space)="picker.open(); $event.preventDefault()"
+         role="button"
+         tabindex="0"
+         [attr.aria-label]="'Select time for ' + getFieldLabel() + (hasTimeValue() ? ', current value: ' + getDisplayTimeValue() : '')"
+         [attr.aria-labelledby]="'time-label-edit-' + field.name"
+         [attr.aria-describedby]="config.hasError ? 'time-error-edit-' + field.name : null"
+         [attr.aria-invalid]="config.hasError"
+         [attr.aria-required]="isFieldRequired()">
+      <!-- Show placeholder when no time selected -->
+      <span *ngIf="!hasTimeValue()" class="time-placeholder">Select Time</span>
+      <!-- Show time display when time is selected -->
+      <span *ngIf="hasTimeValue() && isSecured()" class="flex-1 secured-value">••••••••</span>
+      <span class="flex-1"><app-time-display *ngIf="hasTimeValue() && !isSecured()" [timeString]="getDisplayTimeValue()"></app-time-display></span>
+
+      <!-- Clear button (shown when time is selected) -->
+      <button *ngIf="hasTimeValue()"
+              type="button"
+              class="clear-button"
+              (click)="clearTime($event)"
+              (keydown.enter)="clearTime($event)"
+              (keydown.space)="clearTime($event)"
+              [attr.aria-label]="'Clear time for ' + (field.displayName || field.name)"
+              tabindex="0">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="18" y1="6" x2="6" y2="18"></line>
+          <line x1="6" y1="6" x2="18" y2="18"></line>
+        </svg>
+      </button>
+
+      <mat-icon class="time-icon" aria-hidden="true">schedule</mat-icon>
+    </div>
+
+    <ngx-material-timepicker
+      [enableKeyboardInput]="false"
+      [cancelBtnTmpl]="cancelButton"
+      [confirmBtnTmpl]="okButton"
+      [defaultTime]="hasTimeValue() ? getDisplayTimeValue() : '12:00 AM'"
+      [format]="12"
+      (timeSet)="onTimeSet($event)"
+      #picker>
+    </ngx-material-timepicker>
+
+    <span *ngIf="getTimezone()" class="timezone-caption">{{ getTimezone() }}</span>
+
+    <!-- Error message -->
+    <div class="field-error-message"
+         [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+         role="alert"
+         [attr.id]="'time-error-edit-' + field.name">
+      {{ config.errorMessage }}
+    </div>
+  </div>
+</div>
+
+<!-- Time Picker Button Templates -->
+<ng-template #okButton>
+  <button type="button" class="btn btn-primary btn-sm" aria-label="Save time selection">Save</button>
+</ng-template>
+
+<ng-template #cancelButton>
+  <button type="button" class="btn btn-outline btn-sm" aria-label="Cancel time selection">Cancel</button>
+</ng-template>

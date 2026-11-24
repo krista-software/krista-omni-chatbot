@@ -1,0 +1,47 @@
+/* Calculation Field Component Styles */
+.calculation-field {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 8px;
+  width: 100%;
+}
+
+/* Required asterisk */
+.required-asterisk {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+/* Readonly field styling */
+.readonly-field {
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+}
+
+.readonly-label {
+  font-size: 12px;
+  color: var(--krista-text-secondary, rgba(0, 0, 0, 0.6));
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.readonly-value {
+  font-size: 1rem;
+  color: rgba(0, 0, 0, 0.87);
+  min-height: 20px;
+  line-height: 1.4;
+}
+
+/* Calculation-specific styling */
+.calculation-value {
+  font-weight: 600;
+  color: #1976d2;
+  background-color: rgba(25, 118, 210, 0.04);
+  padding: 8px 12px;
+  border-radius: 4px;
+  border-left: 3px solid #1976d2;
+  font-family: 'Roboto Mono', monospace;
+}
+
+/* Responsive: scales naturally via max-width: 100% on parent. */

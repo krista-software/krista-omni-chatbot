@@ -1,0 +1,43 @@
+<!-- Complex Field Modal Overlay -->
+<div class="complex-field-modal-overlay" (click)="onOverlayClick()">
+  <div class="complex-field-modal-content" (click)="onContentClick($event)">
+    <!-- Header with Close Button -->
+    <div class="complex-field-modal-header">
+      <h2 class="complex-field-modal-title">{{ field.displayName || field.name }}</h2>
+      <button 
+        class="complex-field-modal-close" 
+        (click)="onClose()" 
+        aria-label="Close dialog"
+        type="button">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+
+    <!-- Content - Render the complex field using dynamic-field -->
+    <div class="complex-field-modal-body">
+      <app-dynamic-field
+        [field]="field"
+        [subFields]="subFields"
+        [kristaFields]="kristaFields"
+        [hasAttemptedSubmit]="hasAttemptedSubmit"
+        [workspaceId]="workspaceId"
+        [clientSessionId]="clientSessionId"
+        (valueChange)="onValueChange($event)"
+        (subFieldValueChange)="onSubFieldValueChange($event)"
+        (subFieldBlur)="onSubFieldBlur($event)"
+        (keyPress)="onKeyPress($event)">
+      </app-dynamic-field>
+    </div>
+
+    <!-- Footer with OK Button -->
+    <div class="complex-field-modal-footer">
+      <button 
+        class="complex-field-modal-ok-button" 
+        (click)="onClose()"
+        type="button">
+        OK
+      </button>
+    </div>
+  </div>
+</div>
+

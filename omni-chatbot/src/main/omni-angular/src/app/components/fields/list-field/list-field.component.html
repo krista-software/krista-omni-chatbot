@@ -1,0 +1,323 @@
+<div class="list-field">
+  <!-- Field Label with Tooltip -->
+  <div class="field-label-container">
+    <label class="field-label"
+           [attr.id]="'list-label-' + field.name"
+           [title]="getTooltip()">
+      {{ getFieldLabel() }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+  </div>
+
+  <!-- Readonly mode with no data -->
+  <div *ngIf="isFieldReadOnly() && rows.length === 0" class="readonly-empty" role="status">
+    <em class="no-data-message">No data</em>
+  </div>
+
+  <!-- EntityReference: Readonly mode - use entity-selector-field for proper entity table display -->
+  <div *ngIf="isEntityReferenceField() && isFieldReadOnly() && rows.length > 0">
+    <app-entity-selector-field
+      [field]="getEntitySelectorFormField()"
+      [config]="getEntitySelectorConfig()"
+      [workspaceId]="workspaceId"
+      [clientSessionId]="clientSessionId">
+    </app-entity-selector-field>
+  </div>
+
+  <!-- EntityReference: Edit mode - table with editable cells -->
+  <div *ngIf="isEntityReferenceField() && !isFieldReadOnly() && (rows.length > 0 || true)"
+       class="list-table-container"
+       role="region"
+       [attr.aria-labelledby]="'list-label-' + field.name">
+    <div class="table-scroll-wrapper">
+      <table class="entity-list-table"
+             role="grid"
+             [attr.aria-describedby]="config.hasError ? 'list-error-' + field.name : null">
+        <thead>
+          <tr>
+            <th class="action-header" scope="col">#</th>
+            <th *ngFor="let fieldDef of getEntityFieldDefinitions(); trackBy: trackByFieldDef" class="column-header" [ngClass]="getColumnTypeClass(fieldDef)" scope="col">
+              {{ getSubFieldLabel(fieldDef) }}
+            </th>
+            <th class="action-header" scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of getVisibleRows(); let i = index; trackBy: trackByRowIndex" class="list-row">
+            <td class="row-number">{{ (currentPage - 1) * pageSize + i + 1 }}</td>
+            <td *ngFor="let fieldDef of getEntityFieldDefinitions(); trackBy: trackByFieldDef" class="cell-value" [ngClass]="getColumnTypeClass(fieldDef)">
+              <!-- Complex sub-fields (List/Table/Entity inside EntityReference): show "Open" button -->
+              <ng-container *ngIf="isComplexSubField(fieldDef); else normalEntityCell">
+                <button
+                  type="button"
+                  class="open-complex-field-button"
+                  (click)="openComplexEntitySubFieldModal(row, i, fieldDef)"
+                  [attr.aria-label]="'Open ' + (fieldDef.displayName || fieldDef.name)"
+                  title="Open in dialog">
+                  <mat-icon>open_in_new</mat-icon>
+                </button>
+              </ng-container>
+
+              <ng-template #normalEntityCell>
+                <app-dynamic-field
+                  [field]="getEntityCellAsFormField(row, fieldDef, i)"
+                  [basicFieldConfig]="getCellFieldConfig(i, fieldDef, row?.fields?.[fieldDef.name])"
+                  [textFieldConfig]="getCellTextFieldConfig(i, fieldDef, row?.fields?.[fieldDef.name])"
+                  [numberFieldConfig]="getCellTextFieldConfig(i, fieldDef, row?.fields?.[fieldDef.name])"
+                  [kristaFields]="kristaFields"
+                  [hasAttemptedSubmit]="hasAttemptedSubmit"
+                  [workspaceId]="workspaceId"
+                  [clientSessionId]="clientSessionId"
+                  (valueChange)="onEntityCellValueChange(i, fieldDef.name, $event)">
+                </app-dynamic-field>
+              </ng-template>
+            </td>
+            <td class="row-actions">
+              <button
+                type="button"
+                class="delete-row-button"
+                (click)="onDeleteRow(i)"
+                [attr.aria-label]="'Delete row ' + ((currentPage - 1) * pageSize + i + 1)"
+                title="Delete row">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="rows.length === 0" class="empty-row">
+            <td [attr.colspan]="getEntityFieldDefinitions().length + 2" class="empty-message">
+              <em>No items. Click "Add Row" to add an item.</em>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination-container">
+      <button type="button" class="pagination-button" [disabled]="currentPage === 1" (click)="previousPage()" title="Previous Page">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span class="pagination-info">Page {{ currentPage }} of {{ totalPages }}</span>
+      <button type="button" class="pagination-button" [disabled]="currentPage === totalPages" (click)="nextPage()" title="Next Page">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- MultiField Table Display (with multiple columns for sub-fields) -->
+  <div *ngIf="isMultiField() && (rows.length > 0 || !isFieldReadOnly())"
+       class="list-table-container"
+       role="region"
+       [attr.aria-labelledby]="'list-label-' + field.name">
+    <div class="table-scroll-wrapper">
+      <table class="entity-list-table"
+             role="grid"
+             [attr.aria-describedby]="config.hasError ? 'list-error-' + field.name : null">
+        <thead>
+          <tr>
+            <th *ngIf="!isFieldReadOnly()" class="action-header" scope="col">#</th>
+            <th *ngFor="let fieldDef of getMultiFieldDefinitions(); trackBy: trackByFieldDef" class="column-header" [ngClass]="getColumnTypeClass(fieldDef)" scope="col">
+              {{ getSubFieldLabel(fieldDef) }}
+            </th>
+            <th *ngIf="!isFieldReadOnly()" class="action-header" scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of getVisibleRows(); let i = index; trackBy: trackByRowIndex" class="list-row">
+            <td *ngIf="!isFieldReadOnly()" class="row-number">{{ (currentPage - 1) * pageSize + i + 1 }}</td>
+            <td *ngFor="let fieldDef of getMultiFieldDefinitions(); trackBy: trackByFieldDef" class="cell-value" [ngClass]="getColumnTypeClass(fieldDef)">
+              <!-- Complex sub-fields (List/Table/Entity inside MultiField): show "Open" button -->
+              <ng-container *ngIf="isComplexSubField(fieldDef); else normalSubField">
+                <button
+                  type="button"
+                  class="open-complex-field-button"
+                  (click)="openComplexSubFieldModal(row, i, fieldDef)"
+                  [attr.aria-label]="'Open ' + (fieldDef.displayName || fieldDef.name)"
+                  title="Open in dialog">
+                  <mat-icon>open_in_new</mat-icon>
+                </button>
+              </ng-container>
+
+              <ng-template #normalSubField>
+                <!-- Editable mode: Render editable field using dynamic-field component -->
+                <app-dynamic-field
+                  *ngIf="!isFieldReadOnly()"
+                  [field]="getMultiFieldCellAsFormField(row, fieldDef, i)"
+                  [basicFieldConfig]="getCellFieldConfig(i, fieldDef, row?.[fieldDef.name])"
+                  [textFieldConfig]="getCellTextFieldConfig(i, fieldDef, row?.[fieldDef.name])"
+                  [numberFieldConfig]="getCellTextFieldConfig(i, fieldDef, row?.[fieldDef.name])"
+                  [kristaFields]="kristaFields"
+                  [hasAttemptedSubmit]="hasAttemptedSubmit"
+                  [workspaceId]="workspaceId"
+                  [clientSessionId]="clientSessionId"
+                  (valueChange)="onMultiFieldCellValueChange(i, fieldDef.name, $event)">
+                </app-dynamic-field>
+                <!-- Readonly mode: Show formatted value without labels -->
+                <span *ngIf="isFieldReadOnly() && !isRichTextSubField(fieldDef)" class="readonly-cell-value">
+                  {{ getMultiFieldValue(row, fieldDef) || '—' }}
+                </span>
+                <!-- Readonly mode: Rich text sub-field - render HTML -->
+                <span *ngIf="isFieldReadOnly() && isRichTextSubField(fieldDef)" class="readonly-cell-value rich-text-cell"
+                      [innerHTML]="sanitizeHtml(row?.[fieldDef.name])">
+                </span>
+              </ng-template>
+            </td>
+            <td *ngIf="!isFieldReadOnly()" class="row-actions">
+              <button
+                type="button"
+                class="delete-row-button"
+                (click)="onDeleteRow(i)"
+                [attr.aria-label]="'Delete row ' + ((currentPage - 1) * pageSize + i + 1)"
+                title="Delete row">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="rows.length === 0 && !isFieldReadOnly()" class="empty-row">
+            <td [attr.colspan]="getMultiFieldDefinitions().length + 2" class="empty-message">
+              <em>No items. Click "Add Row" to add an item.</em>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination-container">
+      <button type="button" class="pagination-button" [disabled]="currentPage === 1" (click)="previousPage()" title="Previous Page">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span class="pagination-info">Page {{ currentPage }} of {{ totalPages }}</span>
+      <button type="button" class="pagination-button" [disabled]="currentPage === totalPages" (click)="nextPage()" title="Next Page">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Simple Table Display (for non-EntityReference, non-MultiField fields) -->
+  <div *ngIf="!isEntityReferenceField() && !isMultiField() && (rows.length > 0 || !isFieldReadOnly())"
+       class="list-table-container"
+       role="region"
+       [attr.aria-labelledby]="'list-label-' + field.name">
+    <table class="simple-list-table"
+           role="grid"
+           [attr.aria-describedby]="config.hasError ? 'list-error-' + field.name : null">
+      <thead>
+        <tr>
+          <th class="column-header" scope="col">{{ getColumnLabel() }}</th>
+          <th *ngIf="!isFieldReadOnly()" class="action-header" scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of getVisibleRows(); let i = index; trackBy: trackByRowIndex" class="list-row">
+          <td class="row-value">
+            <!-- Nested complex fields (List/Table inside List): show "Open" button in both edit and readonly -->
+            <ng-container *ngIf="isNestedComplexField(); else simpleCell">
+              <button
+                type="button"
+                class="open-complex-field-button"
+                (click)="openComplexFieldModal(row, i)"
+                [attr.aria-label]="'Open ' + (columnField?.displayName || columnField?.name)"
+                title="Open in dialog">
+                <mat-icon>open_in_new</mat-icon>
+              </button>
+              <div *ngIf="getNestedComplexFieldError(row) as errorMsg"
+                   class="cell-error-message"
+                   role="alert">
+                {{ errorMsg }}
+              </div>
+            </ng-container>
+
+            <ng-template #simpleCell>
+              <!-- Editable mode: Render editable field using dynamic-field component -->
+              <app-dynamic-field
+                *ngIf="!isFieldReadOnly() && columnField"
+                [field]="getRowAsFormField(row, i)"
+                [basicFieldConfig]="getCellFieldConfig(i)"
+                [textFieldConfig]="getCellTextFieldConfig(i)"
+                [numberFieldConfig]="getCellTextFieldConfig(i)"
+                [kristaFields]="kristaFields"
+                [hasAttemptedSubmit]="hasAttemptedSubmit"
+                [workspaceId]="workspaceId"
+                [clientSessionId]="clientSessionId"
+                (valueChange)="onRowValueChange(i, $event)">
+              </app-dynamic-field>
+              <!-- Readonly mode: Show formatted value without labels -->
+              <span *ngIf="isFieldReadOnly() && !isRichTextField()" class="readonly-cell-value">
+                {{ formatRowValue(row) || '—' }}
+              </span>
+              <!-- Readonly mode: Rich text column - render HTML -->
+              <span *ngIf="isFieldReadOnly() && isRichTextField()" class="readonly-cell-value rich-text-cell"
+                    [innerHTML]="sanitizeHtml(row)">
+              </span>
+              <!-- Fallback for when columnField is not defined -->
+              <span *ngIf="!isFieldReadOnly() && !columnField">{{ formatRowValue(row) }}</span>
+            </ng-template>
+          </td>
+          <td *ngIf="!isFieldReadOnly()" class="row-actions">
+            <button
+              type="button"
+              class="delete-row-button"
+              (click)="onDeleteRow(i)"
+              [attr.aria-label]="'Delete row ' + ((currentPage - 1) * pageSize + i + 1)"
+              title="Delete row">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="rows.length === 0 && !isFieldReadOnly()" class="empty-row">
+          <td [attr.colspan]="isFieldReadOnly() ? 1 : 2" class="empty-message">
+            <em>No items. Click "Add Row" to add an item.</em>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination-container">
+      <button type="button" class="pagination-button" [disabled]="currentPage === 1" (click)="previousPage()" title="Previous Page">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+      <span class="pagination-info">Page {{ currentPage }} of {{ totalPages }}</span>
+      <button type="button" class="pagination-button" [disabled]="currentPage === totalPages" (click)="nextPage()" title="Next Page">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Complex Field Modal (for nested List/Table) -->
+  <app-complex-field-modal
+    *ngIf="complexFieldModalOpen && complexFieldModalField"
+    [field]="complexFieldModalField"
+    [subFields]="[]"
+    [kristaFields]="kristaFields"
+    [hasAttemptedSubmit]="hasAttemptedSubmit"
+    [workspaceId]="workspaceId"
+    [clientSessionId]="clientSessionId"
+    (close)="closeComplexFieldModal()"
+    (valueChange)="onComplexFieldValueChange($event)">
+  </app-complex-field-modal>
+
+  <!-- Add Row Button (only in editable mode) -->
+  <div *ngIf="!isFieldReadOnly()" class="add-row-container">
+    <button
+      type="button"
+      class="add-row-button"
+      (click)="onAddRow()"
+      [disabled]="isFieldReadOnly()"
+      [attr.aria-label]="'Add new row to ' + (field.displayName || field.name)">
+      + Add Row
+    </button>
+  </div>
+
+  <!-- Error Message. Not rendered in readonly: the placeholder is kept visible-but-hidden
+       to reserve space so the form does not jump when a message appears while editing,
+       and a readonly field has nothing to validate. -->
+  <div *ngIf="!isFieldReadOnly()" class="field-error-message"
+       [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+       role="alert"
+       [attr.id]="'list-error-' + field.name">
+    {{ config.errorMessage }}
+  </div>
+</div>
+

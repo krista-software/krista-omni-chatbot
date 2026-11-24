@@ -1,0 +1,174 @@
+/**
+ * MessageTextRenderer Component Styles
+ * 
+ * Mirrors original MUI styling from MessageTextRenderer.tsx:
+ * - fontSize: "0.875rem"
+ * - whiteSpace: "pre-wrap"
+ * - wordBreak: "break-word"
+ */
+
+.message-text-container {
+  font-size: var(--kr-font-size-sm);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.message-text {
+  font-size: var(--kr-font-size-sm);
+}
+
+/* Remove default paragraph margins */
+.message-text :deep(p) {
+  margin: 0;
+}
+
+/* Style for krista-button elements */
+.message-text-container :deep(krista-button) {
+  display: inline-block;
+  background: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  color: var(--krista-background-paper, #fff);
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 30px;
+  cursor: pointer;
+  margin: 4px 0;
+}
+
+.message-text-container :deep(krista-button:hover) {
+  opacity: 0.9;
+}
+
+/* Style for image wrappers */
+.message-text-container :deep(.mediaSingleView-content-wrap) {
+  display: inline-block;
+  margin: 8px 0;
+}
+
+.message-text-container :deep(.mediaSingleView-content-wrap.image-wrap-right) {
+  float: right;
+  margin-left: 16px;
+}
+
+.message-text-container :deep(.media-single-node) {
+  margin: 0;
+  padding: 0;
+}
+
+/* Style for images */
+.message-text-container :deep(img) {
+  max-width: 100%;
+  height: auto;
+  cursor: pointer;
+  border-radius: 4px;
+  outline: none;
+  border: none;
+  display: block;
+}
+
+.message-text-container :deep(img.editor-media) {
+  max-height: 220px;
+  max-width: 220px;
+}
+
+.message-text-container :deep(img:focus) {
+  outline: none;
+  border: none;
+}
+
+/* Stream field styles */
+.message-text-container :deep(.stream-field-container) {
+  margin: 8px 0;
+}
+
+.message-text-container :deep(.content-stream-field) {
+  position: relative;
+  min-height: 24px;
+}
+
+.message-text-container :deep(.stream-content) {
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Blocked-popup copy-link fallback */
+.link-fallback {
+  margin-top: 8px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: var(--krista-background-paper, #fff);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: var(--kr-font-size-sm);
+}
+
+.link-fallback-body {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.link-fallback-message {
+  color: var(--krista-text-secondary, rgba(0, 0, 0, 0.6));
+}
+
+.link-fallback-url {
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  word-break: break-all;
+  user-select: all;
+  font-family: monospace;
+  font-size: 0.75rem;
+}
+
+.link-fallback-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.link-fallback-copy {
+  background: var(--krista-primary, #0177C6);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: var(--kr-font-size-sm);
+}
+
+.link-fallback-copy:hover {
+  opacity: 0.9;
+}
+
+.link-fallback-dismiss {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--krista-text-secondary, rgba(0, 0, 0, 0.6));
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 4px;
+}
+
+/* Blinking dot animation */
+@keyframes blink {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.message-text-container :deep(.blinking-dot) {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #1976d2;
+  margin-left: 4px;
+  animation: blink 1s infinite;
+}

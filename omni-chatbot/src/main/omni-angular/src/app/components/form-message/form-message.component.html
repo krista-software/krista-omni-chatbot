@@ -1,0 +1,131 @@
+<div class="form-message-container" role="form" aria-label="Form input">
+  <!-- Message Text -->
+  <div class="message-text" *ngIf="messageText && !hideMessage">
+    <app-message-text-renderer [message]="messageText"></app-message-text-renderer>
+  </div>
+
+  <!-- Form Fields -->
+  <div class="form-content" *ngIf="showForm">
+    <div class="form-fields" role="group" aria-label="Form fields">
+      <div
+        *ngFor="let field of formFields; let i = index; trackBy: trackByField"
+        class="form-field"
+        [ngClass]="{
+          'field-error': hasFieldError(field.name),
+          'small': getFieldWidthClass(field) === 'small',
+          'medium': getFieldWidthClass(field) === 'medium',
+          'large': getFieldWidthClass(field) === 'large'
+        }"
+        [title]="field.attributeValues?.['toolTip'] || ''">
+
+        <!-- Use DynamicFieldComponent to render ANY field type (including MultiField) -->
+        <!-- This matches kristaclient's pattern where app-form-field-container is used for ALL fields -->
+        <app-dynamic-field
+          [field]="field"
+          [autoFocus]="shouldAutoFocus(i)"
+          [textFieldConfig]="getTextFieldConfig(field)"
+          [numberFieldConfig]="getNumberFieldConfig(field)"
+          [richTextFieldConfig]="getRichTextFieldConfig(field)"
+          [basicFieldConfig]="getBasicFieldConfig(field)"
+          [addressFieldConfig]="getAddressFieldConfig(field)"
+          [locationFieldConfig]="getLocationFieldConfig(field)"
+          [fileFieldConfig]="getFileFieldConfig(field)"
+          [addressValue]="getAddressValue(field)"
+          [subFields]="getMultiFieldSubFields(field)"
+          [multiFieldConfig]="getMultiFieldConfig(field)"
+          [kristaFields]="kristaFields"
+          [hasAttemptedSubmit]="hasAttemptedSubmit"
+          [workspaceId]="getWorkspaceId()"
+          [clientSessionId]="getClientSessionId()"
+          (valueChange)="onDynamicFieldValueChange(field, $event)"
+          (blur)="onDynamicFieldBlur(field, $event)"
+          (focus)="onDynamicFieldFocus(field)"
+          (keyPress)="onFieldKeyPress(field, $event)"
+          (subFieldBlur)="onDynamicFieldSubFieldBlur(field, $event)"
+          (subFieldValueChange)="onDynamicFieldSubFieldValueChange(field, $event)">
+        </app-dynamic-field>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit Button & Ephemeral Timer -->
+  <div class="form-actions" *ngIf="ephemeralTime || showSendButton || timerExpired">
+    <!-- Ephemeral Timer (active countdown) -->
+    <app-ephemeral
+      *ngIf="ephemeralTime"
+      [message]="message"
+      [ephemeralTime]="ephemeralTime"
+      (freezeInput)="onFreezeInput($event)">
+    </app-ephemeral>
+
+    <!-- Timer Expired Indicator (for history messages) -->
+    <div *ngIf="timerExpired && !ephemeralTime" class="timer-expired" title="Timer expired">
+      <div class="timer-expired-wrapper">
+        <mat-progress-spinner
+          [diameter]="32"
+          [value]="100"
+          mode="determinate"
+          color="warn"
+          class="timer-expired-spinner">
+        </mat-progress-spinner>
+        <div class="timer-expired-icon">
+          <mat-icon color="warn">lock</mat-icon>
+        </div>
+      </div>
+    </div>
+
+    <!-- Send Button -->
+    <button
+      *ngIf="showSendButton"
+      mat-icon-button
+      color="primary"
+      type="submit"
+      class="send-button"
+      (click)="onSubmitForm()"
+      [disabled]="isButtonDisabled"
+      [attr.aria-label]="isSubmitting ? 'Submitting form...' : 'Submit form'"
+      [attr.aria-busy]="isSubmitting">
+
+      <!-- Loading Spinner (shown when submitting) -->
+      <mat-spinner
+        *ngIf="isSubmitting"
+        diameter="20"
+        strokeWidth="2"
+        color="primary"
+        aria-hidden="true">
+      </mat-spinner>
+      <span *ngIf="isSubmitting" class="visually-hidden">Submitting...</span>
+
+      <!-- Send Icon (shown when not submitting) -->
+      <span *ngIf="!isSubmitting">
+        <svg
+          class="send-icon"
+          [class.disabled]="isButtonDisabled"
+          viewBox="0 0 20 20"
+          width="20"
+          height="20"
+          fill="currentColor"
+          aria-hidden="true"
+          focusable="false">
+        <path d="M5.6 10.7391L14.4 4.95652L7.2 14.0435V18.1739L10.4 14.8696L16 19L20 0L0 6.6087L5.6 10.7391Z"/>
+      </svg>
+      </span>
+    </button>
+  </div>
+
+  <!-- Message Paths -->
+  <app-message-paths
+    *ngIf="showPaths"
+    [paths]="message.paths || []"
+    [submittedPath]="submittedPath"
+    (pathClick)="onPathClick($event)">
+  </app-message-paths>
+
+  <!-- Error Messages -->
+  <div class="error-messages" *ngIf="errorMessages.length > 0" role="alert" aria-live="assertive">
+    <div class="error-message" *ngFor="let error of errorMessages; trackBy: trackByError">
+      <mat-icon class="error-icon" aria-hidden="true">error</mat-icon>
+      <span class="error-text">{{ error }}</span>
+    </div>
+  </div>
+</div>

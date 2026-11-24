@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.filter;
@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -31,6 +32,7 @@ import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerResponseContext;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.io.IOException;
 
@@ -41,6 +43,7 @@ import static org.mockito.Mockito.*;
  * Comprehensive unit tests for CorsResponseFilter class.
  * Tests cover:
  * - CORS header addition to responses
+ * - Preflight OPTIONS request handling
  * - Filter behavior for different HTTP methods
  * - Filter behavior for different paths
  * - Header values validation
@@ -68,11 +71,100 @@ class CorsResponseFilterTest {
         MockitoAnnotations.openMocks(this);
         filter = new CorsResponseFilter();
         headers = new MultivaluedHashMap<>();
-        
+
         // Setup default mock behavior
         when(responseContext.getHeaders()).thenReturn(headers);
         when(requestContext.getUriInfo()).thenReturn(uriInfo);
         when(uriInfo.getPath()).thenReturn("/test/path");
+        when(requestContext.getMethod()).thenReturn("GET");
+    }
+
+    @Nested
+    @DisplayName("Preflight OPTIONS Request Tests")
+    class PreflightOptionsTests {
+
+        @Test
+        @DisplayName("Should abort OPTIONS request with 200 and CORS headers")
+        void shouldAbortOptionsRequestWithCorsHeaders() throws IOException {
+            // Given
+            when(requestContext.getMethod()).thenReturn("OPTIONS");
+
+            // When
+            filter.filter(requestContext);
+
+            // Then
+            ArgumentCaptor<Response> responseCaptor = ArgumentCaptor.forClass(Response.class);
+            verify(requestContext).abortWith(responseCaptor.capture());
+
+            Response response = responseCaptor.getValue();
+            assertThat(response.getStatus()).isEqualTo(200);
+            assertThat(response.getHeaderString("Access-Control-Allow-Origin")).isEqualTo("*");
+            assertThat(response.getHeaderString("Access-Control-Allow-Headers"))
+                    .isEqualTo("Content-Type, Authorization, X-Krista-Original-URI, Chatbot-Session-Id, X-Krista-Context");
+            assertThat(response.getHeaderString("Access-Control-Allow-Methods"))
+                    .isEqualTo("GET, POST, PUT, DELETE, OPTIONS");
+        }
+
+        @Test
+        @DisplayName("Should handle lowercase OPTIONS method")
+        void shouldHandleLowercaseOptions() throws IOException {
+            // Given
+            when(requestContext.getMethod()).thenReturn("options");
+
+            // When
+            filter.filter(requestContext);
+
+            // Then
+            verify(requestContext).abortWith(any(Response.class));
+        }
+
+        @Test
+        @DisplayName("Should not abort non-OPTIONS requests")
+        void shouldNotAbortNonOptionsRequests() throws IOException {
+            // Given
+            when(requestContext.getMethod()).thenReturn("GET");
+
+            // When
+            filter.filter(requestContext);
+
+            // Then
+            verify(requestContext, never()).abortWith(any(Response.class));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {"GET", "POST", "PUT", "DELETE", "PATCH", "HEAD"})
+        @DisplayName("Should not abort any non-OPTIONS HTTP method")
+        void shouldNotAbortNonOptionsMethods(String method) throws IOException {
+            // Given
+            when(requestContext.getMethod()).thenReturn(method);
+
+            // When
+            filter.filter(requestContext);
+
+            // Then
+            verify(requestContext, never()).abortWith(any(Response.class));
+        }
+
+        @ParameterizedTest
+        @ValueSource(strings = {
+                "/config",
+                "/session",
+                "/supportedLanguages",
+                "/inboxes/123/messages",
+                "/entities/search"
+        })
+        @DisplayName("Should handle OPTIONS preflight for all API paths")
+        void shouldHandleOptionsForAllPaths(String path) throws IOException {
+            // Given
+            when(requestContext.getMethod()).thenReturn("OPTIONS");
+            when(uriInfo.getPath()).thenReturn(path);
+
+            // When
+            filter.filter(requestContext);
+
+            // Then
+            verify(requestContext).abortWith(any(Response.class));
+        }
     }
 
     @Nested
@@ -110,7 +202,7 @@ class CorsResponseFilterTest {
 
             // Then
             assertThat(headers.get("Access-Control-Allow-Headers"))
-                    .containsExactly("Content-Type, Authorization, X-Krista-Original-URI");
+                    .containsExactly("Content-Type, Authorization, X-Krista-Original-URI, Chatbot-Session-Id, X-Krista-Context");
         }
 
         @Test
@@ -121,7 +213,7 @@ class CorsResponseFilterTest {
 
             // Then
             assertThat(headers.get("Access-Control-Allow-Methods"))
-                    .containsExactly("GET, POST, PUT, OPTIONS");
+                    .containsExactly("GET, POST, PUT, DELETE, OPTIONS");
         }
 
         @Test
@@ -300,18 +392,17 @@ class CorsResponseFilterTest {
 
             // Then
             assertThat(realHeaders.get("Access-Control-Allow-Origin")).containsExactly("*");
-            assertThat(realHeaders.get("Access-Control-Allow-Headers")).containsExactly("Content-Type, Authorization, X-Krista-Original-URI");
-            assertThat(realHeaders.get("Access-Control-Allow-Methods")).containsExactly("GET, POST, PUT, OPTIONS");
+            assertThat(realHeaders.get("Access-Control-Allow-Headers")).containsExactly("Content-Type, Authorization, X-Krista-Original-URI, Chatbot-Session-Id, X-Krista-Context");
+            assertThat(realHeaders.get("Access-Control-Allow-Methods")).containsExactly("GET, POST, PUT, DELETE, OPTIONS");
         }
 
         @Test
         @DisplayName("Should not throw exception during normal operation")
         void shouldNotThrowException() {
             // When/Then - Should not throw any exception
-            org.junit.jupiter.api.Assertions.assertDoesNotThrow(() -> 
+            org.junit.jupiter.api.Assertions.assertDoesNotThrow(() ->
                 filter.filter(requestContext, responseContext)
             );
         }
     }
 }
-

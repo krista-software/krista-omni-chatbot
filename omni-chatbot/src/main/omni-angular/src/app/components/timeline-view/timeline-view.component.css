@@ -1,0 +1,305 @@
+/* Modern Chatbot Timeline View Styling */
+.timeline-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  background: linear-gradient(180deg, #f0f4f8 0%, #e8eef3 100%);
+  min-height: 0;
+}
+
+.messages-list {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 20px 16px 0px 16px;
+  min-height: 0;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.2) transparent;
+  /* Use flex to allow content to grow and push to bottom */
+  display: flex;
+  flex-direction: column;
+}
+
+/* Spacer that grows to push messages to bottom when content is less than viewport */
+.messages-spacer {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.message-wrapper {
+  margin-bottom: 4px;
+  flex-shrink: 0;
+}
+
+.banner-wrapper {
+  position: relative;
+  margin: 20px 0;
+}
+
+.unread-banner {
+  background: linear-gradient(135deg, var(--krista-primary) 0%, #0056a3 100%);
+  color: #ffffff;
+  text-align: center;
+  padding: 10px 16px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(1, 119, 198, 0.3);
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+.message-bubble-container {
+  /* Message bubble styling handled by message-bubble component */
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--krista-text-secondary);
+  font-style: normal;
+  gap: 12px;
+  padding: 40px;
+  text-align: center;
+}
+
+.empty-state::before {
+  content: '💬';
+  font-size: 48px;
+  opacity: 0.5;
+}
+
+.list-loader {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.typing-indicator {
+  display: flex;
+  justify-content: flex-start;
+  padding: 8px 16px;
+  margin-bottom: 16px;
+}
+
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  background: #ffffff;
+  border-radius: 16px 16px 16px 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.typing-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--krista-primary);
+  animation: typing 1.4s infinite ease-in-out;
+}
+
+.typing-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+
+.typing-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+/* Typing animation */
+@keyframes typing {
+  0%, 80%, 100% {
+    transform: scale(0.6);
+    opacity: 0.4;
+  }
+  40% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Custom scrollbar styling */
+.messages-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.messages-list::-webkit-scrollbar-track {
+  background: transparent;
+  margin: 8px 0;
+}
+
+.messages-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 3px;
+  transition: background 0.2s ease;
+}
+
+.messages-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.messages-list::-webkit-scrollbar-thumb:active {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* Loading states */
+.initial-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(180deg, rgba(240, 244, 248, 0.98) 0%, rgba(232, 238, 243, 0.98) 100%);
+  z-index: 1000;
+  backdrop-filter: blur(4px);
+}
+
+.message-history-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: linear-gradient(180deg, rgba(240, 244, 248, 0.98) 0%, rgba(232, 238, 243, 0.98) 100%);
+  z-index: 1001;
+  backdrop-filter: blur(4px);
+}
+
+/* WhatsApp-style typing indicator */
+.websocket-loading {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  margin: 0 0 8px 0px;
+  background: transparent;
+  border: none;
+}
+
+.typing-bubble {
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+}
+
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.typing-dots .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--krista-primary, #1976d2);
+  animation: typing-bounce 1.4s infinite ease-in-out;
+  display: inline-block;
+}
+
+.typing-dots .dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-dots .dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dots .dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typing-bounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.7;
+  }
+  30% {
+    transform: translateY(-6px);
+    opacity: 1;
+  }
+}
+
+/* New messages button - Minimal modern design */
+.new-messages-btn {
+  position: absolute;
+  bottom: 24px;
+  right: 24px;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  min-height: 40px;
+  padding: 0;
+  background: #ffffff;
+  color: var(--krista-primary, #0177c6);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: 50%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  z-index: 10;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.new-messages-btn mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+}
+
+.new-messages-btn:hover {
+  background: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.16);
+  transform: translateY(-1px);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+.new-messages-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+}
+
+/* Pulse animation only when new messages arrive, not on manual scroll-up */
+@keyframes pulse-subtle {
+  0%, 100% {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+  50% {
+    box-shadow: 0 2px 8px rgba(1, 119, 198, 0.3), 0 0 0 4px rgba(1, 119, 198, 0.1);
+  }
+}
+
+.new-messages-btn.has-new-messages {
+  animation: pulse-subtle 2s ease-in-out infinite;
+}
+
+/* Responsive: timeline scales naturally with container width. */
+
+/* Floating status overlay — sits below messages, above footer */
+.floating-status {
+  flex-shrink: 0;
+  padding: 8px 16px 8px 16px;
+}

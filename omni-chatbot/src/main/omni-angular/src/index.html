@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Krista Chatbot</title>
+  <meta name="description" content="Krista AI-powered chatbot assistant">
+  <base href="__chatbotBasePath__">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <script>
+    var basePath = "__chatbotBasePath__";
+    var cdnCacheVersion = "__cdnCacheVersion__";
+    // Early liveness beacon for the launcher: proves the REAL chat document
+    // (not a proxy 502/504/404 error page — those carry no script) is loading,
+    // the moment parsing starts and long before Angular boots. The launcher
+    // uses it at iframe onload to distinguish "healthy, still booting" from
+    // "error page" instantly (see beginIframeLoad in bootstrap/launcher-core.ts).
+    try {
+      if (window.parent !== window) {
+        window.parent.postMessage('{"messageType": "htmlLoaded"}', '*');
+      }
+    } catch (e) {
+      // best-effort — standalone (non-embedded) mode has no parent to notify
+    }
+  </script>
+
+  <!-- Preconnect to external domains for faster resource loading -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- Critical CSS inlined for faster initial render -->
+  <style>
+    :root {
+      --krista-primary: #0177C6;
+      --krista-background-default: #f6f6f7;
+      --krista-background-paper: #fff;
+      --krista-text-primary: #212121;
+      --kr-color-primary: #0169BE;
+      --kr-color-primary-light: #EAF2FA;
+      --kr-text-color-primary: #212121;
+      --kr-surface-bg-white: #ffffff;
+      --kr-font-family-sans: 'Roboto', sans-serif;
+      --krista-font-family: "Roboto", "Helvetica", Arial, sans-serif;
+    }
+    * {
+      box-sizing: border-box;
+      font-family: var(--krista-font-family, "Roboto", "Helvetica", Arial, sans-serif) !important;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      background-color: var(--krista-background-default);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      scroll-behavior: smooth;
+      overflow: hidden;
+    }
+    body { color: var(--krista-text-primary); }
+    app-root { display: block; height: 100%; }
+  </style>
+
+  <!-- Main stylesheet will be injected by Angular build process -->
+  <!-- Angular CLI automatically injects <link> tags for styles.css with hashed filenames -->
+
+  <!-- Google Fonts - Load Material Icons and Roboto -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <app-root></app-root>
+  <!-- Google Maps API is lazy loaded by GoogleMapsLoaderService when needed -->
+</body>
+</html>

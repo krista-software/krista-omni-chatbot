@@ -1,0 +1,78 @@
+<div class="location-field">
+  <!-- Readonly mode -->
+  <div *ngIf="isFieldReadOnly()" class="readonly-location">
+    <div *ngIf="shouldShowLabel()" class="field-label" [attr.id]="'location-label-' + field.name">
+      {{ getFieldLabel() }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </div>
+    <div class="readonly-value readonly-text"
+         role="status"
+         [attr.aria-labelledby]="'location-label-' + field.name">
+      {{ isSecured() && config.displayValue ? '••••••••' : config.displayValue }}
+    </div>
+  </div>
+
+  <!-- Editable mode -->
+  <mat-form-field *ngIf="!isFieldReadOnly()" appearance="fill" class="full-width krista-field" [class.mat-form-field-invalid]="config.hasError">
+    <mat-label *ngIf="shouldShowLabel()">
+      {{ getFieldLabel() }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </mat-label>
+
+    <input
+      matInput
+      type="text"
+      [attr.id]="'location-input-' + field.name"
+      [value]="isSecured() && config.displayValue ? '••••••••' : config.displayValue"
+      [readonly]="true"
+      [placeholder]="getPlaceholder()"
+      [class.error]="config.hasError"
+      [attr.aria-invalid]="config.hasError"
+      [attr.aria-required]="isFieldRequired()"
+      [attr.aria-describedby]="(config.hasError ? 'location-error-' + field.name + ' ' : '') + (locationError ? 'location-fetch-error-' + field.name : '')"
+      (click)="handleLocationSelection()"
+      (keydown.enter)="handleLocationSelection()"
+      (keydown.space)="handleLocationSelection(); $event.preventDefault()">
+
+    <button
+      mat-icon-button
+      matIconSuffix
+      type="button"
+      (click)="handleLocationSelection()"
+      aria-label="Select location"
+      [title]="'Select location'"
+      class="location-button">
+      <mat-icon aria-hidden="true">my_location</mat-icon>
+    </button>
+  </mat-form-field>
+
+  <!-- Validation error message (outside form field for better visibility) -->
+  <div *ngIf="!isFieldReadOnly()"
+       class="field-error-message"
+       [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+       role="alert"
+       [attr.id]="'location-error-' + field.name">
+    {{ config.errorMessage }}
+  </div>
+
+  <!-- Loading indicator -->
+  <div *ngIf="fetching" class="loading-indicator" role="status" aria-live="polite">
+    <mat-spinner diameter="20" aria-hidden="true"></mat-spinner>
+    <span>Fetching location...</span>
+  </div>
+
+  <!-- Error message -->
+  <div *ngIf="locationError"
+       class="error-message"
+       role="alert"
+       [attr.id]="'location-fetch-error-' + field.name">
+    {{ locationError }}
+    <button mat-icon-button
+            (click)="locationError = ''"
+            class="close-error"
+            aria-label="Dismiss error"
+            type="button">
+      <mat-icon aria-hidden="true">close</mat-icon>
+    </button>
+  </div>
+</div>

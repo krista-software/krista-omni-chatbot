@@ -1,0 +1,187 @@
+{
+  "general": {
+    "defaultApiErrorMessage": "Quelque chose s'est mal passé. Veuillez réessayer plus tard.",
+    "retry": "Retenter",
+    "close": "Fermer"
+  },
+  "footer": {
+    "sendMessage": "envoyer un message",
+    "poweredBy": "Alimenté par",
+    "termsAndConditions": "Termes et Conditions"
+  },
+  "authProvider": {
+    "failedToLogin": "Échec de la connexion. Pour obtenir de l'aide, contactez notre équipe de support."
+  },
+  "loginCallback": {
+    "loginFailed": "Échec de la connexion. Réessayer. Si persiste, contactez l'équipe d'assistance.",
+    "loginProgress": "Connexion en cours. S'il vous plaît, attendez..."
+  },
+  "initializerProvider": {
+    "fetching": "Récupération de la configuration.",
+    "initializing": "Initialisation.",
+    "initFail": "Échec de l'initialisation du chatbot. Veuillez réessayer. Si le problème persiste, contactez notre équipe de support.",
+    "reason": "Raison: {{errorMessage}}",
+    "loadingConfiguration": "Chargement de la configuration...",
+    "authenticating": "Authentification en cours...",
+    "creatingSession": "Création de la session...",
+    "loadingConversationHistory": "Chargement de l'historique de conversation..."
+  },
+  "unknownMessageComponent": {
+    "message": "Type de message inconnu"
+  },
+  "responseAckCompRenderer": {
+    "unnamed": "Utilisateur anonyme",
+    "responseAck": "{{_responseCount}} réponse. {{_contactName}} a répondu à {{_conversationName}} à {{_time}}",
+    "loading": "Chargement..."
+  },
+  "banner": {
+    "unread": "Messages non lus"
+  },
+  "newMessagesBtn": {
+    "newMessages": "Nouveaux messages"
+  },
+  "agent": {
+    "joined": "{{name}} a rejoint",
+    "left": "{{name}} restant"
+  },
+  "placeholder": {
+    "enter": "Entrer {{fieldName}}",
+    "select": "Sélectionner {{fieldName}}",
+    "set": "Régler {{fieldName}}"
+  },
+  "fields": {
+    "stream": {
+      "pauseStreaming": "Mettre en pause le streaming",
+      "resumeStreaming": "Reprendre le streaming"
+    },
+    "location": {
+      "selectLocationPlaceholder": "Rechercher un lieu..."
+    }
+  },
+  "concurrency": {
+    "waiting": {
+      "ariaLabel": "En attente d'une place de chat",
+      "title": "Vous êtes dans la file d'attente",
+      "message": "Tous les agents de chat assistent actuellement d'autres clients. Nous vous connecterons automatiquement dès qu'un agent sera disponible.",
+      "positionLabel": "Position dans la file",
+      "estimatedWaitLabel": "Attente estimée :",
+      "estimatedWaitValue": "~{{minutes}} min",
+      "closeBtn": "Fermer",
+      "closeBtnAria": "Fermer la fenêtre du chat"
+    },
+    "idleWarning": {
+      "title": "La session va expirer",
+      "message": "Votre conversation est restée inactive. Sélectionnez « Continuer la session » pour la maintenir active, sinon elle se terminera automatiquement.",
+      "secondsLabel": "secondes",
+      "stillHereBtn": "Continuer la session",
+      "stillHereBtnAria": "Continuez votre session pour garder la conversation active"
+    },
+    "disconnected": {
+      "title": "Session terminée",
+      "message": "Votre conversation a été terminée pour cause d'inactivité.",
+      "reconnectBtn": "Démarrer une nouvelle session",
+      "reconnectBtnAria": "Démarrer une nouvelle session de chat",
+      "closeBtn": "Fermer",
+      "closeBtnAria": "Fermer la fenêtre du chat"
+    }
+  },
+  "krista": {
+    "general": {
+      "defaultErrorMessage": "Quelque chose s'est mal passé. Veuillez réessayer plus tard.",
+      "ok": "D'accord",
+      "search": "Recherche",
+      "cancel": "Annuler",
+      "clear": "Effacer",
+      "remove": "Retirer",
+      "delete": "Supprimer",
+      "save": "Enregistrer",
+      "noResults": "Aucune entrée trouvée",
+      "selectAll": "Tout sélectionner",
+      "unknownField": "Champ inconnu",
+      "enterCorrectValues": "Assurez-vous d'entrer les valeurs appropriées."
+    },
+    "address": {
+      "street": "Rue",
+      "street2": "Rue # 2",
+      "city": "Ville",
+      "state": "État",
+      "country": "Pays",
+      "postalCode": "Code Postal"
+    },
+    "table": {
+      "deletedRows": "Lignes supprimées",
+      "selectedRows": "Lignes sélectionnées:",
+      "rowsPerPage": "Lignes par page:",
+      "noData": "Aucune ligne disponible à afficher.",
+      "confirmDelete": "Voulez-vous vraiment supprimer définitivement?"
+    },
+    "entity": {
+      "authRequired": "Authentification requise. Cliquez sur 'Authentifier' ci-dessous pour continuer.",
+      "searchAgainAfterAuth": "Après que l'authentification est terminée, revenez à cette fenêtre. Recherchez à nouveau pour afficher les résultats.",
+      "authenticate": "Authentifier",
+      "selectAllHelpText": "Sélectionnez toutes les options sur cette page",
+      "selected": "Sélectionnés"
+    },
+    "file": {
+      "atLeastOneUploadOption": "Il doit y avoir au moins une option de téléchargement sélectionnée dans les paramètres du fichier.",
+      "unknownFormat": "Impossible de télécharger {{filename}}. Format de fichier inconnu.",
+      "unknownFileFormat": "Impossible de télécharger le fichier. Format de fichier inconnu.",
+      "notSupported": "Impossible de télécharger {{filename}}. Format de fichier non pris en charge, compressez-le dans un fichier ZIP et téléchargez-le à nouveau.",
+      "typeNotSupported": "Impossible de télécharger {{filename}}. Type de fichier non pris en charge.",
+      "minSize": "Impossible de télécharger {{filename}}. La taille du fichier doit être supérieure à {{size}}",
+      "maxSize": "Impossible de télécharger {{filename}}. La taille du fichier doit être inférieure à {{size}}",
+      "uploadInProgress": "Le téléchargement du fichier est en cours."
+    },
+    "location": {
+      "grantPermission": "Accorder l'autorisation de localisation",
+      "selectLocation": "Sélectionnez l'emplacement",
+      "selectedLocation": "Emplacement sélectionné",
+      "searchPlaceholder": "Rechercher un lieu..."
+    },
+    "date": {
+      "selectAfter": "Sélectionnez une date après le {{date}}",
+      "selectOnOrAfter": "Sélectionnez une date le ou après le {{date}}",
+      "select": "Sélectionner {{date}}",
+      "selectBefore": "Sélectionnez une date avant le {{date}}",
+      "selectOnOrBefore": "Sélectionnez une date au plus tard le {{date}}",
+      "selectBeforeOrAfterDate": "Sélectionnez une date avant ou après le {{date}}",
+      "selectBeforeDateOrAfterDate": "Sélectionnez une date avant le {{before}} ou après le {{after}}",
+      "selectBetween": "Sélectionnez une date entre {{min}} et {{max}}"
+    },
+    "dateRange": {
+      "selectBetween": "Sélectionnez une plage de dates entre {{min}} et {{max}}",
+      "selectOnOrAfter": "Sélectionnez une plage de dates à partir du {{min}}",
+      "selectOnOrBefore": "Sélectionnez une plage de dates au plus tard le {{max}}",
+      "selectMaxDays": "Sélectionnez {{days}} jour(s) maximum",
+      "selectMaxHours": "Sélectionnez {{hours}} heure(s) maximum",
+      "rulesConflict": "Conflit entre les règles sélectionnées, veuillez les ajuster pour permettre une plage de dates valide."
+    },
+    "radio": {
+      "noSelection": "Aucune option sélectionnée.",
+      "noOptions": "Options non disponibles."
+    },
+    "validators": {
+      "startDateLessThanEndDate": "La date de début doit être inférieure à la date de fin.",
+      "allowedEmailDomains": "Domaines autorisés : {{domains}}.",
+      "maxDateRangeInDays": "La plage ne doit pas dépasser {{days}} jour(s).",
+      "maxDateRangeInHours": "La plage ne doit pas dépasser {{hours}} heure(s).",
+      "maxLength": "La longueur doit être inférieure ou égale à {{length}}.",
+      "minLength": "La longueur doit être supérieure ou égale à {{length}}.",
+      "maxSelection": "Impossible de sélectionner plus de {{count}} options.",
+      "minSelection": "Sélectionnez au moins {{count}} options.",
+      "maxValue": "La valeur doit être inférieure ou égale à {{max}}.",
+      "minValue": "La valeur doit être supérieure ou égale à {{min}}.",
+      "pattern": "La valeur ne correspond pas au modèle requis : {{pattern}}",
+      "invalidPhoneNumber": "Numéro de téléphone invalide.",
+      "required": "Ce champ est obligatoire."
+    }
+  },
+  "bootFailed": {
+    "title": "Chat indisponible",
+    "message": "Nous n'avons pas pu démarrer le chat. Veuillez réessayer.",
+    "retryBtn": "Réessayer",
+    "retryBtnAria": "Réessayer de démarrer le chat",
+    "closeBtn": "Fermer",
+    "closeBtnAria": "Fermer la fenêtre de chat"
+  }
+}

@@ -1,0 +1,134 @@
+/* Address Field Component Styles - Matches MultiField styling */
+.address-field {
+  position: relative;
+  width: 100%;
+}
+
+/* Left border decoration (vertical line) - matches MultiField */
+.address-field::before {
+  content: '';
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-right: 0;
+  border-radius: 4px 0 0 4px;
+  width: 16px;
+  display: block;
+  position: absolute;
+  top: 8px;
+  left: 0;
+  bottom: 0;
+}
+
+/* Field label - matches MultiField label styling */
+.field-label {
+  padding-left: 24px;
+  font-size: var(--kr-font-size-sm);
+  font-weight: 500;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.required-asterisk {
+  color: var(--kr-accent-color-error, #f44336);
+  margin-left: 2px;
+}
+
+/* Address content container - matches MultiField content area */
+.address-content {
+  padding: 8px 0 8px 24px;
+}
+
+/* Editable mode */
+.editable-mode {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Address row for side-by-side fields */
+.address-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  width: 100%;
+}
+
+.address-row > div {
+  flex: 1 1 140px;
+}
+
+/* Specific field sizing - using app-text-field wrapper divs */
+.city-field {
+  flex: 2; /* City gets more space */
+}
+
+.state-field {
+  flex: 1; /* State gets less space */
+}
+
+.postal-field {
+  flex: 1; /* Postal code gets less space */
+}
+
+.country-field {
+  flex: 2; /* Country gets more space */
+}
+
+/* Remove bottom margin from text-field components inside address field */
+.address-field app-text-field {
+  display: block;
+}
+
+.address-field app-text-field ::ng-deep .text-field {
+  margin-bottom: 0;
+}
+
+/* Krista field styling */
+.krista-field {
+  width: 100%;
+}
+
+.krista-field .mat-mdc-form-field-subscript-wrapper {
+  margin-top: 4px;
+}
+
+/* Error message */
+.error-message {
+  margin-top: 8px;
+  color: #f44336;
+  font-size: 12px;
+}
+
+/* Readonly mode - each field on its own line */
+.readonly-mode {
+  padding-left: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.readonly-subfield-label {
+  font-size: var(--kr-font-size-sm);
+  font-weight: 500;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  line-height: 1.5;
+}
+
+.readonly-subfield-value {
+  font-size: 1rem;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  line-height: 1.4;
+}
+
+/* Focus styling */
+.krista-field.mat-focused .mat-mdc-form-field-outline-thick {
+  color: #1976d2;
+}
+
+/* Placeholder styling */
+.krista-field input::placeholder {
+  color: rgba(0, 0, 0, 0.6);
+  opacity: 1;
+}
+
+/* Responsive: fields scale naturally via max-width: 100% on parent. */

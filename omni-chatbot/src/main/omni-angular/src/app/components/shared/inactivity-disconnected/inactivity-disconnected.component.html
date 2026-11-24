@@ -1,0 +1,30 @@
+<div class="disconnected-overlay" role="alertdialog" aria-modal="true" aria-labelledby="disconnected-title" aria-describedby="disconnected-desc">
+  <div class="disconnected-modal">
+    <div class="disconnected-header">
+      <div class="disconnected-icon" aria-hidden="true">
+        <span class="disconnected-icon-inner">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="12" cy="12" r="9" stroke="var(--krista-primary, #0169BE)" stroke-width="2"/>
+            <path d="M8.5 12.3 L11 14.8 L15.5 9.3" stroke="var(--krista-primary, #0169BE)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </span>
+      </div>
+      <h2 id="disconnected-title" class="disconnected-title">{{ 'concurrency.disconnected.title' | translate }}</h2>
+    </div>
+    <p id="disconnected-desc" class="disconnected-message">{{ 'concurrency.disconnected.message' | translate }}</p>
+    <button
+      class="reconnect-btn"
+      type="button"
+      (click)="onReconnect()"
+      [attr.aria-label]="'concurrency.disconnected.reconnectBtnAria' | translate">
+      {{ 'concurrency.disconnected.reconnectBtn' | translate }}
+    </button>
+    <button
+      class="close-btn"
+      type="button"
+      (click)="onClose()"
+      [attr.aria-label]="'concurrency.disconnected.closeBtnAria' | translate">
+      {{ 'concurrency.disconnected.closeBtn' | translate }}
+    </button>
+  </div>
+</div>

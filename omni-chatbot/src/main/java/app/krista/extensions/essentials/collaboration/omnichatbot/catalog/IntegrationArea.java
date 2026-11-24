@@ -13,23 +13,27 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.catalog;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 
+import app.krista.extension.executor.ExtensionResponse;
 import app.krista.extension.executor.Invoker;
 import app.krista.extension.impl.anno.*;
 import app.krista.extension.request.RoutingInfo;
+import app.krista.extensions.essentials.collaboration.omnichatbot.ChatBotExtension;
+import app.krista.extensions.essentials.collaboration.omnichatbot.auth.AuthConstants;
 import app.krista.extensions.essentials.collaboration.omnichatbot.contants.Constants;
+import app.krista.extensions.essentials.collaboration.omnichatbot.service.ChatBotUIService;
 import app.krista.ksdk.accounts.Account;
 import app.krista.ksdk.accounts.AccountProvider;
 import app.krista.ksdk.context.AuthorizationContext;
 import app.krista.ksdk.inboxes.Inbox;
 import app.krista.ksdk.inboxes.InboxManager;
+import app.krista.ksdk.invoker.InvokerConfiguration;
 import app.krista.ksdk.message.Message;
 import app.krista.model.field.DisplayNamedValuedField;
 import app.krista.omni.sdk.complex_fields.impl.MessageDtoFactory;
@@ -38,10 +42,12 @@ import app.krista.omni.sdk.medium.api.dto.Pages;
 import app.krista.omni.sdk.medium.api.message.MediumInfo;
 import app.krista.omni.sdk.medium.interactive.InteractiveMediumService;
 import app.krista.omni.sdk.medium.interactive.InteractiveMessageIn;
+import app.krista.omni.sdk.medium.text.util.CommonInvokerParameters;
 import app.krista.omni.sdk.spi.impl.util.Languages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 
 @Domain(id = "catEntryDomain_5fa2fc97-4b17-44cf-b98f-aa91a459a091",
         name = "Collaboration",
@@ -50,89 +56,61 @@ import javax.inject.Named;
         ecosystemVersion = "adb6c978-f976-4d3d-b4d4-1e99aa6efdab")
 public class IntegrationArea {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(IntegrationArea.class);
+
     private final AuthorizationContext authorizationContext;
     private final InteractiveMediumService mediumService;
     private final InboxManager inboxManager;
     private final Invoker invoker;
-    private final Invoker self;
     private final AccountProvider accountProvider;
+    private final ChatBotExtension chatBotExtension;
+    private final InvokerConfiguration invokerConfiguration;
 
     @Inject
-    public IntegrationArea(@Named("self") Invoker self, @Named("Authentication") Invoker invoker,
-                           AuthorizationContext authorizationContext, InboxManager inboxManager, AccountProvider accountProvider) {
-        this.self = self;
+    public IntegrationArea(Invoker invoker, AuthorizationContext authorizationContext, InboxManager inboxManager,
+                           AccountProvider accountProvider, ChatBotExtension chatBotExtension,
+                           InvokerConfiguration invokerConfiguration) {
         this.invoker = invoker;
         this.authorizationContext = authorizationContext;
         this.accountProvider = accountProvider;
         this.mediumService = InteractiveMediumService.getInstance();
         this.inboxManager = inboxManager;
+        this.chatBotExtension = chatBotExtension;
+        this.invokerConfiguration = invokerConfiguration;
     }
 
     /**
-     * Generates the HTML script element for embedding the chatbot on external websites.
+     * Generates what a customer needs to reach the chatbot: the launcher script tag to
+     * embed on their own site, and a link that opens the chatbot directly.
      *
-     * <p>This catalog request creates a complete HTML snippet that includes:
-     * <ul>
-     *   <li>CSS stylesheet link for the launcher</li>
-     *   <li>JavaScript file for the launcher</li>
-     *   <li>Initialization script with chatbot configuration</li>
-     *   <li>Chat bubble SVG icon</li>
-     * </ul>
+     * <p>The launcher loads its own stylesheet and initialises itself, so the single
+     * script tag is all a host page needs.
      *
-     * <p>If an Authentication extension is bound, it also retrieves and includes
-     * the authentication script element.
+     * <p>Both replies are RichText, which is rendered as HTML: the anchor becomes a real
+     * clickable link, while the script tag is entity-escaped so it stays visible, copyable
+     * text (a live script element would render as nothing).
      *
-     * @return the complete HTML script element for chatbot integration
-     * @throws ExecutionException if the catalog request to Authentication extension fails
-     * @throws InterruptedException if the catalog request is interrupted
+     * @return the integration script and the chatbot URL
      */
     @CatalogRequest(
             id = "localDomainRequest_163d54d1-683e-45e6-b40e-bc0ba2a016fd",
-            name = "Get Script Element",
-            description = "Get Script Element",
+            name = "Get Integration Information",
+            description = "Replies with the script tag to embed the chatbot on a website, and a link that opens the chatbot directly.",
             area = "Integration",
             type = CatalogRequest.Type.QUERY_SYSTEM)
-    @Field.Text(name = "Script Element", required = false, attributes = {@Attribute(name = "visualWidth", value = "S")}, options = {})
-    public String getScriptElement() throws ExecutionException, InterruptedException {
-        String dependency = self.getBindings().get("Authentication");
-        String authnScript = "";
-        if (!(dependency == null || dependency.isBlank())) {
-            Map<String, Object> outputs = invoker.handleCatalogRequest("localDomainRequest_723f4e2c-4f16-4e21-98d4-35184ce1cefb", false, Map.of()).get();
-            authnScript = (String) outputs.get("Script Element");
-        }
-
-        String basePath = self.getRoutingInfo().getRoutingURL(self.getRoutingInfo().getRoutingId(),
+    @Field(name = "Integration Script", type = "RichText", required = false, attributes = {@Attribute(name = "visualWidth", value = "L")}, options = {})
+    @Field(name = "Chatbot URL", type = "RichText", required = false, attributes = {@Attribute(name = "visualWidth", value = "L")}, options = {})
+    public Map<String, Object> getIntegrationScript() {
+        String basePath = invoker.getRoutingInfo().getRoutingURL(invoker.getRoutingInfo().getRoutingId(),
                 RoutingInfo.Type.APPLIANCE) + "/chatbot/";
+        String chatbotUrl = basePath + ChatBotUIService.CDN_CACHE_VERSION + "/ui/";
 
-        return "<link rel=\"stylesheet\" href=\"" + basePath + "ui/launcher.css\" />\n" +
-                "<script src=\"" + basePath + "ui/launcher.js\"></script>\n" +
-                "<script>\n" +
-                "    let kristaChat = null;\n" +
-                "    function createChatbotClient(data, ref) { // data jwt\n" +
-                "      const options = {\n" +
-                "        position: 'bottomRight', // bottomRight, centerLeft, centerRight, topLeft, topRight\n" +
-                "        transition: 'slideIn', //backIn, bounceIn, fadeIn, lightSpeedIn, rotateInDown, rotateInUp, zoomIn, slideIn,\n" +
-                "        host: \"" + basePath + "\",\n" +
-                "        chatBubble: {\n" +
-                "          cssClass: 'bubble-btn',\n" +
-                "          icon: `<svg width=\"60\" height=\"60\" viewBox=\"0 0 60 60\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n" +
-                "              <path fill- rule=\"evenodd\" clip - rule=\"evenodd\" d = \"M30 0C13.4315 0 0 13.4315 0 30C0 46.5685 13.4315 60 30 60C35.0129 60 39.7387 58.7705 43.8922 56.5965C44.3533 56.3552 44.8874 56.2858 45.3902 56.4205L55.7458 59.1953C57.2329 59.5938 58.5938 58.2329 58.1953 56.7458L55.563 46.9219C55.418 46.3809 55.5096 45.8058 55.7961 45.3245C58.4663 40.8394 60 35.5988 60 30C60 13.4315 46.5685 0 30 0Z\" fill=\"#3F3920\" />\n" +
-                "              <path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M26 34.0898V37C26 37.5523 26.4477 38 27 38H35.5858C35.851 38 36.1054 38.1054 36.2929 38.2929L38.4879 40.4879C38.6769 40.6769 39 40.543 39 40.2757V32C39 31.4477 38.5523 31 38 31V33C38 33.5523 37.5523 34 37 34H26.4142C26.2699 34 26.1288 34.0312 26 34.0898Z\" fill=\"white\" />\n" +
-                "              <path d=\"M21 23C21 22.4477 21.4477 22 22 22H35C35.5523 22 36 22.4477 36 23V31C36 31.5523 35.5523 32 35 32H24.4142C24.149 32 23.8946 32.1054 23.7071 32.2929L21.5121 34.4879C21.3231 34.6769 21 34.543 21 34.2757V23Z\" fill=\"white\" />\n" +
-                "            </svg >`\n" +
-                "        }\n" +
-                "      }\n" +
-                "      kristaChat = new Chatbot(options);\n" +
-                "      kristaChat.init(); \n" +
-                "    }\n" +
-                "    $(document).ready(function () {\n" +
-                "      const ref = {\n" +
-                "        chatBubble: $('.chat-bubble')\n" +
-                "      }\n" +
-                "\n" +
-                "        createChatbotClient({}, ref);\n" +
-                "    })\n" +
-                "  </script>";
+        Map<String, Object> reply = new LinkedHashMap<>();
+        reply.put("Integration Script",
+                "&lt;script src=\"" + basePath + "ui/launcher.js\"&gt;&lt;/script&gt;");
+        reply.put("Chatbot URL",
+                "<a href=\"" + chatbotUrl + "\" target=\"_blank\" rel=\"noopener noreferrer\">Chatbot Link</a>");
+        return reply;
     }
 
     /**
@@ -153,7 +131,11 @@ public class IntegrationArea {
             type = CatalogRequest.Type.CHANGE_SYSTEM)
     @Field.Text(name = "Message", required = false, attributes = {@Attribute(name = "visualWidth", value = "S")}, options = {})
     public String getLastUserMessage() {
-        Account authorizedAccount = authorizationContext.getAuthorizedAccount();
+        Account authorizedAccount = (authorizationContext != null && authorizationContext.isAuthenticated())
+                ? authorizationContext.getAuthorizedAccount() : null;
+        if (authorizedAccount == null) {
+            return "";
+        }
         InteractiveMessageIn textMediumMessageIn = new InteractiveMessageIn(new MediumInfo(Constants.MEDIUM_TYPE, authorizedAccount.getAccountId()), null);
         Account authenticatedAccount = mediumService.getAuthenticatedAccount(textMediumMessageIn, Languages.ENGLISH.getCode());
         String inboxId = mediumService.getSessionInbox(authenticatedAccount).getInboxId();
@@ -275,6 +257,122 @@ public class IntegrationArea {
         result.put("Details", messageList);
 
         return result;
+    }
+
+    /**
+     * Saves the chatbot setup parameters onto this invoker, so a conversation can configure the
+     * chatbot at runtime instead of an administrator editing the invoker setup screen by hand.
+     *
+     * <p>Only the parameters that are supplied are changed: an optional parameter that is omitted
+     * keeps its currently stored value, which lets a caller update a single setting without having
+     * to resend the rest, while passing an empty text explicitly clears that setting. The welcome
+     * conversation is mandatory and is always written.
+     *
+     * <p>The merged attributes are run through the same validation the setup screen uses
+     * ({@link ChatBotExtension#validateAttributes(Map)}): the welcome and fallback conversations must
+     * exist and be unique for the current execution mode, and every key in {@code attribute_parameters}
+     * must map to an existing workspace attribute. Nothing is persisted when validation fails.
+     *
+     * <p>{@code trustExtension} is the one setting that is not an attribute: it is the invoker's
+     * "Trust Extension" switch, without which guest login fails because the chatbot cannot create
+     * accounts. Leave it empty to keep the current setting. <b>Changing it restarts the chatbot</b>,
+     * because the rights are applied while the invoker loads, so the conversation that changes it may
+     * not receive this response.
+     *
+     * @param welcomeConversation the conversation started when a user opens the chatbot (optional;
+     *                            omit to keep the current value, or pass blank to clear it and greet
+     *                            with the Welcome Message instead)
+     * @param fallbackConversation the conversation used when Krista cannot match a user request
+     * @param sessionTimeout minutes of inactivity after which a chat session ends
+     * @param defaultRole the role assigned to newly created guest accounts
+     * @param attributeParameters JSON object of workspace attributes to copy onto guest accounts
+     * @param trustExtension the "Trust Extension" switch, or empty to leave it unchanged
+     * @return a SUCCESS response carrying a "Status" message, or a FAILURE response explaining why
+     *         the parameters could not be saved
+     */
+    @CatalogRequest(
+            id = "localDomainRequest_86a839f6-6640-4e7a-b367-0c088f095968",
+            name = "Set Setup Parameters",
+            description = "Save the chatbot setup parameters on this invoker",
+            area = "Integration",
+            type = CatalogRequest.Type.CHANGE_SYSTEM)
+    @Field.Text(name = "Status", required = false, attributes = {@Attribute(name = "visualWidth", value = "S")}, options = {})
+    public ExtensionResponse setSetupParameters(
+            @Field.Text(name = Constants.WELCOME_CONVERSATION_NAME, required = false,
+                    attributes = {@Attribute(name = "visualWidth", value = "S")}, options = {}) String welcomeConversation,
+            @Field.Text(name = CommonInvokerParameters.FALLBACK_CONVERSATION, required = false,
+                    attributes = {@Attribute(name = "visualWidth", value = "S")}, options = {}) String fallbackConversation,
+            @Field(name = CommonInvokerParameters.SESSION_TIMEOUT, type = "Number", required = false,
+                    attributes = {@Attribute(name = "visualWidth", value = "S")}, options = {}) Double sessionTimeout,
+            @Field.Text(name = AuthConstants.DEFAULT_ROLE_KEY, required = false,
+                    attributes = {@Attribute(name = "visualWidth", value = "S")}, options = {}) String defaultRole,
+            @Field.Text(name = AuthConstants.ATTRIBUTE_PARAMETERS, required = false,
+                    attributes = {@Attribute(name = "visualWidth", value = "S")}, options = {}) String attributeParameters,
+            @Field.Boolean(name = Constants.TRUST_EXTENSION, required = false,
+                    description = "Grants the chatbot the workspace-admin rights it needs to create guest "
+                            + "accounts. Leave empty to keep the current setting; changing it restarts the chatbot.",
+                    attributes = {@Attribute(name = "visualWidth", value = "S")}, options = {}) Boolean trustExtension) {
+        // Welcome Conversation is optional: omit it to leave the current setting unchanged,
+        // or pass a blank value to clear it — in which case the chatbot greets with the
+        // Welcome Message instead. validateAttributes only checks the conversation exists
+        // when a non-blank name is set.
+        Map<String, Object> attributes = new HashMap<>(invoker.getAttributes());
+        if (welcomeConversation != null) {
+            // A blank value (incl. whitespace) clears the conversation so the chatbot greets
+            // with the Welcome Message; a non-blank value sets it. Omitting it (null) leaves
+            // the stored value unchanged.
+            attributes.put(Constants.WELCOME_CONVERSATION_NAME,
+                    welcomeConversation.isBlank() ? "" : welcomeConversation);
+        }
+        putIfNotNull(attributes, CommonInvokerParameters.FALLBACK_CONVERSATION, fallbackConversation);
+        // Kept as a Double deliberately: the omni SDK reads this attribute behind an
+        // "instanceof Double" check and silently falls back to the default timeout for any other
+        // numeric type, which would look like the configured value was ignored.
+        putIfNotNull(attributes, CommonInvokerParameters.SESSION_TIMEOUT, sessionTimeout);
+        putIfNotNull(attributes, AuthConstants.DEFAULT_ROLE_KEY, defaultRole);
+        putIfNotNull(attributes, AuthConstants.ATTRIBUTE_PARAMETERS, attributeParameters);
+        try {
+            chatBotExtension.validateAttributes(attributes);
+        } catch (IllegalArgumentException cause) {
+            return failure(cause.getMessage(), ExtensionResponse.Error.ExceptionType.INPUT_ERROR);
+        } catch (RuntimeException cause) {
+            // The conversation and workspace-attribute lookups are backed by remote stores; a store
+            // failure is not the caller's input error and must not escape as an unhandled exception.
+            LOGGER.error("#####-CHATBOT SETUP-PARAMETERS validation failed unexpectedly", cause);
+            return failure("Could not validate the chatbot setup parameters. Please check the extension logs.",
+                    ExtensionResponse.Error.ExceptionType.SYSTEM_ERROR);
+        }
+        // trustExtension is passed through as-is: null leaves the invoker's stored rights alone, which
+        // keeps this an attribute-only save. A non-null value that differs from the stored one makes
+        // the platform reload the invoker (see the class javadoc on the overload).
+        boolean saved = invokerConfiguration.saveChanges(invoker.getWorkspaceId(), invoker.getInvokerId(),
+                attributes, "live", false, trustExtension);
+        if (!saved) {
+            return failure("Could not save the chatbot setup parameters. Please check the extension logs.",
+                    ExtensionResponse.Error.ExceptionType.SYSTEM_ERROR);
+        }
+        // Runtime configuration changes are otherwise invisible to operators; attributeParameters is
+        // summarised rather than logged because it is free-form JSON.
+        LOGGER.info("#####-CHATBOT SETUP-PARAMETERS saved invokerId={} welcomeConversation={} "
+                        + "fallbackConversation={} sessionTimeout={} defaultRole={} attributeParameters={} "
+                        + "trustExtension={}",
+                invoker.getInvokerId(), welcomeConversation, fallbackConversation, sessionTimeout, defaultRole,
+                attributeParameters == null ? "unchanged" : "set",
+                trustExtension == null ? "unchanged" : trustExtension);
+        Map<String, Object> responseMap = new HashMap<>();
+        responseMap.put("Status", "Setup parameters saved successfully.");
+        return new ExtensionResponse(ExtensionResponse.Result.SUCCESS, responseMap, null, null, null);
+    }
+
+    private static void putIfNotNull(Map<String, Object> attributes, String key, Object value) {
+        if (value != null) {
+            attributes.put(key, value);
+        }
+    }
+
+    private static ExtensionResponse failure(String message, ExtensionResponse.Error.ExceptionType exceptionType) {
+        return new ExtensionResponse(ExtensionResponse.Result.FAILURE, null,
+                new ExtensionResponse.Error(message, System.currentTimeMillis(), exceptionType, null), null, null);
     }
 
 }

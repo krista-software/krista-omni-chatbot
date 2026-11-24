@@ -13,20 +13,18 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.impl;
 
-import app.krista.extension.util.InvokerAttributeProvider;
-import app.krista.extensions.essentials.collaboration.omnichatbot.contants.Constants;
+import app.krista.extensions.essentials.collaboration.omnichatbot.audit.AuditService;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.WsPayloadRequestHandler;
 import app.krista.omni.sdk.medium.interactive.InteractiveMediumService;
 import app.krista.omni.sdk.spi.util.GsonJsonMapperImpl;
 import org.jvnet.hk2.annotations.Service;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,21 +41,16 @@ import java.util.Map;
  */
 @Service
 public class WsPayloadHandlerRegistry {
-    private final Map<String, WsPayloadRequestHandler> handlersMap = new HashMap<>();
 
-    /**
-     * Registers all payload handlers with their corresponding type keys.
-     *
-     * <p>This method is called by the HK2 dependency injection framework
-     * after construction to initialize the handler registry.
-     *
-     * @param welcomeConversationProvider provider for the welcome conversation name attribute
-     */
+    private final Map<String, WsPayloadRequestHandler> handlersMap = new HashMap<>();
+    private final AuditService auditService;
+
     @Inject
-    public void registerHandlers(@Named(Constants.WELCOME_CONVERSATION_NAME) InvokerAttributeProvider<String> welcomeConversationProvider) {
-        handlersMap.put("welcome", new WsWelcomeMessageHandler(InteractiveMediumService.getInstance(), welcomeConversationProvider));
-        handlersMap.put("Message", new WsMessageHandler(InteractiveMediumService.getInstance(), GsonJsonMapperImpl.getInstance()));
-        handlersMap.put("MessageAnswer", new WsMessageAnswerHandler(InteractiveMediumService.getInstance(), GsonJsonMapperImpl.getInstance()));
+    public WsPayloadHandlerRegistry(AuditService auditService) {
+        this.auditService = auditService;
+        handlersMap.put("welcome", new WsWelcomeMessageHandler());
+        handlersMap.put("Message", new WsMessageHandler(InteractiveMediumService.getInstance(), GsonJsonMapperImpl.getInstance(), auditService));
+        handlersMap.put("MessageAnswer", new WsMessageAnswerHandler(InteractiveMediumService.getInstance(), GsonJsonMapperImpl.getInstance(), auditService));
     }
 
     /**

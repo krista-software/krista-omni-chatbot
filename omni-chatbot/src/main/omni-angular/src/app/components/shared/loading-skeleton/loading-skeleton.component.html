@@ -1,0 +1,20 @@
+<!-- App Logo Skeleton -->
+<div *ngIf="variant === SkeletonVariant.applogo" class="applogo-skeleton">
+  <div class="logo-placeholder" [ngStyle]="skeletonStyles">
+    <img *ngIf="logoSrc" [src]="logoSrc" alt="Loading..." class="logo-image" />
+    <div *ngIf="!logoSrc" [ngClass]="skeletonClasses" [ngStyle]="skeletonStyles"></div>
+  </div>
+</div>
+
+<!-- Spinner Skeleton -->
+<div *ngIf="variant === SkeletonVariant.spinner" class="spinner-skeleton">
+  <mat-spinner diameter="24" color="primary"></mat-spinner>
+</div>
+
+<!-- Standard Skeletons -->
+<div 
+  *ngIf="variant !== SkeletonVariant.applogo && variant !== SkeletonVariant.spinner"
+  [ngClass]="skeletonClasses" 
+  [ngStyle]="skeletonStyles">
+  <ng-content></ng-content>
+</div>

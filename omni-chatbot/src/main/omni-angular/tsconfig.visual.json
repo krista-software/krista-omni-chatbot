@@ -1,0 +1,16 @@
+/* TypeScript config for the visual-regression harness only.
+   Mirrors tsconfig.app.json but entry-points at src/visual/main.visual.ts so the
+   harness is compiled independently of the shipped application. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "./out-tsc/visual",
+    "types": ["google.maps"]
+  },
+  "files": [
+    "src/visual/main.visual.ts"
+  ],
+  "include": [
+    "src/**/*.d.ts"
+  ]
+}

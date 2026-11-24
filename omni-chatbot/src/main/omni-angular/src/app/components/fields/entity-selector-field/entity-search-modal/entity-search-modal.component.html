@@ -1,0 +1,144 @@
+<div class="entity-search-modal">
+  <!-- Modal Header -->
+  <div class="modal-header">
+    <h2 class="modal-title">Select {{ entitySelectorMeta.entityName }}</h2>
+    <button type="button" class="close-button" (click)="onCancel()">
+      <svg viewBox="0 0 24 24" class="close-icon">
+        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Modal Content -->
+  <div class="modal-content">
+
+  <!-- Search Bar -->
+  <div class="search-bar">
+    <!-- Filter Dropdown -->
+    <div class="custom-select-wrapper" *ngIf="availableFilters.length > 0">
+      <div class="custom-dropdown" (click)="toggleFilterDropdown()" #filterDropdown>
+        <div class="dropdown-selected">
+          {{ selectedFilter?.field?.name || 'Select Filter' }}
+        </div>
+        <svg class="dropdown-arrow" viewBox="0 0 24 24" [class.open]="isFilterDropdownOpen">
+          <path d="M7 10l5 5 5-5z"/>
+        </svg>
+        <div class="dropdown-menu" *ngIf="isFilterDropdownOpen">
+          <div
+            class="dropdown-item"
+            *ngFor="let filter of availableFilters; trackBy: trackByFilter"
+            (click)="selectFilter(filter); $event.stopPropagation()"
+            [class.selected]="selectedFilter?.field?.name === filter.field.name">
+            {{ filter.field.name }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search Input -->
+    <div class="custom-input-wrapper">
+      <input
+        type="text"
+        class="custom-search-input"
+        [(ngModel)]="searchValue"
+        (keyup.enter)="onSearch()"
+        placeholder="Search {{ entitySelectorMeta.entityName }}"
+        autofocus>
+
+      <!-- Clear/Cancel Icon Button - Only show when there's a search value -->
+      <button
+        *ngIf="searchValue"
+        type="button"
+        mat-icon-button
+        class="clear-button"
+        (click)="clearSearch()"
+        aria-label="clear">
+        <mat-icon>close</mat-icon>
+      </button>
+
+      <!-- Search Icon Button -->
+      <button
+        type="button"
+        mat-icon-button
+        class="search-icon-button"
+        (click)="onSearch()"
+        [disabled]="searchStatus === 'loading'"
+        aria-label="search">
+        <mat-icon>search</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Content -->
+  <div class="modal-content">
+
+    <!-- Initial State - Before any search -->
+    <div class="initial-state" *ngIf="searchStatus === 'idle'">
+      <p class="initial-message">Start your search or filter through the options to find exactly what you're looking for.</p>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-state" *ngIf="searchStatus === 'loading'">
+      <div class="custom-spinner"></div>
+      <p>Searching...</p>
+    </div>
+
+    <!-- Error State -->
+    <div class="error-state" *ngIf="searchStatus === 'error'">
+      <svg viewBox="0 0 24 24" class="error-icon">
+        <path d="M11 15h2v2h-2zm0-8h2v6h-2zm.99-5C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+      </svg>
+      <p class="error-message">{{ errorMessage }}</p>
+      <button type="button" class="primary-button" (click)="onSearch()">
+        Try Again
+      </button>
+    </div>
+
+    <!-- Authentication Required -->
+    <div class="auth-state" *ngIf="searchStatus === 'authentication'">
+      <svg viewBox="0 0 24 24" class="auth-icon">
+        <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+      </svg>
+      <p class="auth-message">Authentication required for {{ authDetails?.invokerName }}</p>
+      <button type="button" class="primary-button" (click)="onAuthenticate()">
+        Authenticate
+      </button>
+    </div>
+
+    <!-- Empty State - No results found after search -->
+    <div class="empty-state" *ngIf="searchStatus === 'success' && searchResults.length === 0">
+      <svg viewBox="0 0 24 24" class="empty-icon">
+        <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+        <line x1="5" y1="5" x2="14" y2="14" stroke="currentColor" stroke-width="2"/>
+      </svg>
+      <p>No results found</p>
+      <p class="empty-hint">Try adjusting your search criteria</p>
+    </div>
+
+    <!-- Search Results Table - Using NewTable Component -->
+    <div class="search-results-table" *ngIf="searchStatus === 'success' && searchResults.length > 0 && tableInput">
+      <app-new-table [tableInput]="tableInput"></app-new-table>
+    </div>
+
+  </div>
+
+  <!-- Modal Footer -->
+  <div class="modal-footer">
+    <!-- Action Buttons -->
+    <div class="modal-actions">
+      <div class="spacer"></div>
+      <button type="button" class="text-button" (click)="onCancel()">
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="primary-button"
+        (click)="onSave()"
+        *ngIf="isMultiSelect"
+        [disabled]="selectionCount === 0">
+        Add
+      </button>
+    </div>
+  </div>
+</div>
+

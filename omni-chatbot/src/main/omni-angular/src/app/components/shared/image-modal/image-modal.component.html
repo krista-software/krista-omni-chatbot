@@ -1,0 +1,21 @@
+<!-- Image Modal Overlay -->
+<div class="image-modal-overlay" (click)="onOverlayClick()">
+  <div class="image-modal-content">
+    <!-- Close Button -->
+    <button 
+      class="image-modal-close" 
+      (click)="onClose()" 
+      aria-label="Close image preview"
+      type="button">
+      <mat-icon>close</mat-icon>
+    </button>
+    
+    <!-- Image -->
+    <img 
+      [src]="imageSrc" 
+      [alt]="altText" 
+      class="image-modal-image"
+      (click)="onImageClick($event)">
+  </div>
+</div>
+

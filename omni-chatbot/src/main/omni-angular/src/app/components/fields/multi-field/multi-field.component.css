@@ -1,0 +1,96 @@
+/* MultiField Container - matches original's CompositeFieldRenderer styling */
+.multi-field-container {
+  position: relative;
+}
+
+/* Left border decoration (vertical line) */
+.multi-field-container::before {
+  content: '';
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-right: 0;
+  border-radius: 4px 0 0 4px;
+  width: 16px;
+  display: block;
+  position: absolute;
+  top: 8px;
+  left: 0;
+  bottom: 0;
+}
+
+/* Parent field label */
+.multi-field-label {
+  padding-left: 24px;
+  font-size: var(--kr-font-size-sm);
+  font-weight: 500;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+/* Required asterisk */
+.required-asterisk {
+  color: var(--kr-accent-color-error, #f44336);
+  margin-left: 2px;
+}
+
+/* Sub-fields content area */
+.multi-field-content {
+  padding: 8px 0 8px 24px;
+}
+
+/* Individual sub-field wrapper */
+.sub-field-wrapper {
+  margin-bottom: 20px;
+}
+
+.sub-field-wrapper:last-child {
+  margin-bottom: 0;
+}
+
+/* Empty state message */
+.empty-state {
+  padding-left: 24px;
+  color: var(--krista-text-secondary, rgba(0, 0, 0, 0.6));
+  font-size: var(--kr-font-size-sm);
+  font-style: italic;
+}
+
+/* Unsupported field type message */
+.unsupported-field {
+  padding: 8px 12px;
+  background-color: #fff3e0;
+  border-left: 3px solid #ff9800;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  font-size: var(--kr-font-size-sm);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+
+.unsupported-field em {
+  font-style: italic;
+  color: #e65100;
+}
+
+/* Parent field error message */
+.field-error-message {
+  color: var(--kr-accent-color-error, #f44336);
+  font-size: 0.75rem;
+  margin-top: 4px;
+  margin-left: 24px;
+  line-height: 1.2;
+}
+
+/* Responsive: fields scale naturally via max-width: 100% on parent. */
+
+/* Inline layout support (for future use) */
+.multi-field-content.inline .sub-field-wrapper {
+  display: inline-block;
+  margin-right: 20px;
+  margin-bottom: 20px;
+  vertical-align: top;
+}
+
+.multi-field-content.inline .sub-field-wrapper:last-child {
+  margin-right: 0;
+}
+

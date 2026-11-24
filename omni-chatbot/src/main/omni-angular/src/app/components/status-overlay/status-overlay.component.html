@@ -1,0 +1,17 @@
+<!-- Status Overlay — single bubble with dots + rotating text.
+     Text uses CSS opacity transition (no *ngIf) to avoid layout-shift flicker. -->
+<div class="status-overlay" role="status" aria-live="polite" aria-label="Processing status">
+
+  <div class="status-bubble">
+    <div class="status-dots" aria-hidden="true">
+      <span class="dot"></span>
+      <span class="dot"></span>
+      <span class="dot"></span>
+    </div>
+
+    <img *ngIf="imageUrl" [src]="imageUrl" class="status-image" alt="Status image"/>
+
+    <p class="status-text" [class.visible]="textVisible">{{ currentMessage }}</p>
+  </div>
+
+</div>

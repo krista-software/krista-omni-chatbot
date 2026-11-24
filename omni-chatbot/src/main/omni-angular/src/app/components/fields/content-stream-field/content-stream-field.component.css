@@ -1,0 +1,61 @@
+.stream-field-container {
+  position: relative;
+  width: 100%;
+  padding: 8px 0;
+}
+
+.stream-content {
+  position: relative;
+  min-height: 24px;
+  line-height: 1.6;
+  font-family: 'Roboto', 'Helvetica', Arial, sans-serif;
+  font-size: 0.9rem;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+}
+
+.stream-text {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+/* Blinking dot indicator */
+.blinking-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--krista-primary-color, #1976d2);
+  margin-left: 4px;
+  animation: blink 1.4s infinite both;
+}
+
+@keyframes blink {
+  0%, 80%, 100% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+
+/* Stream controls */
+.stream-controls {
+  position: absolute;
+  bottom: -4px;
+  right: -4px;
+  z-index: 1;
+}
+
+.control-button {
+  width: 24px;
+  height: 24px;
+  line-height: 24px;
+}
+
+.control-button mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  line-height: 18px;
+}
+

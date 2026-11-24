@@ -13,16 +13,17 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.impl;
 
 import app.krista.extension.request.protos.ws.WsEvent;
 import app.krista.extension.request.protos.ws.WsTextMessageReceived;
-import app.krista.extensions.essentials.collaboration.omnichatbot.service.impl.WsConnectionStore;
+import app.krista.extensions.essentials.collaboration.omnichatbot.metrics.ChatBotMetrics;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.WsEventHandler;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.WsPayloadRequestHandler;
+import app.krista.extensions.essentials.collaboration.omnichatbot.store.ConnectionStore;
 import app.krista.ksdk.accounts.Account;
 import app.krista.ksdk.context.AuthorizationContext;
 import app.krista.ksdk.notifications.Notification;
@@ -48,8 +49,11 @@ public class WsRequestHandler implements WsEventHandler {
     private static final String CHATBOT_MEDIUM_TYPE = "CHATBOT";
     private static final Logger LOGGER = LoggerFactory.getLogger(WsRequestHandler.class);//NOSONAR
 
-    public WsRequestHandler(WsPayloadHandlerRegistry payloadHandlerRegistry) {
+    private final ConnectionStore connectionStore;
+
+    public WsRequestHandler(WsPayloadHandlerRegistry payloadHandlerRegistry, ConnectionStore connectionStore) {
         this.payloadHandlerRegistry = payloadHandlerRegistry;
+        this.connectionStore = connectionStore;
         this.gsonJsonMapper = GsonJsonMapperImpl.getInstance();
     }
 
@@ -70,6 +74,9 @@ public class WsRequestHandler implements WsEventHandler {
         try {
             String messageString = ((WsTextMessageReceived) wsEvent).getString();
             Notification notification = gsonJsonMapper.fromString(messageString, Notification.class);
+            // NOTE: inbound message-received telemetry is emitted once at the outermost WS entry
+            // (ChatBotProtocolHandler), which runs for every frame regardless of the account guard
+            // below — so no message-count is needed here (it would double-count).
             Account authorizedAccount = authorizationContext.getAuthorizedAccount();
             if (authorizedAccount == null) {
                 LOGGER.error("#####-CHATBOT- NO AUTHORIZED ACCOUNT FOUND FOR CONNECTION ID: {}", wsEvent.getConnection().getConnectionId());
@@ -91,6 +98,7 @@ public class WsRequestHandler implements WsEventHandler {
             }
         } catch (Exception e) {
             LOGGER.error("#####-CHATBOT- ERROR PROCESSING WEBSOCKET MESSAGE FOR CONNECTION ID: {}", wsEvent.getConnection().getConnectionId(), e);
+            ChatBotMetrics.recordError("WsRequestHandler", e);
         }
     }
 
@@ -104,6 +112,6 @@ public class WsRequestHandler implements WsEventHandler {
      */
     @Override
     public String authenticate(String accountId, WsEvent wsEvent) throws IOException {
-        return WsConnectionStore.getAccountIdByWsConnectionId(wsEvent.getConnection().getConnectionId());
+        return WsAuthorizationRecovery.resolveAccountId(connectionStore, wsEvent);
     }
 }

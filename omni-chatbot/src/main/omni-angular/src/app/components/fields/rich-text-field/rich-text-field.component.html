@@ -1,0 +1,70 @@
+<div class="rich-text-field-container">
+  <!-- Read-only display: Formatted HTML without editor -->
+  <div *ngIf="isFieldReadOnly()" class="readonly-field">
+    <label *ngIf="shouldShowLabel() && (field.displayName !== undefined ? field.displayName : field.name)"
+           class="field-label"
+           [attr.id]="'richtext-label-' + field.name">
+      {{ field.displayName !== undefined ? field.displayName : field.name }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+    <div *ngIf="!isSecured()" class="readonly-value"
+         role="status"
+         [attr.aria-labelledby]="'richtext-label-' + field.name"
+         [innerHTML]="getSanitizedHtml()">
+    </div>
+    <div *ngIf="isSecured()" class="readonly-value secured-value" role="status">••••••••</div>
+
+  </div>
+
+  <!-- Secured editable: show masked value -->
+  <div *ngIf="!isFieldReadOnly() && isSecured()" class="editor-container">
+    <label *ngIf="shouldShowLabel()" class="field-label">
+      {{ field.displayName !== undefined ? field.displayName : field.name }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+    <div class="secured-value" role="status">••••••••</div>
+  </div>
+
+  <!-- Editable display: ngx-editor WYSIWYG editor -->
+  <div *ngIf="!isFieldReadOnly() && !isSecured()" class="editor-container">
+    <!-- Field label -->
+    <label *ngIf="shouldShowLabel()"
+           class="field-label"
+           [attr.id]="'richtext-label-edit-' + field.name">
+      {{ field.displayName !== undefined ? field.displayName : field.name }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+
+    <!-- ngx-editor wrapper -->
+    <div class="NgxEditor__Wrapper">
+      <!-- Toolbar -->
+      <ngx-editor-menu
+        [editor]="editor"
+        [toolbar]="toolbar">
+      </ngx-editor-menu>
+
+      <!-- Editor -->
+      <ngx-editor
+        [editor]="editor"
+        [formControl]="formControl"
+        [placeholder]="getPlaceholder()"
+        [outputFormat]="'html'"
+        (blur)="onBlur()"
+        (focus)="onFocus()"
+        [attr.aria-invalid]="config.hasError"
+        [attr.aria-required]="isFieldRequired()"
+        [attr.aria-describedby]="config.hasError ? 'richtext-error-edit-' + field.name : null"
+        [class.error]="config.hasError">
+      </ngx-editor>
+    </div>
+
+    <!-- Error message for editable -->
+    <div class="field-error-message"
+         [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+         role="alert"
+         [attr.id]="'richtext-error-edit-' + field.name">
+      {{ config.errorMessage }}
+    </div>
+  </div>
+</div>
+

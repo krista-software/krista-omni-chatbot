@@ -1,0 +1,36 @@
+
+<div class="vt-grid">
+  <div class="vt-case" *ngFor="let c of cases" [attr.data-vt]="c.id">
+    <div class="vt-caption">{{ c.id }}</div>
+
+    <!-- Mirrors the real bubble nesting so :host-context(.user-message) and
+         .user-message descendant rules resolve exactly as they do in the app. -->
+    <div class="message-bubble" [class.user-message]="c.outgoing" [class.bot-message]="!c.outgoing">
+      <div class="message-wrapper">
+        <div class="message-content" [class.vt-outgoing]="c.outgoing">
+
+          <ng-container [ngSwitch]="c.kind">
+            <app-pick-one-field *ngSwitchCase="'pick-one'"
+                                [field]="c.field" [config]="c.config"></app-pick-one-field>
+
+            <app-pick-many-field *ngSwitchCase="'pick-many'"
+                                 [field]="c.field" [config]="c.config"></app-pick-many-field>
+
+            <app-switch-field *ngSwitchCase="'switch'"
+                              [field]="c.field" [config]="c.config"></app-switch-field>
+
+            <app-file-field *ngSwitchCase="'file'"
+                            [field]="c.field" [config]="c.config"></app-file-field>
+
+            <app-rating-field *ngSwitchCase="'rating'"
+                              [field]="c.field" [config]="c.config"></app-rating-field>
+
+            <app-date-range-field *ngSwitchCase="'date-range'"
+                                  [field]="c.field" [config]="c.config"></app-date-range-field>
+          </ng-container>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

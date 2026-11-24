@@ -1,0 +1,54 @@
+/* Modern Chatbot App Layout */
+.root-container {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  font-family: 'Roboto', 'Helvetica', Arial, sans-serif;
+  background: linear-gradient(180deg, #f0f4f8 0%, #e8eef3 100%);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.layout-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+  background: #ffffff;
+  overflow: hidden;
+}
+
+
+
+.content-container {
+  flex: 1;
+  overflow: visible;
+  background: transparent;
+  min-height: 0;
+}
+
+/* Ensure footer has proper space */
+app-footer {
+  flex-shrink: 0;
+  background: white;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .root-container {
+    height: 100vh;
+    height: -webkit-fill-available; /* For mobile Safari */
+  }
+}
+
+/* Global styles */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Roboto', 'Helvetica', Arial, sans-serif;
+}

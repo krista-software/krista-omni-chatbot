@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot;
@@ -22,28 +22,31 @@ import app.krista.extension.authorization.MustAuthenticateException;
 import app.krista.extension.authorization.MustAuthorizeException;
 import app.krista.extension.authorization.RequestAuthenticator;
 import app.krista.extension.executor.Invoker;
+import app.krista.ksdk.accounts.Account;
 import app.krista.extension.request.ProtoRequest;
 import app.krista.extension.request.ProtoResponse;
 import app.krista.extension.request.RoutingInfo;
 import app.krista.extension.request.protos.http.HttpProtocol;
 import app.krista.extension.request.protos.http.HttpRequest;
 import app.krista.extension.request.protos.ws.WsConnectionOpened;
+import app.krista.extension.request.protos.ws.WsConnectionClosed;
+import app.krista.extension.request.protos.ws.WsConnectionUpgradeRequest;
 import app.krista.extension.request.protos.ws.WsEvent;
+import app.krista.extensions.essentials.collaboration.omnichatbot.auth.AuthConstants;
+import app.krista.extensions.essentials.collaboration.omnichatbot.auth.GuestRequestAuthenticator;
 import app.krista.extensions.essentials.collaboration.omnichatbot.contants.Constants;
+import app.krista.extensions.essentials.collaboration.omnichatbot.metrics.ChatBotMetrics;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.WsEventHandlerRegistry;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.impl.WsConnectionOpenedHandler;
 import app.krista.ksdk.context.AuthorizationContext;
 import app.krista.model.field.NamedField;
 import app.krista.omni.sdk.complex_fields.impl.FromLinkRequestAuthenticator;
-import app.krista.omni.sdk.spi.util.Logger;
 import org.jvnet.hk2.annotations.Contract;
 import org.jvnet.hk2.annotations.Service;
 
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.ws.rs.HttpMethod;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -55,9 +58,10 @@ public class ChatBotAuthenticator implements RequestAuthenticator {
     private final Invoker invoker;
 
     @Inject
-    public ChatBotAuthenticator(@Named("Authentication") Invoker authenticationInvoker, AuthorizationContext authorizationContext,
+    public ChatBotAuthenticator(GuestRequestAuthenticator guestRequestAuthenticator,
+                                AuthorizationContext authorizationContext,
                                 WsEventHandlerRegistry wsEventHandlerRegistry, Invoker invoker) {
-        this.requestAuthenticator = authenticationInvoker.getRequestAuthenticator();
+        this.requestAuthenticator = guestRequestAuthenticator;
         this.authorizationContext = authorizationContext;
         this.wsEventHandlerRegistry = wsEventHandlerRegistry;
         this.invoker = invoker;
@@ -81,7 +85,9 @@ public class ChatBotAuthenticator implements RequestAuthenticator {
      *   <li>HTTP requests: Delegates to the bound Authentication extension after updating headers</li>
      *   <li>WebSocket events: Handles via the WebSocket event handler registry</li>
      *   <li>Entity search requests: Uses FromLinkRequestAuthenticator</li>
-     *   <li>Config/sendTranscript requests: Returns the already authorized account ID</li>
+     *   <li>Public static-asset and bootstrap paths
+     *       (/config, /preview-config, /sendTranscript, /static/, /ui/, /docs/, /integration):
+     *       Skips the bound Authentication invoker roundtrip and returns the already authorized account ID.</li>
      * </ul>
      *
      * @param protoRequest the protocol request to authenticate
@@ -90,28 +96,44 @@ public class ChatBotAuthenticator implements RequestAuthenticator {
     @Override
     public String getAuthenticatedAccountId(ProtoRequest protoRequest) {
         try {
-            if (protoRequest instanceof HttpRequest) {
-                HttpRequest httpRequest = (HttpRequest) protoRequest;
+            if (protoRequest instanceof HttpRequest httpRequest) {
                 httpRequest.bufferBody();
                 String httpRequestMethod = httpRequest.getMethod();
                 String uriString = httpRequest.getUri().toString();
+                String requestPath = httpRequest.getUri().getPath();
                 FromLinkRequestAuthenticator fromLinkRequestAuthenticator = new FromLinkRequestAuthenticator();
                 if ((HttpMethod.POST.equalsIgnoreCase(httpRequestMethod) && uriString.contains(Constants.ENDPOINT_ENTITY))) {
                     return fromLinkRequestAuthenticator.getAuthenticatedAccountId(protoRequest);
                 }
-                final String requestUri = httpRequest.getUri().toString();
-                if(requestUri.contains("/config") || requestUri.contains("/sendTranscript")){
-                    return authorizationContext.getAuthorizedAccount().getAccountId();
+                if (isStaticOrPublicPath(requestPath)) {
+                    if (authorizationContext != null && authorizationContext.isAuthenticated()) {
+                        Account authorizedAccount = authorizationContext.getAuthorizedAccount();
+                        if (authorizedAccount != null) {
+                            return authorizedAccount.getAccountId();
+                        }
+                    }
+                    return null;
                 }
                 httpRequest = updateHttpRequest(httpRequest);
-                return requestAuthenticator.getAuthenticatedAccountId(httpRequest);
+                String httpAccountId = requestAuthenticator.getAuthenticatedAccountId(httpRequest);
+                ChatBotMetrics.recordAuthAttempt(httpAccountId != null ? "success" : "failure", "http");
+                return httpAccountId;
             }
             if (protoRequest instanceof WsEvent) {
-                return handleWsEvent((WsEvent) protoRequest);
+                String wsAccountId = handleWsEvent((WsEvent) protoRequest);
+                // Only count the connection-OPEN as an auth attempt — that is the genuine
+                // login moment. Other WS events (text messages, etc.) merely re-resolve the
+                // account from the connection id; counting those inflates auth attempts and
+                // produces benign "failure" noise when the per-node connection map misses.
+                if (protoRequest instanceof WsConnectionOpened) {
+                    ChatBotMetrics.recordAuthAttempt(wsAccountId != null ? "success" : "failure", "ws");
+                }
+                return wsAccountId;
             }
             return null;
         } catch (IOException | RuntimeException cause) {
-            Logger.log("#####-CHATBOT-Error while authenticating user", LocalDateTime.now());
+            ChatBotMetrics.recordAuthAttempt("failure", protoRequest instanceof WsEvent ? "ws" : "http");
+            ChatBotMetrics.recordError("ChatBotAuthenticator", cause);
             return null;
         }
     }
@@ -132,18 +154,25 @@ public class ChatBotAuthenticator implements RequestAuthenticator {
      * @throws IOException if an I/O error occurs during authentication
      */
     private String handleWsEvent(WsEvent wsEvent) throws IOException {
-        if (wsEvent instanceof WsConnectionOpened) {
-            WsConnectionOpened upgradeRequest = (WsConnectionOpened) wsEvent;
+        if (wsEvent instanceof WsConnectionOpened upgradeRequest) {
             HttpRequest httpRequest = upgradeRequest.getHttpRequest();
             httpRequest.bufferBody();
             if (!Objects.isNull(httpRequest.getHeaders()) && !httpRequest.getHeaders().isEmpty()) {
                 String cookie = httpRequest.getHeaders().get(Constants.COOKIE);
                 if (Objects.isNull(cookie) || cookie.isBlank()) {
-                    Logger.log("#####-CHATBOT-Cookie is not present");
                     String cookieHeader = httpRequest.getHeaders().get(Constants.CHATBOT_SESSION_ID);
                     if (Objects.isNull(cookieHeader) || cookieHeader.isBlank()) {
-                        Logger.log("#####-CHATBOT-Cookie header is not present");
-                        return null;
+                        // Browsers cannot set custom headers on a WS upgrade, and the
+                        // session cookie is third-party (blockable) when the chatbot is
+                        // embedded in a customer site — the client therefore also carries
+                        // the session id as a ?clientSessionId query param, which
+                        // GuestRequestAuthenticator already resolves. Only reject when
+                        // that is absent too.
+                        String querySessionId = httpRequest.getQueryParameters()
+                                .getFirst(AuthConstants.CLIENT_SESSION_ID_QUERY_PARAM);
+                        if (Objects.isNull(querySessionId) || querySessionId.isBlank()) {
+                            return null;
+                        }
                     }
                 }
             }
@@ -153,7 +182,6 @@ public class ChatBotAuthenticator implements RequestAuthenticator {
                 WsConnectionOpenedHandler wsEventHandler = (WsConnectionOpenedHandler) wsEventHandlerRegistry.getWsEventHandler(wsEvent);
                 return wsEventHandler.authenticate(accountId, wsEvent);
             } catch (Exception ex) {
-                Logger.log("#####-CHATBOT-Error while authenticating user hence returning null", LocalDateTime.now());
                 return null;
             }
         }
@@ -172,6 +200,34 @@ public class ChatBotAuthenticator implements RequestAuthenticator {
      * @param httpRequest the HTTP request to update
      * @return a new HTTP request with the updated headers, or {@code null} if input is null
      */
+    /**
+     * Returns {@code true} when {@code path} addresses an asset or endpoint that
+     * does not require the bound Authentication invoker round-trip — the chatbot
+     * UI bundle, docs, the integration page, and the inert {@code /config} +
+     * {@code /sendTranscript} endpoints which only ever return data already
+     * scoped to {@link AuthorizationContext}.
+     *
+     * <p>Matches against the URI {@code path} only (never the query string), so a
+     * URL like {@code /api/anything?ref=/ui/x} cannot bypass the bound
+     * authenticator just because its query contains a public-path substring.
+     */
+    private static boolean isStaticOrPublicPath(String path) {
+        if (path == null) {
+            return false;
+        }
+        return path.endsWith("/config")
+                // Preview-mode config (Integration Settings live preview): identical
+                // inert payload to /config, just uncached — same public treatment.
+                || path.endsWith("/preview-config")
+                || path.endsWith("/sendTranscript")
+                || path.contains("/static/")
+                || path.contains("/ui/")
+                || path.contains("/docs/")
+                || path.endsWith("/integration")
+                // Audit tab endpoints (read-only, served from the admin integration page).
+                || path.contains("/audit/");
+    }
+
     private HttpRequest updateHttpRequest(HttpRequest httpRequest) {
         if (Objects.isNull(httpRequest)) {
             return null;

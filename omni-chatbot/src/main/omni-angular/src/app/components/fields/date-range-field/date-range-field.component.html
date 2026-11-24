@@ -1,0 +1,87 @@
+<div class="date-range-field">
+  <div class="field-container">
+    <label class="field-label"
+           [attr.id]="'date-range-label-' + field.name"
+           [attr.for]="isFieldReadOnly() ? null : 'date-range-input-' + field.name">
+      {{ getFieldLabel() }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+
+    <!-- Readonly display: Plain text without date pickers -->
+    <div *ngIf="isFieldReadOnly()" class="readonly-date-range">
+      <div class="readonly-value"
+           role="status"
+           [attr.aria-labelledby]="'date-range-label-' + field.name">
+        {{ isSecured() && getFormattedDateRangeValue() ? '••••••••' : (getFormattedDateRangeValue() || 'No date range selected') }}
+      </div>
+
+      <span *ngIf="getTimezone()" class="timezone-caption">{{ getTimezone() }}</span>
+
+      <!-- Help text for readonly -->
+      <div *ngIf="getHelpText()" class="help-text" [attr.id]="'date-range-help-' + field.name">
+        {{ getHelpText() }}
+      </div>
+
+    </div>
+
+    <!-- Editable display: Custom date range picker input -->
+    <div *ngIf="!isFieldReadOnly()">
+      <div class="date-range-input-wrapper"
+           [class.has-error]="config.hasError"
+           (click)="openDateRangePicker()"
+           (keydown.enter)="openDateRangePicker()"
+           (keydown.space)="openDateRangePicker(); $event.preventDefault()">
+        <input
+          type="text"
+          class="date-range-input"
+          [attr.id]="'date-range-input-' + field.name"
+          [value]="isSecured() && getFormattedDateRangeValue() ? '••••••••' : getFormattedDateRangeValue()"
+          placeholder="Select date range"
+          readonly
+          [attr.aria-invalid]="config.hasError"
+          [attr.aria-required]="isFieldRequired()"
+          [attr.aria-describedby]="(config.hasError ? 'date-range-error-edit-' + field.name + ' ' : '') + (getHelpText() ? 'date-range-help-edit-' + field.name : '')"
+          [attr.aria-label]="'Select date range for ' + (field.displayName || field.name)">
+
+        <!-- Clear button (shown when date range is selected) -->
+        <button *ngIf="hasDateRangeValue()"
+                type="button"
+                class="clear-button"
+                (click)="clearDateRange($event)"
+                (keydown.enter)="clearDateRange($event)"
+                (keydown.space)="clearDateRange($event)"
+                [attr.aria-label]="'Clear date range for ' + (field.displayName || field.name)"
+                tabindex="0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+
+        <span class="calendar-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+            <line x1="16" y1="2" x2="16" y2="6"></line>
+            <line x1="8" y1="2" x2="8" y2="6"></line>
+            <line x1="3" y1="10" x2="21" y2="10"></line>
+          </svg>
+        </span>
+      </div>
+
+      <span *ngIf="getTimezone()" class="timezone-caption">{{ getTimezone() }}</span>
+
+      <!-- Help text for editable -->
+      <div *ngIf="getHelpText()" class="help-text" [attr.id]="'date-range-help-edit-' + field.name">
+        {{ getHelpText() }}
+      </div>
+
+      <!-- Error message for editable -->
+      <div class="fallback-error-message"
+           [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+           role="alert"
+           [attr.id]="'date-range-error-edit-' + field.name">
+        {{ config.errorMessage }}
+      </div>
+    </div>
+  </div>
+</div>

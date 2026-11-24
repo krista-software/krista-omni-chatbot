@@ -1,0 +1,243 @@
+<div class="flex flex-col h-100 w-100"
+     [class.readonly-table]="tableInput.tableConfig.readonly"
+     *ngIf="tableInput && tableHeaders.length">
+
+  <div *ngIf="tableInput.dataSource.dataRows.length"
+       class="selected-cell-container"
+       [ngStyle]="{'visibility': showTable ? 'visible' : 'hidden'}">
+    <div *ngIf="tableInput.tableConfig.showCellSelectionData" [ngClass]="{'show-border':tableInput.tableConfig.showBorder}">
+      <div class="selected-cell-data" *ngIf="selectedCellData; else noSelectionMessage">
+        <p class="selected-cell" [innerHTML]="selectedCellData | safeHtml"></p>
+      </div>
+
+      <!-- Message when no cell is selected -->
+      <ng-template #noSelectionMessage>
+        <div class="selected-cell-data">
+          <p class="selected-cell color-light">Select any cell in the table to view its data.</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <div class="main-container flex-1"
+       [ngClass]="{'justify-center items-center':!tableInput.dataSource.dataRows.length}"
+       [ngStyle]="{'visibility': showTable ? 'visible' : 'hidden'}">
+    <ng-container *ngIf="tableInput.dataSource.dataRows.length">
+      <table mat-table [dataSource]="tableInput.dataSource" matSort matSortDisableClear matSortDirection="desc">
+        <!-- Selection Column -->
+        <ng-container matColumnDef="select" sticky *ngIf="hasSelection">
+          <th mat-header-cell *matHeaderCellDef class="select-column">
+            <mat-checkbox
+              class="mat-primary"
+              *ngIf="!(tableInput.tableConfig.selection === 'SINGLE')"
+              (change)="toggleAllRows()"
+              [checked]="isAllSelected()"
+              [indeterminate]="selection.hasValue() && !isAllSelected()"
+              [aria-label]="checkboxLabel()"
+            >
+            </mat-checkbox>
+          </th>
+          <td mat-cell *matCellDef="let row" class="select-column">
+            <mat-checkbox class="mat-primary"
+                          (click)="$event.stopPropagation()"
+                          (change)="onRowSelect(row, $event)"
+                          [checked]="selection.isSelected(row)"
+                          [aria-label]="checkboxLabel()">
+            </mat-checkbox>
+          </td>
+        </ng-container>
+
+        <!-- Define Columns Dynamically -->
+        <ng-container *ngFor="let column of tableHeaders; let index=index; trackBy: trackByColumn" [matColumnDef]="column.title">
+          <ng-container *ngIf="isSortable(column); else nonSortableColumn">
+            <!-- Sortable Column -->
+            <th mat-header-cell *matHeaderCellDef mat-sort-header disableClear>
+              <div class="header-content title--sm !text-color-text-dark-grey">
+                <img class="icon" [src]="getColumnIcon(column.type)" alt="{{ column }} icon"/>
+                <span class="pr-4 text-xs"> {{ column.title | titlecase }} </span>
+              </div>
+            </th>
+          </ng-container>
+
+          <!-- Non-Sortable Column -->
+          <ng-template #nonSortableColumn>
+            <th mat-header-cell *matHeaderCellDef>
+              <div class="header-content title--sm !text-color-text-dark-grey">
+                <img class="icon" [src]="getColumnIcon(column.type)" alt="{{ column }} icon"/>
+                <span class="pr-4 text-xs"> {{ column.title | titlecase }} </span>
+              </div>
+            </th>
+          </ng-template>
+
+          <td mat-cell *matCellDef="let row" (click)="onCellClick(row.cells[index])"
+              [ngClass]="{'selected-cell-highlight': selectedCell === row.cells[index]}">
+            <ng-container *ngIf="row.cells[index] as cell">
+              <ng-container *ngIf="isTypeOf(cell, TableValueCell)">
+                <ng-container [ngSwitch]="extractShortFieldType(column.type)">
+                  <!-- Switch/Toggle Field - Use existing component -->
+                  <ng-container *ngSwitchCase="'Switch'">
+                    <div class="table-cell-component">
+                      <app-switch-field
+                        [field]="getCellAsFormField(cell, column)"
+                        [config]="getReadOnlyFieldConfig()">
+                      </app-switch-field>
+                    </div>
+                  </ng-container>
+
+                  <!-- Rating Field - Use existing component -->
+                  <ng-container *ngSwitchCase="'Rating'">
+                    <div class="table-cell-component">
+                      <app-rating-field
+                        [field]="getCellAsFormField(cell, column)"
+                        [config]="getReadOnlyFieldConfig()">
+                      </app-rating-field>
+                    </div>
+                  </ng-container>
+
+                  <!-- Date Field - Use existing component -->
+                  <ng-container *ngSwitchCase="'Date'">
+                    <div class="table-cell-component">
+                      <app-date-field
+                        [field]="getCellAsFormField(cell, column)"
+                        [config]="getReadOnlyFieldConfig()">
+                      </app-date-field>
+                    </div>
+                  </ng-container>
+
+                  <!-- PickMany/Checkboxes Field - Use existing component -->
+                  <ng-container *ngSwitchCase="'Checkboxes'">
+                    <div class="table-cell-component">
+                      <app-pick-many-field
+                        [field]="getCellAsFormField(cell, column)"
+                        [config]="getReadOnlyFieldConfig()">
+                      </app-pick-many-field>
+                    </div>
+                  </ng-container>
+
+                  <!-- PickMany Field - Use existing component -->
+                  <ng-container *ngSwitchCase="'PickMany'">
+                    <div class="table-cell-component">
+                      <app-pick-many-field
+                        [field]="getCellAsFormField(cell, column)"
+                        [config]="getReadOnlyFieldConfig()">
+                      </app-pick-many-field>
+                    </div>
+                  </ng-container>
+
+                  <!-- File Field - Display file names -->
+                  <ng-container *ngSwitchCase="'File'">
+                    <div class="table-cell-file">
+                      <ng-container *ngIf="getFileDisplayValue(cell) as fileDisplay">
+                        <span class="file-display">{{ fileDisplay }}</span>
+                      </ng-container>
+                    </div>
+                  </ng-container>
+
+                  <!-- Camera Field - Display file names -->
+                  <ng-container *ngSwitchCase="'Camera'">
+                    <div class="table-cell-file">
+                      <ng-container *ngIf="getFileDisplayValue(cell) as fileDisplay">
+                        <span class="file-display">{{ fileDisplay }}</span>
+                      </ng-container>
+                    </div>
+                  </ng-container>
+
+                  <!-- Rich Text Field - Use existing component with compact mode -->
+                  <ng-container *ngSwitchCase="'RichText'">
+                    <div class="table-cell-component">
+                      <app-rich-text-field
+                        [field]="getCellAsFormField(cell, column)"
+                        [config]="getRichTextFieldConfigForTable()">
+                      </app-rich-text-field>
+                    </div>
+                  </ng-container>
+
+                  <!-- Default: Plain text -->
+                  <ng-container *ngSwitchDefault>
+                    <span [innerHTML]="cell?.getDisplay() | safeHtml"></span>
+                  </ng-container>
+                </ng-container>
+              </ng-container>
+
+              <ng-container *ngIf="isTypeOf(cell, TableActionCell)">
+                <button mat-icon-button
+                        class="mat-icon-32"
+                        (click)="cell?.onCellClick(getColumn(index), cell.getRawValue())">
+                  <mat-icon class="material-symbols-outlined">open_in_new</mat-icon>
+                </button>
+              </ng-container>
+            </ng-container>
+          </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky:true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+      </table>
+    </ng-container>
+  </div>
+
+  <!-- Paginator -->
+  <!--  [ngStyle]="{ 'border': tableInput.tableConfig.loadStrategy !== 'Pagination' ? 'none' : '' }" if border need to remove-->
+  <div class="paginator-container" *ngIf="!tableInput.tableConfig.hideFooter" [ngClass]="{'show-border':tableInput.tableConfig.showBorder}">
+    <div class="new-table-page-footer"
+         [ngStyle]="{ 'visibility': tableInput.tableConfig.loadStrategy !== 'Pagination' ? 'hidden' : 'visible' }">
+      <div class="page-info">
+        <span class="page-text">Rows per page</span>
+        <div class="gap"></div>
+        <mat-select
+          [disabled]="!showTable"
+          [compareWith]="comparePage"
+          [value]="pageSize"
+          (selectionChange)="setPageSize($event.value)">
+          <mat-option value="10">10</mat-option>
+          <mat-option value="15">15</mat-option>
+          <mat-option value="20">20</mat-option>
+          <mat-option value="25">25</mat-option>
+        </mat-select>
+
+      </div>
+      <div class="page-navigation">
+        <button mat-icon-button
+                class="mat-icon-32"
+                title="Previous Page"
+                [disabled]="!_hasPrevPage"
+                [class.button-disabled]="!_hasPrevPage"
+                (click)="prevPage($event)">
+          <mat-icon>chevron_left</mat-icon>
+        </button>
+
+        <div class="gap"></div>
+        <p class="text-xs">{{ this.pageIndex }}</p>
+        <div class="gap"></div>
+
+        <button mat-icon-button
+                class="mat-icon-32"
+                title="Next Page"
+                [disabled]="!_hasNextPage ||  isEmptyTable"
+                [class.button-disabled]="!_hasNextPage  || isEmptyTable"
+                (click)="nextPage($event)">
+          <mat-icon>chevron_right</mat-icon>
+        </button>
+
+      </div>
+      <div class="dummy"></div>
+    </div>
+
+    <!-- Remove Row -->
+    <div *ngIf="tableInput.tableConfig.allowRemoveRows">
+      <button
+        mat-stroked-button
+        (click)="removeRows()"
+        [disabled]="!selection.selected.length"
+        class="ml-auto !absolute !right-4 !z-[1000] !h-[25px] !w-[76px] removeBtn-top mr-4"
+        [ngClass]="{'removeBtn': !selection.selected.length}"
+      >
+        Remove
+      </button>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="!tableHeaders.length" class="h-100 w-100 flex items-center justify-center text-base text-[#727272]">
+  <p>No Column selected to show</p>
+</div>

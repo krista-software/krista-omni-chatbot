@@ -1,0 +1,80 @@
+/* Rating Field Styling */
+.rating-field .field-container {
+}
+
+/* .field-label intentionally not overridden here — see shared-field-styles.css. */
+
+.rating-field .star-rating {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.rating-field .star-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--kr-text-color-light, #aaaaaa); /* Lighter color for unfilled stars */
+  transition: color 0.2s ease;
+}
+
+.rating-field .star-button.filled {
+  color: var(--kr-color-primary, #0169BE) !important; /* Krista blue color to match pick one/many */
+}
+
+.rating-field .star-button:disabled {
+  cursor: not-allowed;
+}
+
+.rating-field .star-button:disabled.filled {
+  color: var(--kr-color-primary, #0169BE) !important; /* Keep blue color even when disabled */
+  opacity: 1; /* Full opacity to ensure blue is visible */
+}
+
+.rating-field .star-button:disabled:not(.filled) {
+  color: var(--kr-text-color-light, #aaaaaa);
+  opacity: 0.6;
+}
+
+.rating-field .star-button:not(:disabled):hover {
+  color: var(--kr-color-primary, #0169BE);
+}
+
+.rating-field .star-button .mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: inherit; /* Inherit color from parent button */
+}
+
+/* Ensure filled stars are blue - high specificity */
+.rating-field .star-rating .star-button.filled .mat-icon {
+  color: var(--kr-color-primary, #0169BE) !important;
+}
+
+/* Ensure disabled filled stars remain blue - high specificity */
+.rating-field .star-rating .star-button:disabled.filled .mat-icon {
+  color: var(--kr-color-primary, #0169BE) !important;
+}
+
+/* Ensure unfilled stars are light gray - high specificity */
+.rating-field .star-rating .star-button:not(.filled) .mat-icon {
+  color: var(--kr-text-color-light, #aaaaaa) !important;
+}
+
+/* Error message styling */
+.field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+  margin-top: 4px;
+}
+
+/* Required asterisk */
+.required-asterisk {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+/* Responsive: scales naturally via max-width: 100% on parent. */

@@ -9,6 +9,13 @@
         </Console>
     </Appenders>
     <Loggers>
+        <!-- Chatbot extension's own logs at INFO so operational/diagnostic lines
+             (pool warm + consume, login pool-vs-fresh, invoker load steps) are
+             visible in SigNoz. Everything else stays at WARN to avoid third-party
+             INFO noise. additivity=false prevents double-logging via Root. -->
+        <Logger name="app.krista.extensions.essentials.collaboration.omnichatbot" level="INFO" additivity="false">
+            <AppenderRef ref="Console"/>
+        </Logger>
         <Root level="WARN">
             <AppenderRef ref="Console"/>
         </Root>

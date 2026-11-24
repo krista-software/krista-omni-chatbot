@@ -1,0 +1,96 @@
+<!-- Timeline View -->
+<div class="timeline-container" role="log" aria-label="Chat messages" aria-live="polite">
+  <!-- Initial Loading State (overlay) -->
+  <div class="initial-loading" *ngIf="loadingService.isInitialLoading$ | async" role="status" aria-live="polite">
+    <app-loading
+      [variant]="LoadingVariant.dots"
+      [message]="(loadingService.loadingMessage$ | async) || 'Loading...'"
+      size="large">
+    </app-loading>
+  </div>
+
+  <!-- Message History Loading State (overlay) -->
+  <div class="message-history-loading" *ngIf="loadingService.isMessageHistoryLoading$ | async" role="status" aria-live="polite">
+    <app-loading
+      [variant]="LoadingVariant.dots"
+      [message]="(loadingService.loadingMessage$ | async) || 'Loading conversation history...'"
+      size="large">
+    </app-loading>
+  </div>
+
+  <!-- Messages List - always visible, loading overlays appear on top -->
+  <div class="messages-list" #messagesContainer role="list" aria-label="Message list">
+    <!-- Spacer to push messages to bottom when there's not enough content to fill the viewport -->
+    <div class="messages-spacer"></div>
+
+    <!-- Loading indicator for previous messages -->
+    <div class="list-loader" *ngIf="fetchingPrevMessages" role="status" aria-live="polite">
+      <mat-spinner diameter="24" aria-hidden="true"></mat-spinner>
+      <span class="visually-hidden">Loading previous messages...</span>
+    </div>
+
+    <!-- Message items -->
+    <div class="message-wrapper"
+         *ngFor="let message of messages; trackBy: trackByMessageId; let i = index"
+         role="listitem">
+      <!-- Date separator banner (matches original app) -->
+      <app-banner-wrapper
+        [index]="i"
+        [messages]="messages"
+        [message]="message"
+        [unreadMessageId]="unreadMessageId"
+        [firstItemIndex]="0">
+      </app-banner-wrapper>
+
+      <!-- Message bubble -->
+      <div class="message-bubble-container">
+        <app-message-bubble
+          [message]="message"
+          [topicId]="topicId"
+          [isWelcomeMessage]="isWelcomeMessage">
+        </app-message-bubble>
+      </div>
+    </div>
+
+    <!-- Loading indicator for next messages (shown initially until first message arrives) -->
+    <!-- Matches original app behavior: fetchingNextMessages is initially true -->
+    <div class="list-loader" *ngIf="fetchingNextMessages" role="status" aria-live="polite">
+      <mat-spinner diameter="24" aria-hidden="true"></mat-spinner>
+      <span class="visually-hidden">Loading messages...</span>
+    </div>
+
+    <!-- Typing indicator - server-driven takes priority, fallback to client-driven -->
+    <div class="websocket-loading" *ngIf="(isTyping || (loadingService.isWebSocketLoading$ | async)) && !isStatusMode" role="status" aria-live="polite" aria-label="Bot is typing">
+      <div class="typing-bubble">
+        <div class="typing-dots" aria-hidden="true">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Status Messages Overlay — floating above footer in bottom-left corner.
+       Shown when the last message is an "Inform A Person" step with informStepType === 'status'.
+       Positioned outside the scrollable messages-list so new messages don't push below it. -->
+  <app-status-overlay
+    *ngIf="isStatusMode"
+    [messages]="statusMessages"
+    [imageUrl]="statusImage"
+    class="floating-status">
+  </app-status-overlay>
+
+  <!-- Scroll to bottom button (when not at bottom) -->
+  <!-- Pulse animation only plays when new messages arrive, not on manual scroll-up -->
+  <button
+    mat-fab
+    type="button"
+    class="new-messages-btn"
+    [class.has-new-messages]="newIncomingMessages"
+    *ngIf="!atBottom"
+    (click)="scrollToBottom()"
+    [attr.aria-label]="newIncomingMessages ? 'Scroll to new messages' : 'Scroll to bottom'">
+    <mat-icon aria-hidden="true">keyboard_arrow_down</mat-icon>
+  </button>
+</div>

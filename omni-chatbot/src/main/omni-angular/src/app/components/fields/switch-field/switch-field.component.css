@@ -1,0 +1,85 @@
+/* Switch Field Styling */
+.switch-field .field-container {
+}
+
+/* .field-label intentionally not overridden here — see shared-field-styles.css. */
+
+/* Custom Toggle Switch */
+.custom-toggle {
+  display: inline-block;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 8px;
+}
+
+.custom-toggle.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.toggle-track {
+  width: 42px;
+  height: 24px;
+  background-color: #ccc;
+  border-radius: 12px;
+  position: relative;
+  transition: background-color 0.2s ease;
+  border: 2px solid #ccc;
+}
+
+.custom-toggle.checked .toggle-track {
+  background-color: #1976d2;
+  border-color: #1976d2;
+}
+
+.toggle-thumb {
+  width: 18px;
+  height: 18px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.custom-toggle.checked .toggle-thumb {
+  transform: translateX(18px);
+}
+
+.custom-toggle.disabled .toggle-track {
+  background-color: #e0e0e0;
+  border-color: #e0e0e0;
+}
+
+.custom-toggle.disabled .toggle-thumb {
+  background-color: #f5f5f5;
+}
+
+/* Override disabled styles for checked disabled switches (readonly true) */
+.custom-toggle.checked.disabled .toggle-track {
+  background-color: #1976d2 !important;
+  border-color: #1976d2 !important;
+}
+
+.custom-toggle.checked.disabled .toggle-thumb {
+  background-color: #ffffff !important;
+  transform: translateX(18px);
+}
+
+/* Error message styling */
+.field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+  margin-top: 4px;
+}
+
+/* Required asterisk */
+.required-asterisk {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+/* Responsive: scales naturally via max-width: 100% on parent. */

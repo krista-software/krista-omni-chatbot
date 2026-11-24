@@ -13,11 +13,12 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.impl;
 
+import app.krista.extensions.essentials.collaboration.omnichatbot.audit.AuditService;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.WsPayloadRequestHandler;
 import app.krista.model.field.util.GsonJsonMapper;
 import app.krista.omni.sdk.medium.api.MediumService;
@@ -36,13 +37,16 @@ import java.util.Map;
  * and forwards them to the medium service for processing.
  */
 public class WsMessageHandler implements WsPayloadRequestHandler {
+
     private final MediumService mediumService;
     private final GsonJsonMapper gsonJsonMapper;
+    private final AuditService auditService;
     private static final Logger LOGGER = LoggerFactory.getLogger(WsMessageHandler.class);
 
-    public WsMessageHandler(MediumService mediumService, GsonJsonMapper gsonJsonMapper) {
+    public WsMessageHandler(MediumService mediumService, GsonJsonMapper gsonJsonMapper, AuditService auditService) {
         this.mediumService = mediumService;
         this.gsonJsonMapper = gsonJsonMapper;
+        this.auditService = auditService;
     }
 
     /**
@@ -67,6 +71,7 @@ public class WsMessageHandler implements WsPayloadRequestHandler {
             LOGGER.warn("LOGGER.warn{}", message);
             Object messageIn = this.gsonJsonMapper.fromString(message, MessageDto.class);
             this.mediumService.getReceiver().receiveMessage(new InteractiveMessageIn(mediumInfo, messageIn));
+            auditService.recordUserMessage();
         } catch (Exception e) {
             LOGGER.error("#####-CHATBOT- ERROR PROCESSING MESSAGE FOR TARGET ADDRESS: {}", mediumInfo.getTargetAddress(), e);
         }

@@ -13,13 +13,15 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.service;
 
 import app.krista.extension.executor.Invoker;
 import app.krista.extension.request.protos.ws.WsConnection;
+import app.krista.extensions.essentials.collaboration.omnichatbot.audit.AuditService;
+import app.krista.extensions.essentials.collaboration.omnichatbot.metrics.ChatBotMetrics;
 import app.krista.extensions.essentials.collaboration.omnichatbot.resource.dto.NotificationMessage;
 import app.krista.extensions.essentials.collaboration.omnichatbot.resource.dto.SessionDto;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.impl.WsConnectionStore;
@@ -27,6 +29,7 @@ import app.krista.extensions.essentials.collaboration.omnichatbot.store.Connecti
 import app.krista.extensions.essentials.collaboration.omnichatbot.store.SessionStore;
 import app.krista.extensions.essentials.collaboration.omnichatbot.utils.ActiveMQConsumer;
 import app.krista.extensions.essentials.collaboration.omnichatbot.utils.ActiveMQProducer;
+import app.krista.extensions.essentials.collaboration.omnichatbot.utils.LocalHostInfo;
 import app.krista.ksdk.message.MessageAnswer;
 import app.krista.ksdk.notifications.Notification;
 import app.krista.ksdk.storage.StorageProvider;
@@ -43,26 +46,29 @@ import org.slf4j.LoggerFactory;
 import javax.inject.Inject;
 import javax.jms.*;
 import java.io.IOException;
-import java.net.InetAddress;
 import java.util.*;
 
 @Service
 public class ChatBotMessageSender implements InteractiveMediumMessageSender {
     private static final org.slf4j.Logger LOGGER = LoggerFactory.getLogger(ChatBotMessageSender.class);
+
     private final SessionStore sessionStore;
     private final GsonJsonMapper gsonJsonMapper;
     private final ConnectionStore connectionStore;
     private final ActiveMQProducer producer;
     private final ActiveMQConsumer stateConsumer;
+    private final AuditService auditService;
 
     @Inject
     public ChatBotMessageSender(SessionStore sessionStore, StorageProvider storageProvider,
-                                Invoker invoker, ConnectionStore connectionStore) throws JMSException, IOException {
+                                Invoker invoker, ConnectionStore connectionStore,
+                                AuditService auditService) throws JMSException, IOException {
         this.sessionStore = sessionStore;
         this.connectionStore = connectionStore;
         this.gsonJsonMapper = GsonJsonMapperImpl.getInstance();
         this.producer = ActiveMQProducer.create(storageProvider, invoker);
         this.stateConsumer = ActiveMQConsumer.create(storageProvider, invoker);
+        this.auditService = auditService;
         initStateConsumer();
     }
 
@@ -79,7 +85,6 @@ public class ChatBotMessageSender implements InteractiveMediumMessageSender {
             if (!(message instanceof TextMessage textMessage)) return;
             try {
                 String json = textMessage.getText();
-                LOGGER.info("#####-CHATBOT-Received chatbot state message: {}", json);
                 JsonObject payloadObj = getJsonObject(json);
                 if (payloadObj == null) return;
 
@@ -90,6 +95,7 @@ public class ChatBotMessageSender implements InteractiveMediumMessageSender {
 
             } catch (Exception e) {
                 LOGGER.error("#####-CHATBOT-Error processing chatbot state message", e);
+                ChatBotMetrics.recordError("ChatBotMessageSender", e);
             }
         });
     }
@@ -106,15 +112,15 @@ public class ChatBotMessageSender implements InteractiveMediumMessageSender {
     private void sendExecutionStateUpdateNotification(String accountId, Map<String, Object> payload) {
         var wsConnection = WsConnectionStore.getWsConnectionByAccountId(accountId);
         if (wsConnection == null) {
-            LOGGER.info("#####-CHATBOT-No WS connection for accountId={} on this node; ignoring.", accountId);
             return;
         }
         NotificationMessage executionStateUpdateNotification = createExecutionStateUpdateNotification(payload);
         try {
             wsConnection.sendTextMessage(gsonJsonMapper.toString(executionStateUpdateNotification));
-            LOGGER.info("#####-CHATBOT-Sent statusUpdate to accountId={} on this node", accountId);
+            ChatBotMetrics.recordNotificationSent("ExecutionStateUpdateNotification");
         } catch (IOException e) {
             LOGGER.error("#####-CHATBOT-Failed to send WS message to accountId={}", accountId, e);
+            ChatBotMetrics.recordError("ChatBotMessageSender", e);
         }
     }
 
@@ -185,38 +191,46 @@ public class ChatBotMessageSender implements InteractiveMediumMessageSender {
      */
     @Override
     public void sendMessages(List<InteractiveMessageOut> list) {
+        // Telemetry only, at the OUTERMOST level: count every outbound message the bot
+        // produced (including welcome-conversation messages) here, before the per-message
+        // delivery guards below early-return — otherwise specific cases (cold connection,
+        // sidebar-answered, etc.) are silently uncounted. No functional change.
+        if (list != null) {
+            list.forEach(m -> ChatBotMetrics.recordMessageSent(m.getMediumInfo().getTargetAddress()));
+        }
+        int dispatched = 0;
         for (InteractiveMessageOut outMessage : list) {
             String targetAddress = outMessage.getMediumInfo().getTargetAddress();
-            WsConnection wsConnection = WsConnectionStore.getWsConnectionByAccountId(targetAddress);
-            if (wsConnection == null) {
-                LOGGER.error("#####-CHATBOT- NO WEBSOCKET CONNECTION FOUND FOR ACCOUNT ID: {}", targetAddress);
-                return;
-            }
-            LOGGER.info("#####-CHATBOT-Got the websocket connection for the accountId: {}", targetAddress);
-            if (wsConnection.isClosed()) {
-                LOGGER.warn("#####-CHATBOT- WEBSOCKET CONNECTION ALREADY CLOSED FOR ACCOUNT ID: {} AND PROCESSID: {}", targetAddress, ProcessHandle.current().pid());
-                return;
-            }
+            // Deliver via the DISTRIBUTED connection id + the shared ActiveMQ topic, NOT the
+            // node-local WsConnectionStore. WsConnectionStore is an in-memory static map that
+            // only holds sockets authenticated on this node's current classloader, so a
+            // background sender (the SDK session-timeout monitor) — or this code after an
+            // extension reload — sees null for a perfectly live socket and silently drops the
+            // message while the user is still deleted. The platform's NettyWsRequestHandler
+            // routes by connectionId to whichever node owns the socket.
             SessionDto sessionDto = sessionStore.get(targetAddress);
             if (sessionDto == null) {
                 LOGGER.error("#####-CHATBOT- NO SESSION FOUND FOR ACCOUNT ID: {}", targetAddress);
-                return;
+                continue;
+            }
+            String connectionId = connectionStore.get(targetAddress);
+            if (connectionId == null) {
+                LOGGER.error("#####-CHATBOT- NO CONNECTION ID FOUND FOR ACCOUNT ID: {}", targetAddress);
+                continue;
+            }
+            MessageDto messageDto = outMessage.getMessage();
+            if (isSidebarAnsweredMessage(messageDto)) {
+                continue;
             }
             Map<String, Object> payload = new HashMap<>();
             payload.put("inboxId", sessionDto.getSessionInboxId());
-            String connectionId = connectionStore.get(targetAddress);
-            if (connectionId == null) {
-                LOGGER.warn("#####-CHATBOT- NO CONNECTION ID FOUND FOR ACCOUNT ID: {}", targetAddress);
-            }
-            LOGGER.info("#####-CHATBOT-Adding connectionId: {} into the notification payload for account: {}", connectionId, targetAddress);
             payload.put("connectionId", connectionId);
-            MessageDto messageDto = outMessage.getMessage();
-            if (isSidebarAnsweredMessage(messageDto)) {
-                return;
-            }
             payload.put("messages", List.of(messageDto));
-            LOGGER.info("#####-CHATBOT-Message from server: {}", messageDto.getMessage());
             sendNotificationPayload(payload, targetAddress, messageDto.getType());
+            dispatched++;
+        }
+        if (dispatched > 0) {
+            auditService.recordBotMessages(dispatched);
         }
     }
 
@@ -237,17 +251,19 @@ public class ChatBotMessageSender implements InteractiveMediumMessageSender {
         }
         NotificationMessage notificationMessage = createNewMessageNotification(payload);
         String newOutMessage = gsonJsonMapper.toString(notificationMessage);
-        String serverAddress = null;
         try {
-            serverAddress = InetAddress.getLocalHost().getHostAddress();
             producer.sendMessage(newOutMessage);
+            ChatBotMetrics.recordActiveMqMessageSent();
+            ChatBotMetrics.recordNotificationSent("NewMessages");
             if (!Objects.isNull(updateNotification)) {
                 String updateOutMessage = gsonJsonMapper.toString(new NotificationMessage("notification", updateNotification));
-                LOGGER.warn("#####-CHATBOT-Sending the update message notification: {} for the accountId: {}", updateOutMessage, targetAddress);
                 producer.sendMessage(updateOutMessage);
+                ChatBotMetrics.recordActiveMqMessageSent();
+                ChatBotMetrics.recordNotificationSent("UpdateMessage");
             }
         } catch (Exception cause) {
-            LOGGER.error("#####-CHATBOT- ERROR WHILE SENDING MESSAGE FOR ACCOUNTID: {} FROM HOST: {}", targetAddress, serverAddress, cause);
+            LOGGER.error("#####-CHATBOT- ERROR WHILE SENDING MESSAGE FOR ACCOUNTID: {} FROM HOST: {}", targetAddress, LocalHostInfo.hostAddress(), cause);
+            ChatBotMetrics.recordError("ChatBotMessageSender", cause);
         }
     }
 

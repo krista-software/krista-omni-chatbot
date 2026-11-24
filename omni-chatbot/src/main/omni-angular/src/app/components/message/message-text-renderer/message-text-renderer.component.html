@@ -1,0 +1,28 @@
+<div class="message-text-container" (click)="onContentClick($event)">
+  <span class="message-text" [innerHTML]="sanitizedContent"></span>
+</div>
+
+<!-- Image Modal -->
+<app-image-modal
+  *ngIf="imageModalVisible"
+  [imageSrc]="imageModalSrc"
+  [altText]="imageModalAlt"
+  (close)="closeImageModal()">
+</app-image-modal>
+
+<!-- Blocked-popup fallback: appears only when a message link's new tab was
+     blocked by a sandboxed host embed (missing 'allow-popups'). Lets the user
+     copy the URL and open it manually. Invisible in normally embedded chatbots. -->
+<div class="link-fallback" *ngIf="linkFallbackVisible" role="alert">
+  <div class="link-fallback-body">
+    <span class="link-fallback-message">This link can't open in a new tab here. Copy it to open manually:</span>
+    <span class="link-fallback-url">{{ linkFallbackUrl }}</span>
+  </div>
+  <div class="link-fallback-actions">
+    <button type="button" class="link-fallback-copy" (click)="copyFallbackLink()">
+      {{ linkFallbackCopied ? 'Copied' : 'Copy link' }}
+    </button>
+    <button type="button" class="link-fallback-dismiss" (click)="dismissLinkFallback()" aria-label="Dismiss">✕</button>
+  </div>
+</div>
+

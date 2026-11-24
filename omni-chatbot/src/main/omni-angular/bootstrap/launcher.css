@@ -1,0 +1,373 @@
+/* NOTE: The Integration Settings page renders a static replica of these
+   bubble/container styles ("Live Preview" in
+   src/main/resources/integration/index.html). If you change the visual
+   styling here, update that preview to match. */
+.chat-bubble {
+  position: fixed;
+  z-index: 10000;
+}
+.hide {
+  display: none;
+}
+.bubble-btn {
+  cursor: pointer;
+  display: flex;
+  background: white;
+  border-radius: 999px;
+  border-style: solid;
+  padding: 1px;
+}
+.bubble-btn .bubble-btn-text {
+  line-height: 50px;
+  padding: 0 16px;
+  font-size: 16px;
+  font-weight: 500;
+  color: #434343;
+}
+.bubble-btn .bubble-btn-icon {
+  display: flex;
+  min-width: 50px;
+  height: 50px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+}
+.chatbot-error-icon {
+  width: 20px;
+  height: 20px;
+  background: #ec4d4d;
+  border-radius: 50%;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  font-size: 14px;
+  color: #ffffff;
+  position: absolute;
+  right: 0;
+  border: 1px solid white;
+}
+.chatbot-unread-icon {
+  width: 16px;
+  height: 16px;
+  background: #4fd7ed;
+  border-radius: 999px;
+  position: absolute;
+  display: none;
+  right: 0;
+}
+.chatbot-unread-icon.visible {
+  display: block;
+}
+.chatbot-error-icon.visible {
+  display: flex;
+}
+.chatbot-error-message {
+  position: absolute;
+  min-width: 250px;
+  background: #fdecea;
+  padding: 12px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: rgb(97, 26, 21);
+  display: none;
+  margin-bottom: 8px;
+}
+.chat-bubble:hover .chatbot-error-message.visible {
+  display: block;
+}
+.chat-bubble.bottomRight {
+  bottom: 30px;
+  right: 30px;
+}
+.chat-bubble.bottomRight .chatbot-error-message {
+  right: 0;
+  bottom: 100%;
+}
+.chat-bubble.bottomLeft .chatbot-error-message {
+  left: 0;
+  bottom: 100%;
+}
+.chat-bubble.topRight .chatbot-error-message {
+  right: 0;
+  top: 100%;
+}
+.chat-bubble.topLeft .chatbot-error-message {
+  left: 0;
+  top: 100%;
+}
+.chat-bubble.bottomLeft {
+  bottom: 30px;
+  left: 30px;
+}
+.chat-bubble.topRight {
+  top: 35px;
+  right: 30px;
+}
+.chat-bubble.topLeft {
+  top: 35px;
+  left: 30px;
+}
+.chat-bubble.centerRight {
+  top: 50%;
+  right: 30px;
+}
+.chat-bubble.centerLeft {
+  top: 50%;
+  left: 30px;
+}
+.chatbot-button {
+  border-width: 0;
+  width: 56px;
+  height: 56px;
+  background-color: rgb(45, 140, 255);
+  padding: 0;
+  border-radius: 50%;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
+  margin: 0;
+  min-width: 0;
+  max-width: none;
+  min-height: 0;
+  max-height: none;
+  overflow: hidden;
+}
+
+.chatbot-container {
+  box-sizing: border-box;
+  padding: 0;
+  border-radius: 10px;
+  background: #fff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  transform: translate(0);
+  width: 500px;
+  height: calc(100vh - 32px);
+  position: fixed;
+  z-index: 100000;
+  transition: width 0.2s;
+}
+
+.chatbot-container-error {
+  box-sizing: border-box;
+  padding: 0;
+  border-radius: 10px;
+  background: rgb(252, 0, 0);
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  box-shadow: -1px 0 0 rgb(0 0 0 / 10%), -3px 0 9px rgb(0 0 0 / 15%);
+  transform: translate(0);
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  width: 500px;
+  height: 100vh;
+  position: fixed;
+  z-index: 100000;
+}
+
+.chatbot-container iframe {
+  border: none;
+  background: #fff;
+  border-radius: 10px;
+  max-width: 100% !important;
+}
+
+.chatbot-container-error iframe {
+  border: none;
+  background: rgb(252, 0, 0);
+}
+.close {
+  position: absolute;
+  top: 20px;
+  right: 5px;
+  padding: 0;
+  width: 25px;
+  height: 25px;
+  border-radius: 5px;
+  background: transparent !important;
+  border: none;
+  cursor: pointer;
+}
+
+.chatbot-container.bottomRight,
+.chatbot-container.centerRight,
+.chatbot-container.topRight {
+  right: 16px;
+}
+.chatbot-container.bottomLeft,
+.chatbot-container.centerLeft,
+.chatbot-container.topLeft {
+  left: 16px;
+}
+.chatbot-container.bottomRight,
+.chatbot-container.bottomLeft {
+  bottom: 16px;
+}
+.chatbot-container.centerRight,
+.chatbot-container.centerLeft {
+  bottom: calc(50% - 300px);
+}
+.chatbot-container.topRight,
+.chatbot-container.topLeft {
+  top: 16px;
+}
+.hidden {
+  visibility: hidden;
+}
+
+.chatbotSnackbar {
+  visibility: hidden;
+  min-width: 250px;
+  margin-left: -125px;
+  text-align: center;
+  padding: 16px;
+  position: fixed;
+  z-index: 1;
+  left: 50%;
+  bottom: 30px;
+  border-radius: 7px;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+/* Show the snackbar when clicking on a button (class added with JavaScript) */
+.showChatbotSnackbar {
+  visibility: visible; /* Show the snackbar */
+}
+
+.chatbot-resize-btn {
+  position: absolute;
+  /* The launcher is injected into arbitrary host pages. A host `* { box-sizing:
+     border-box }` reset would make this button's 10px width include its 8px
+     horizontal padding + 1px border (18px), collapsing the content box — and the
+     chevron svg — to 0 width. Pin to content-box so the icon always renders. */
+  box-sizing: content-box;
+  width: 10px;
+  height: 0px;
+  background: #ffffff;
+  padding: 20px 4px;
+  border: 1px solid #e0e0e0;
+  color: #757575;
+  bottom: 89px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.chatbot-resize-btn:hover {
+  background: #f5f5f5;
+  color: #0169BE;
+  border-color: #0169BE;
+  box-shadow: 0 2px 6px rgba(1, 105, 190, 0.2);
+}
+
+.chatbot-resize-btn:active {
+  transform: scale(0.96);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.chatbot-resize-btn-left {
+  left :-20px;
+}
+
+.chatbot-resize-btn-right {
+  right: -20px;
+}
+
+/* ── Service-unavailable overlay ─────────────────────────────── */
+.chatbot-unavailable-overlay {
+  position: absolute;
+  inset: 0;
+  background: #ffffff;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px 28px;
+  z-index: 10;
+  box-sizing: border-box;
+}
+.chatbot-unavailable-close-btn {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: none;
+  border: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  color: rgba(0,0,0,0.4);
+  font-size: 22px;
+  line-height: 1;
+  padding: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.chatbot-unavailable-close-btn:hover {
+  background: rgba(0,0,0,0.06);
+  color: rgba(0,0,0,0.7);
+}
+.chatbot-unavailable-icon {
+  margin-bottom: 20px;
+}
+.chatbot-unavailable-title {
+  font-family: Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: #212121;
+  margin: 0 0 10px;
+}
+.chatbot-unavailable-message {
+  font-family: Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  color: rgba(0,0,0,0.55);
+  margin: 0 0 28px;
+  line-height: 1.6;
+}
+.chatbot-unavailable-message span {
+  display: block;
+}
+.chatbot-unavailable-message span + span {
+  margin-top: 6px;
+}
+.chatbot-unavailable-retry-btn {
+  border: none;
+  border-radius: 24px;
+  padding: 11px 28px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+  transition: opacity 0.2s;
+}
+.chatbot-unavailable-retry-btn:hover {
+  opacity: 0.88;
+}
+.chatbot-unavailable-retry-btn:active {
+  opacity: 0.75;
+}
+
+.chatbot-resize-btn svg {
+  fill: currentColor;
+  width: 10px;
+  height: 10px;
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
+}
+
+.chatbot-resize-btn:hover svg {
+  transform: scale(1.15);
+}

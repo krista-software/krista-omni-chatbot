@@ -1,0 +1,59 @@
+<!-- Header Component -->
+<!-- NOTE: The Integration Settings page renders a static replica of this header
+     ("Live Preview" in src/main/resources/integration/index.html). If you change
+     the visual structure here, update that preview to match. -->
+<header class="header-container" role="banner">
+  <!-- Bot Icon -->
+  <div class="bot-icon-container">
+    <img
+      [src]="chatbotIcon || '/assets/images/krista-logo.svg'"
+      alt="Krista chatbot assistant"
+      class="bot-icon"
+      (error)="onImageError($event)">
+  </div>
+
+  <!-- Bot Name and Subtitle (with dynamic positioning) -->
+  <div class="bot-info" [ngClass]="'text-align-' + botNamePosition">
+    <h1 class="bot-name">{{ botName }}</h1>
+    <p class="bot-subtitle" *ngIf="botSubTitle">{{ botSubTitle }}</p>
+  </div>
+
+  <!-- Action Buttons Container -->
+  <div class="action-buttons" role="group" aria-label="Chat controls">
+    <!-- Language Selector (matches original app: Header.tsx lines 100-110) -->
+    <!-- Lightweight custom dropdown for better performance -->
+    <app-language-dropdown
+      *ngIf="canChangeLanguage && languages && languages.length > 0"
+      [languages]="languages"
+      [selectedLanguage]="selectedLanguage"
+      (languageChange)="onLanguageChange($event)">
+    </app-language-dropdown>
+
+    <!-- Restart Button (matches original app: IconButton with CircularProgress size 16) -->
+    <button
+      mat-icon-button
+      type="button"
+      (click)="onRestart()"
+      [disabled]="isReloading"
+      class="action-button restart-button"
+      [class.is-loading]="isReloading"
+      aria-label="Restart Conversation"
+      [matTooltip]="'Restart Conversation'">
+      <mat-icon class="refresh-icon" aria-hidden="true">refresh</mat-icon>
+      <!-- Circular spinner shown during reload (no layout shift) -->
+      <span class="refresh-spinner" aria-hidden="true"></span>
+      <span *ngIf="isReloading" class="visually-hidden">Restarting conversation...</span>
+    </button>
+
+    <!-- Minimize Button (collapses the chat window back to the launcher bubble; state is preserved) -->
+    <button
+      mat-icon-button
+      type="button"
+      (click)="onClose()"
+      class="action-button close-button"
+      aria-label="Minimize Chat"
+      [matTooltip]="'Minimize Chat'">
+      <mat-icon aria-hidden="true">remove</mat-icon>
+    </button>
+  </div>
+</header>

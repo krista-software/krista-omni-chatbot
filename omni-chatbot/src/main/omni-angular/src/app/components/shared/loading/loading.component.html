@@ -1,0 +1,38 @@
+<div class="loading-container" [ngClass]="'loading-' + size" role="status" aria-live="polite" [attr.aria-label]="message || 'Loading'">
+  <!-- Spinner Loading -->
+  <div *ngIf="variant === LoadingVariant.spinner" class="spinner-loading">
+    <mat-spinner [diameter]="spinnerDiameter" color="primary" aria-hidden="true"></mat-spinner>
+    <p *ngIf="message" class="loading-message">{{ message }}</p>
+  </div>
+
+  <!-- Dots Loading (similar to original app's DotsStyleLoading) -->
+  <div *ngIf="variant === LoadingVariant.dots" class="dots-loading">
+    <div class="dots-container" aria-hidden="true">
+      <div class="dot dot-1"></div>
+      <div class="dot dot-2"></div>
+      <div class="dot dot-3"></div>
+    </div>
+    <p *ngIf="message" class="loading-message">{{ message }}</p>
+  </div>
+
+  <!-- App Logo Loading -->
+  <div *ngIf="variant === LoadingVariant.applogo" class="applogo-loading">
+    <div class="logo-container">
+      <img *ngIf="logoSrc" [src]="logoSrc" alt="" class="logo-image" aria-hidden="true" />
+      <div *ngIf="!logoSrc" class="logo-placeholder" aria-hidden="true">
+        <mat-icon aria-hidden="true">chat</mat-icon>
+      </div>
+      <div class="dots-container" aria-hidden="true">
+        <div class="dot dot-1"></div>
+        <div class="dot dot-2"></div>
+        <div class="dot dot-3"></div>
+      </div>
+    </div>
+    <p *ngIf="message" class="loading-message">{{ message }}</p>
+  </div>
+
+  <!-- Text Loading -->
+  <div *ngIf="variant === LoadingVariant.text" class="text-loading">
+    <p class="loading-message">{{ message }}</p>
+  </div>
+</div>

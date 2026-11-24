@@ -13,7 +13,7 @@
   - [Get Transcript of the Conversation](pages/get-transcript-of-the-conversation.md)
 
 - **Integration Operations**
-  - [Get Script Element](pages/get-script-element.md)
+  - [Get Integration Information](pages/get-integration-script.md)
   - [Get Last User Message](pages/get-last-user-message.md)
   - [Get Session Info by Email](pages/get-session-info-by-email.md)
 

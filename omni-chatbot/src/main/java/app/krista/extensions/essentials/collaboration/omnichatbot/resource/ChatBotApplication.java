@@ -13,14 +13,19 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.resource;
 
+import app.krista.extensions.essentials.collaboration.omnichatbot.auth.ChatBotAuthResource;
+import app.krista.extensions.essentials.collaboration.omnichatbot.auth.KristaExceptionMapper;
+import app.krista.extensions.essentials.collaboration.omnichatbot.filter.CacheControlResponseFilter;
+import app.krista.extensions.essentials.collaboration.omnichatbot.filter.CdnCacheVersionFilter;
 import app.krista.extensions.essentials.collaboration.omnichatbot.filter.CorsResponseFilter;
 import app.krista.omni.sdk.complex_fields.impl.rest.EntitySearchResource;
 import app.krista.omni.sdk.complex_fields.impl.rest.FormApiResource;
+import app.krista.extensions.essentials.collaboration.omnichatbot.resource.AuditResource;
 import org.jvnet.hk2.annotations.ContractsProvided;
 import org.jvnet.hk2.annotations.Service;
 
@@ -37,10 +42,19 @@ public class ChatBotApplication extends Application {
     public Set<Class<?>> getClasses() {
         return Set.of(
                 ChatBotResource.class,
+                ChatBotAuthResource.class,
+                AuditResource.class,
                 EntitySearchResource.class,
                 FormApiResource.class,
-                CorsResponseFilter.class
+                CorsResponseFilter.class,
+                CdnCacheVersionFilter.class,
+                CacheControlResponseFilter.class
         );
+    }
+
+    @Override
+    public Set<Object> getSingletons() {
+        return Set.of(new KristaExceptionMapper());
     }
 
 }

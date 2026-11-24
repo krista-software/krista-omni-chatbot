@@ -1,0 +1,114 @@
+<div class="pick-many-field">
+  <div class="field-container">
+    <label *ngIf="shouldShowLabel() && getFieldLabel()"
+           class="field-label"
+           [attr.id]="'pick-many-label-' + field.name">
+      {{ getFieldLabel() }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+
+    <!-- Secured mode: show masked value -->
+    <div *ngIf="isSecured() && hasValue()" class="readonly-value secured-value" role="status">
+      ••••••••
+    </div>
+
+    <!-- Readonly display - plain text for 5 or fewer selected -->
+    <div *ngIf="!isSecured() && isFieldReadOnly() && options.length > 0 && !useDropdown" class="readonly-value">
+      {{ getSelectedLabels() }}
+    </div>
+
+    <!-- No options available message -->
+    <div *ngIf="!isSecured() && options.length === 0" class="no-options-message" role="status">
+      <em>{{ isFieldReadOnly() ? 'No options selected.' : 'Options not available.' }}</em>
+    </div>
+
+    <!-- Readonly dropdown - custom trigger + hidden mat-select for CDK overlay popup -->
+    <div *ngIf="!isSecured() && isFieldReadOnly() && options.length > 0 && useDropdown" class="dropdown-field readonly-dropdown">
+      <div class="readonly-trigger" (click)="openReadonlyDropdown()">
+        <span class="readonly-trigger-text">{{ getTriggerText() }}</span>
+        <mat-icon class="readonly-trigger-arrow">arrow_drop_down</mat-icon>
+      </div>
+      <mat-select
+        #readonlySelect
+        [value]="field.value || []"
+        multiple
+        panelClass="pick-many-select-panel pick-many-readonly-panel"
+        disableOptionCentering
+        class="readonly-hidden-select">
+        <mat-option *ngFor="let option of options; trackBy: trackByValue"
+                    [value]="option.value">
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+    </div>
+
+    <!-- Active dropdown mode with search for more than 5 options -->
+    <div *ngIf="!isSecured() && !isFieldReadOnly() && options.length > 0 && useDropdown" class="dropdown-field">
+      <div class="dropdown-with-clear">
+        <mat-select
+          [value]="field.value || []"
+          [required]="isFieldRequired()"
+          [attr.aria-labelledby]="'pick-many-label-' + field.name"
+          [attr.aria-describedby]="config.hasError ? 'pick-many-error-' + field.name : null"
+          (selectionChange)="onDropdownChange($event)"
+          (openedChange)="onSelectOpenedChange($event)"
+          multiple
+          panelClass="pick-many-select-panel"
+          placeholder="Search or select options"
+          disableOptionCentering>
+          <!-- Search input inside the dropdown -->
+          <div class="select-search-wrapper" (click)="$event.stopPropagation()">
+            <input
+              class="select-search-input"
+              type="text"
+              placeholder="Search..."
+              [value]="searchText"
+              (input)="filterOptions($any($event.target).value)"
+              (keydown)="$event.stopPropagation()">
+            <mat-icon *ngIf="searchText" class="search-clear-icon" (click)="filterOptions('')">close</mat-icon>
+          </div>
+          <mat-option *ngFor="let option of filteredOptions; trackBy: trackByValue"
+                      [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+          <div *ngIf="filteredOptions.length === 0" class="no-results-message">
+            No matching options
+          </div>
+        </mat-select>
+        <button *ngIf="hasValue() && !isFieldRequired()"
+                type="button"
+                class="clear-button"
+                (click)="clearSelection($event)"
+                aria-label="Clear all selections"
+                title="Clear all selections">
+          <mat-icon class="clear-icon">close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Checkboxes for options (5 or fewer) -->
+    <div *ngIf="!isSecured() && !isFieldReadOnly() && options.length > 0 && !useDropdown"
+         class="checkbox-group"
+         role="group"
+         [attr.aria-labelledby]="'pick-many-label-' + field.name"
+         [attr.aria-describedby]="config.hasError ? 'pick-many-error-' + field.name : null">
+      <mat-checkbox
+        *ngFor="let option of options; trackBy: trackByValue"
+        [checked]="isOptionSelected(option.value)"
+        (change)="onCheckboxChange(option.value, $event.checked)"
+        class="checkbox-option"
+        color="primary"
+        [attr.aria-label]="option.label">
+        {{ option.label }}
+      </mat-checkbox>
+    </div>
+
+    <!-- Error message -->
+    <div *ngIf="!isFieldReadOnly()" class="field-error-message"
+         [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+         role="alert"
+         [attr.id]="'pick-many-error-' + field.name">
+      {{ config.errorMessage }}
+    </div>
+  </div>
+</div>

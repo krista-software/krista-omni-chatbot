@@ -6,6 +6,7 @@ plugins {
 codeLinesStat {
     sourceFilters.skipBlankLines = true // optional, `false` by default
     fileExtensions = ['java'] // optional, empty by default
+
 }
 jar.archiveBaseName = "omni-chatbot-extension"
 group 'app.krista.extensions.essentials.collaboration'
@@ -63,7 +64,7 @@ node {
     // The Node.js project directory location
     // This is where the package.json file and node_modules directory are located
     // By default it is at the root of the current project
-    nodeProjectDir = file("$projectDir/src/main/ui/")
+    nodeProjectDir = file("$projectDir/src/main/omni-angular/")
 }
 
 if (rootProject.file('buildnr.txt').canRead()) {
@@ -71,6 +72,15 @@ if (rootProject.file('buildnr.txt').canRead()) {
 } else {
     ext.buildnr = "0"
 }
+
+// Cache mode selector. `./gradlew build-dev` bakes cache.disabled=true into the jar
+// (cache-mode.properties, read by Constants.resolveCacheControl) so every cacheable
+// response — index.html, /ui/* bundles, launcher.js/css, /config, /supportedLanguages,
+// /launcher-file — is served no-store (always fresh, CDN caching off). A plain
+// `./gradlew build`/`jar` keeps the production Cache-Control headers. Force explicitly
+// with -PcacheDisabled. Detected at configuration time from the requested task graph.
+def cacheDisabled = project.hasProperty('cacheDisabled') ||
+        gradle.startParameter.taskNames.any { it == 'build-dev' || it.endsWith(':build-dev') }
 
 //Install packages locally
 tasks.register('installPackages', NpmTask) {
@@ -90,6 +100,60 @@ tasks.register('bundleLauncher', NpmTask) {
 
 tasks.register('buildUI') { dependsOn 'bundleLauncher' }
 
+// Locate a Chrome/Chromium binary for the Angular unit tests. Honors CHROME_BIN, then
+// common binaries on PATH, then the macOS default installs. Returns null if none exist.
+def resolveChromeBin = {
+    def explicit = System.getenv('CHROME_BIN')
+    if (explicit && new File(explicit).exists()) {
+        return explicit
+    }
+    def names = ['google-chrome-stable', 'google-chrome', 'chromium', 'chromium-browser', 'chrome']
+    def pathDirs = (System.getenv('PATH') ?: '').split(File.pathSeparator)
+    for (name in names) {
+        for (dir in pathDirs) {
+            def candidate = new File(dir as String, name as String)
+            if (candidate.isFile() && candidate.canExecute()) {
+                return candidate.absolutePath
+            }
+        }
+    }
+    for (macPath in ['/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+                     '/Applications/Chromium.app/Contents/MacOS/Chromium']) {
+        if (new File(macPath).exists()) {
+            return macPath
+        }
+    }
+    return null
+}
+def chromeBin = resolveChromeBin()
+
+// Runs the Angular/Karma unit specs (src/main/omni-angular/**/*.spec.ts) as part of the
+// build. `npm run test:ci` pins --watch=false (plain `ng test` watches forever and would
+// hang the build) and uses the ChromeHeadlessCI launcher defined in karma.conf.js.
+// A non-zero karma exit propagates through NpmTask, so a failing spec fails the build.
+// OPTIONAL: these specs need a headless Chrome. If no browser is found the task is
+// SKIPPED (not failed) so the jar still builds on agents without Chrome; when a browser
+// IS present the specs run and any failure breaks the build.
+tasks.register('testUI', NpmTask) {
+    dependsOn 'installPackages'
+    args = ['run', 'test:ci']
+    // Point Karma's ChromeHeadless launcher at the detected browser.
+    if (chromeBin != null) {
+        execOverrides {
+            it.environment 'CHROME_BIN', chromeBin
+        }
+    }
+    onlyIf {
+        if (chromeBin == null) {
+            logger.warn("⚠ testUI SKIPPED: no Chrome/Chromium found — Angular unit specs not run. " +
+                    "Install Chrome or set CHROME_BIN to enable them.")
+            return false
+        }
+        logger.lifecycle("✔ testUI running Angular specs with Chrome: ${chromeBin}")
+        return true
+    }
+}
+
 compileJava.dependsOn clean
 compileJava.dependsOn buildUI
 
@@ -101,6 +165,16 @@ java {
 
 test {
     useJUnitPlatform()
+    // A failing test MUST break the build. This is Gradle's default, stated
+    // explicitly so it cannot be relaxed by accident.
+    ignoreFailures = false
+    // Surface what actually broke in CI logs instead of just "there were failures".
+    testLogging {
+        events "failed", "skipped"
+        exceptionFormat = "full"
+        showStackTraces = true
+        showCauses = true
+    }
 }
 
 repositories {
@@ -110,16 +184,9 @@ repositories {
     mavenCentral()
 }
 
-configurations {
-    implementation {
-        canBeConsumed = false
-        canBeResolved = true
-    }
-}
-
 dependencies {
-    annotationProcessor 'app.krista:extension-impl-anno-processors:feature_KR-19276'
-    implementation 'app.krista:krista-apis:feature_KR-19276'
+    annotationProcessor 'app.krista:extension-impl-anno-processors:1.0.130'
+    implementation 'app.krista:krista-apis:1.0.130'
     implementation 'org.glassfish.hk2:hk2-api:3.0.3'
     implementation 'com.kristasoft.common:common-test:1.0.43'
     implementation 'javax.jms:javax.jms-api:2.0'
@@ -128,6 +195,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.10.0'
 
     // Mockito for mocking
     testImplementation 'org.mockito:mockito-core:5.5.0'
@@ -135,16 +203,18 @@ dependencies {
 
     // AssertJ for fluent assertions
     testImplementation 'org.assertj:assertj-core:3.24.2'
-}
 
-test {
-    useJUnitPlatform()
+    // Embedded Apache Artemis broker for real JMS integration tests (matches the
+    // artemis-jms-client version pulled transitively at runtime). Test scope only;
+    // requires network on first resolve.
+    testImplementation 'org.apache.activemq:artemis-server:2.40.0'
+    testImplementation 'org.apache.activemq:artemis-jms-client:2.40.0'
 }
 
 //Generate launcher.properties from .env file
 tasks.register('generateLauncherProperties') {
     doLast {
-        def envFile = file("$projectDir/src/main/ui/.env")
+        def envFile = file("$projectDir/src/main/omni-angular/.env")
         def propsFile = file("$projectDir/src/main/resources/launcher.properties")
 
         // Create resources directory if it doesn't exist
@@ -168,9 +238,30 @@ tasks.register('generateLauncherProperties') {
 //Added to copy dist into resource folder
 processResources {
     dependsOn generateLauncherProperties
-    from("$projectDir/src/main/ui/dist") {
+    // Copy Angular app files
+    from("$projectDir/src/main/omni-angular/dist/omni-angular/browser") {
         into 'ui'
     }
+    // Copy launcher files
+    from("$projectDir/src/main/omni-angular/dist") {
+        into 'ui'
+        include 'launcher*.js', 'launcher*.css'
+    }
+    // Bake the build-time cache mode into the jar. Read by Constants.resolveCacheControl:
+    // build-dev => no-store everywhere (always fresh); build/jar => production headers.
+    doLast {
+        def cacheModeFile = new File(destinationDir, 'cache-mode.properties')
+        cacheModeFile.text = "cache.disabled=${cacheDisabled}\n"
+        println "✔ Generated cache-mode.properties with cache.disabled=${cacheDisabled}"
+    }
+}
+
+// `./gradlew build-dev` — produces the deployable extension jar (same as `jar`, tests and
+// all) but with Cache-Control forced to no-store so the UI/config are always fresh.
+tasks.register('build-dev') {
+    group = 'build'
+    description = 'Builds the extension jar with all Cache-Control headers forced to no-store (always fresh, CDN caching disabled).'
+    dependsOn tasks.named('jar')
 }
 
 tasks.register('createSourceDir', Exec) {
@@ -189,8 +280,8 @@ tasks.register('includeSources', Exec) {
 }
 
 tasks.register('cleanDir', Delete) {
-    delete "$projectDir/src/main/ui/dist"
-    delete "$projectDir/src/main/ui/node_modules"
+    delete "$projectDir/src/main/omni-angular/dist"
+    delete "$projectDir/src/main/omni-angular/node_modules"
 }
 
 import java.util.regex.Pattern
@@ -288,6 +379,18 @@ tasks.register('generateReleaseProperties', GenerateReleasePropertiesTask) {
 }
 tasks.named("jar") {
     dependsOn tasks.named("generateReleaseProperties")
+    // Building the extension artifact must run the test suite — the Java tests always,
+    // and the Angular specs when a browser is available (testUI self-skips on agents
+    // without Chrome; see its onlyIf). Any test that DOES run and fails breaks the build.
+    // Without this, `gradle jar` — how the deployable extension jar is produced —
+    // compiles and packages without executing a single test.
+    dependsOn tasks.named("test")
+    dependsOn tasks.named("testUI")
+}
+
+// `gradle build`/`check` must also run the Angular specs, not just the Java tests.
+tasks.named("check") {
+    dependsOn tasks.named("testUI")
 }
 
 jar {
@@ -300,7 +403,7 @@ jar {
     manifest {
     }
     from {
-        configurations.implementation.collect {
+        configurations.runtimeClasspath.collect {
             it.isDirectory() ? it : zipTree(it)
         }
     }

@@ -1,0 +1,76 @@
+/* Modern Chatbot Text Input Styling */
+.text-input-wrapper {
+  width: 100%;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.text-input {
+  resize: none;
+  font-family: 'Roboto', 'Helvetica', Arial, sans-serif;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 8px 0;
+  width: 100%;
+  color: var(--krista-text-primary);
+  min-height: 24px;
+  max-height: 48px; /* 2 rows max (24px per row) */
+  overflow-y: auto;
+}
+
+.text-input::placeholder {
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87)) !important;
+  opacity: 0.6 !important;
+  font-weight: 400;
+}
+
+/* Browser-specific placeholder selectors for better compatibility */
+.text-input::-webkit-input-placeholder {
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87)) !important;
+  opacity: 0.6 !important;
+  font-weight: 400;
+}
+
+.text-input::-moz-placeholder {
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87)) !important;
+  opacity: 0.6 !important;
+  font-weight: 400;
+}
+
+.text-input::-ms-input-placeholder {
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87)) !important;
+  opacity: 0.6 !important;
+  font-weight: 400;
+}
+
+.text-input:disabled {
+  color: var(--krista-text-disabled);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.text-input:focus {
+  outline: none;
+}
+
+/* Custom scrollbar for textarea */
+.text-input::-webkit-scrollbar {
+  width: 4px;
+}
+
+.text-input::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.text-input::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 2px;
+}
+
+.text-input::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}

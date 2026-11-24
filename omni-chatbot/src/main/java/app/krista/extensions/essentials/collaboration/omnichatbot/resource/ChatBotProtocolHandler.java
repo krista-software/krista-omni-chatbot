@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.resource;
@@ -23,8 +23,12 @@ import app.krista.extension.request.ProtoRequest;
 import app.krista.extension.request.ProtoResponse;
 import app.krista.extension.request.protos.ws.WsEvent;
 import app.krista.extension.request.protos.ws.WsProtocol;
+import app.krista.extension.request.protos.ws.WsTextMessageReceived;
+import app.krista.extensions.essentials.collaboration.omnichatbot.metrics.ChatBotMetrics;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.WsEventHandlerRegistry;
 import app.krista.ksdk.context.AuthorizationContext;
+import app.krista.omni.sdk.spi.util.GsonJsonMapperImpl;
+import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,8 +71,56 @@ public class ChatBotProtocolHandler {
     public ProtoResponse handleWebSocketEvent(ProtoRequest request) throws IOException {
         WsEvent wsEvent = (WsEvent) request;
         LOGGER.warn("WsEvent received frame type: {} Event connection Id: {}   ", wsEvent.getClass().getSimpleName(), wsEvent.getConnection().getConnectionId());
+        // Telemetry only — classify the raw frame at the OUTERMOST WS entry (this runs for every
+        // frame regardless of downstream handler dispatch or per-node auth timing) and count a real
+        // inbound message HERE, so it can never be lost to an early-return further down the chain.
+        // Fully wrapped so a telemetry/parse fault can never affect message processing. No functional change.
+        recordFrameTelemetry(wsEvent);
         wsEventHandlerRegistry.getWsEventHandler(wsEvent).handle(authorizationContext, wsEvent);
         return null;
+    }
+
+    /**
+     * Telemetry only. Emits one span per raw WS frame (tagged with frame class, signal, and payload
+     * type) and, for a genuine inbound user message ({@code Message} / {@code MessageAnswer}),
+     * counts it once at this outermost boundary. Pings and connection/welcome frames are excluded.
+     * All parsing is best-effort and swallowed — this must never break the message flow.
+     */
+    private void recordFrameTelemetry(WsEvent wsEvent) {
+        String frameType = wsEvent.getClass().getSimpleName();
+        String signal = null;
+        String payloadType = null;
+        try {
+            if (wsEvent instanceof WsTextMessageReceived textFrame) {
+                textFrame.buffer();
+                JsonObject json = GsonJsonMapperImpl.getInstance().fromString(textFrame.getString(), JsonObject.class);
+                if (json != null) {
+                    if (json.has("signal") && !json.get("signal").isJsonNull()) {
+                        signal = json.get("signal").getAsString();
+                    }
+                    if (json.has("payload") && json.get("payload").isJsonObject()) {
+                        JsonObject payload = json.getAsJsonObject("payload");
+                        if (payload.has("type") && !payload.get("type").isJsonNull()) {
+                            payloadType = payload.get("type").getAsString();
+                        }
+                    }
+                }
+            }
+        } catch (Exception ignore) {
+            // best-effort telemetry parse; never affect message flow
+        }
+        ChatBotMetrics.recordWsFrame(frameType, signal, payloadType);
+        if ("Message".equals(payloadType) || "MessageAnswer".equals(payloadType)) {
+            String accountId = null;
+            try {
+                if (authorizationContext.isAuthenticated() && authorizationContext.getAuthorizedAccount() != null) {
+                    accountId = authorizationContext.getAuthorizedAccount().getAccountId();
+                }
+            } catch (Exception ignore) {
+                // best-effort
+            }
+            ChatBotMetrics.recordMessageReceived(payloadType, accountId);
+        }
     }
 
 

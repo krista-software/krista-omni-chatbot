@@ -1,0 +1,191 @@
+{
+  "general": {
+    "defaultApiErrorMessage": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งในภายหลัง",
+    "retry": "ลองใหม่",
+    "close": "ปิด"
+  },
+  "footer": {
+    "sendMessage": "ส่งข้อความ",
+    "poweredBy": "ขับเคลื่อนโดย",
+    "termsAndConditions": "ข้อกำหนดและเงื่อนไข"
+  },
+  "authProvider": {
+    "failedToLogin": "เข้าสู่ระบบล้มเหลว สำหรับความช่วยเหลือเพิ่มเติม กรุณาติดต่อฝ่ายสนับสนุน"
+  },
+  "loginCallback": {
+    "loginFailed": "เข้าสู่ระบบล้มเหลว กรุณาลองใหม่ หากปัญหายังคงอยู่ กรุณาติดต่อทีมสนับสนุน",
+    "loginProgress": "กำลังเข้าสู่ระบบ กรุณารอสักครู่..."
+  },
+  "initializerProvider": {
+    "fetching": "กำลังดึงการกำหนดค่า",
+    "initializing": "กำลังเริ่มต้น",
+    "initFail": "การเริ่มต้นแชทบอทล้มเหลว กรุณาลองใหม่ หากปัญหายังคงอยู่ กรุณาติดต่อทีมสนับสนุนของเรา",
+    "reason": "เหตุผล: {{errorMessage}}",
+    "loadingConfiguration": "กำลังโหลดการกำหนดค่า...",
+    "authenticating": "กำลังตรวจสอบสิทธิ์...",
+    "creatingSession": "กำลังสร้างเซสชัน...",
+    "loadingConversationHistory": "กำลังโหลดประวัติการสนทนา..."
+  },
+  "unknownMessageComponent": {
+    "message": "ประเภทข้อความที่ไม่รู้จัก"
+  },
+  "responseAckCompRenderer": {
+    "unnamed": "ผู้ใช้ไม่ระบุชื่อ",
+    "responseAck": "{{_responseCount}} การตอบกลับ {{_contactName}} ตอบกลับ {{_conversationName}} เมื่อ {{_time}}",
+    "loading": "กำลังโหลด..."
+  },
+  "banner": {
+    "unread": "ข้อความที่ยังไม่ได้อ่าน"
+  },
+  "newMessagesBtn": {
+    "newMessages": "ข้อความใหม่"
+  },
+  "agent": {
+    "joined": "{{name}} เข้าร่วมแล้ว",
+    "left": "{{name}} ออกแล้ว"
+  },
+  "placeholder": {
+    "enter": "ป้อน {{fieldName}}",
+    "select": "เลือก {{fieldName}}",
+    "set": "ตั้งค่า {{fieldName}}"
+  },
+  "fields": {
+    "stream": {
+      "pauseStreaming": "หยุดการสตรีมชั่วคราว",
+      "resumeStreaming": "เริ่มการสตรีมต่อ"
+    },
+    "location": {
+      "selectLocationPlaceholder": "ค้นหาสถานที่..."
+    }
+  },
+  "concurrency": {
+    "waiting": {
+      "ariaLabel": "กำลังรอช่องแชท",
+      "title": "คุณอยู่ในคิว",
+      "message": "ขณะนี้เจ้าหน้าที่แชททั้งหมดกำลังให้บริการลูกค้าท่านอื่น เราจะเชื่อมต่อให้คุณโดยอัตโนมัติทันทีที่มีเจ้าหน้าที่ว่าง",
+      "positionLabel": "ลำดับในคิว",
+      "estimatedWaitLabel": "เวลารอโดยประมาณ:",
+      "estimatedWaitValue": "~{{minutes}} นาที",
+      "closeBtn": "ปิด",
+      "closeBtnAria": "ปิดหน้าต่างแชท"
+    },
+    "idleWarning": {
+      "title": "เซสชันกำลังจะหมดอายุ",
+      "message": "การสนทนาของคุณไม่มีการใช้งาน เลือก \"ดำเนินเซสชันต่อ\" เพื่อให้เซสชันยังคงทำงาน มิฉะนั้นการสนทนาจะสิ้นสุดโดยอัตโนมัติ",
+      "secondsLabel": "วินาที",
+      "stillHereBtn": "ดำเนินเซสชันต่อ",
+      "stillHereBtnAria": "ดำเนินเซสชันต่อเพื่อให้การสนทนายังคงทำงาน"
+    },
+    "disconnected": {
+      "title": "เซสชันสิ้นสุดแล้ว",
+      "message": "การสนทนาของคุณสิ้นสุดลงเนื่องจากไม่มีการใช้งาน",
+      "reconnectBtn": "เริ่มเซสชันใหม่",
+      "reconnectBtnAria": "เริ่มเซสชันแชทใหม่",
+      "closeBtn": "ปิด",
+      "closeBtnAria": "ปิดหน้าต่างแชท"
+    }
+  },
+  "krista": {
+    "general": {
+      "defaultErrorMessage": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้งในภายหลัง",
+      "ok": "ตกลง",
+      "search": "ค้นหา",
+      "cancel": "ยกเลิก",
+      "clear": "ล้าง",
+      "remove": "ลบออก",
+      "delete": "ลบ",
+      "save": "บันทึก",
+      "noResults": "ไม่พบรายการ",
+      "selectAll": "เลือกทั้งหมด",
+      "unknownField": "ฟิลด์ที่ไม่รู้จัก",
+      "enterCorrectValues": "กรุณากรอกค่าที่ถูกต้อง"
+    },
+    "address": {
+      "street": "ถนน",
+      "street2": "ถนน 2",
+      "city": "เมือง",
+      "state": "จังหวัด",
+      "country": "ประเทศ",
+      "postalCode": "รหัสไปรษณีย์"
+    },
+    "table": {
+      "deletedRows": "แถวที่ถูกลบ",
+      "selectedRows": "แถวที่เลือก:",
+      "rowsPerPage": "แถวต่อหน้า:",
+      "noData": "ไม่มีข้อมูลที่จะแสดง",
+      "confirmDelete": "คุณแน่ใจหรือไม่ว่าต้องการลบอย่างถาวร?"
+    },
+    "entity": {
+      "authRequired": "ต้องมีการตรวจสอบสิทธิ์ คลิก 'ตรวจสอบสิทธิ์' ด้านล่างเพื่อดำเนินการต่อ",
+      "searchAgainAfterAuth": "หลังจากตรวจสอบสิทธิ์เสร็จสิ้น ให้กลับมาที่หน้าต่างนี้ ค้นหาอีกครั้งเพื่อดูผลลัพธ์",
+      "authenticate": "ตรวจสอบสิทธิ์",
+      "selectAllHelpText": "เลือกตัวเลือกทั้งหมดในหน้านี้",
+      "selected": "เลือกแล้ว"
+    },
+    "file": {
+      "atLeastOneUploadOption": "ควรเลือกตัวเลือกการอัปโหลดอย่างน้อยหนึ่งรายการในการตั้งค่าไฟล์",
+      "unknownFormat": "ไม่สามารถอัปโหลด {{filename}} รูปแบบไฟล์ที่ไม่รู้จัก",
+      "unknownFileFormat": "ไม่สามารถอัปโหลดไฟล์ รูปแบบไฟล์ที่ไม่รู้จัก",
+      "notSupported": "ไม่สามารถอัปโหลด {{filename}} รูปแบบไฟล์ไม่รองรับ กรุณาบีบอัดเป็นไฟล์ ZIP แล้วอัปโหลดอีกครั้ง",
+      "typeNotSupported": "ไม่สามารถอัปโหลด {{filename}} ประเภทไฟล์ไม่รองรับ",
+      "minSize": "ไม่สามารถอัปโหลด {{filename}} ขนาดไฟล์ต้องมากกว่า {{size}}",
+      "maxSize": "ไม่สามารถอัปโหลด {{filename}} ขนาดไฟล์ต้องน้อยกว่า {{size}}",
+      "uploadInProgress": "กำลังอัปโหลดไฟล์"
+    },
+    "location": {
+      "grantPermission": "กรุณาให้สิทธิ์การเข้าถึงตำแหน่ง",
+      "selectLocation": "เลือกตำแหน่ง",
+      "selectedLocation": "ตำแหน่งที่เลือก",
+      "searchPlaceholder": "ค้นหาสถานที่..."
+    },
+    "date": {
+      "selectAfter": "กรุณาเลือกวันที่หลังจาก {{date}}",
+      "selectOnOrAfter": "กรุณาเลือกวันที่ตั้งแต่ {{date}} เป็นต้นไป",
+      "select": "เลือก {{date}}",
+      "selectBefore": "กรุณาเลือกวันที่ก่อน {{date}}",
+      "selectOnOrBefore": "กรุณาเลือกวันที่ไม่เกิน {{date}}",
+      "selectBeforeOrAfterDate": "กรุณาเลือกวันที่ก่อนหรือหลัง {{date}}",
+      "selectBeforeDateOrAfterDate": "กรุณาเลือกวันที่ก่อน {{before}} หรือหลัง {{after}}",
+      "selectBetween": "กรุณาเลือกวันที่ระหว่าง {{min}} ถึง {{max}}"
+    },
+    "dateRange": {
+      "selectBetween": "กรุณาเลือกช่วงวันที่ระหว่าง {{min}} ถึง {{max}}",
+      "selectOnOrAfter": "กรุณาเลือกช่วงวันที่ตั้งแต่ {{min}} เป็นต้นไป",
+      "selectOnOrBefore": "กรุณาเลือกช่วงวันที่ไม่เกิน {{max}}",
+      "selectMaxDays": "เลือกได้สูงสุด {{days}} วัน",
+      "selectMaxHours": "เลือกได้สูงสุด {{hours}} ชั่วโมง",
+      "rulesConflict": "กฎที่เลือกขัดแย้งกัน กรุณาปรับเพื่อให้ช่วงวันที่ถูกต้อง"
+    },
+    "radio": {
+      "noSelection": "ไม่ได้เลือกตัวเลือกใด",
+      "noOptions": "ไม่มีตัวเลือกที่ใช้ได้"
+    },
+    "validators": {
+      "required": "จำเป็นต้องกรอกฟิลด์นี้",
+      "noSelection": "ไม่ได้เลือกตัวเลือกใด",
+      "noOptions": "ไม่มีตัวเลือกที่ใช้ได้",
+      "invalidEmail": "ที่อยู่อีเมลไม่ถูกต้อง",
+      "invalidPhoneNumber": "หมายเลขโทรศัพท์ไม่ถูกต้อง",
+      "enterCorrectValues": "กรุณากรอกค่าที่ถูกต้อง",
+      "minLength": "ความยาวต้องมากกว่าหรือเท่ากับ {{length}}",
+      "maxLength": "ความยาวต้องน้อยกว่าหรือเท่ากับ {{length}}",
+      "minValue": "ค่าต้องมากกว่าหรือเท่ากับ {{min}}",
+      "maxValue": "ค่าต้องน้อยกว่าหรือเท่ากับ {{max}}",
+      "minSelection": "กรุณาเลือกอย่างน้อย {{count}} ตัวเลือก",
+      "maxSelection": "ไม่สามารถเลือกเกิน {{count}} ตัวเลือก",
+      "pattern": "ค่าไม่ตรงกับรูปแบบที่กำหนด: {{pattern}}",
+      "allowedEmailDomains": "โดเมนที่อนุญาต: {{domains}}",
+      "startDateLessThanEndDate": "วันที่เริ่มต้นต้องน้อยกว่าวันที่สิ้นสุด",
+      "maxDateRangeInDays": "ช่วงต้องไม่เกิน {{days}} วัน",
+      "maxDateRangeInHours": "ช่วงต้องไม่เกิน {{hours}} ชั่วโมง"
+    }
+  },
+  "bootFailed": {
+    "title": "ไม่สามารถใช้แชทได้",
+    "message": "เราไม่สามารถเริ่มแชทได้ โปรดลองอีกครั้ง",
+    "retryBtn": "ลองอีกครั้ง",
+    "retryBtnAria": "ลองเริ่มแชทอีกครั้ง",
+    "closeBtn": "ปิด",
+    "closeBtnAria": "ปิดหน้าต่างแชท"
+  }
+}

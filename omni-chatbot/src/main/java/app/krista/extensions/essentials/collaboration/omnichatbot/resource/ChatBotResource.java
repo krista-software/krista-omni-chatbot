@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.resource;
@@ -22,14 +22,15 @@ import app.krista.extension.executor.Invoker;
 import app.krista.extension.impl.jaxrs.util.Resources;
 import app.krista.extension.request.RoutingInfo;
 import app.krista.extensions.essentials.collaboration.omnichatbot.ChatBotExtension;
+import app.krista.extensions.essentials.collaboration.omnichatbot.ChatBotPool;
+import app.krista.extensions.essentials.collaboration.omnichatbot.audit.AuditService;
 import app.krista.extensions.essentials.collaboration.omnichatbot.contants.Constants;
+import app.krista.extensions.essentials.collaboration.omnichatbot.metrics.ChatBotMetrics;
 import app.krista.extensions.essentials.collaboration.omnichatbot.resource.dto.Configuration;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ChatBotApiService;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ChatBotUIService;
 import app.krista.extensions.essentials.collaboration.omnichatbot.utils.ChatBotUtil;
 import app.krista.extensions.essentials.collaboration.omnichatbot.utils.TranscriptUtils;
-import app.krista.ksdk.invoker.InvokerConfiguration;
-import app.krista.ksdk.nlp.Language;
 import app.krista.omni.sdk.complex_fields.impl.rest.EntitySearchService;
 import app.krista.omni.sdk.medium.api.dto.FormResponse;
 import app.krista.omni.sdk.medium.api.dto.MessageDto;
@@ -49,7 +50,6 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Path("/")
 public class ChatBotResource {
@@ -59,19 +59,21 @@ public class ChatBotResource {
     private final ChatBotUIService chatBotUIService;
     private final Invoker invoker;
     private final TranscriptUtils transcriptUtils;
-    private final InvokerConfiguration invokerConfiguration;
     private final ChatBotExtension chatBotExtension;
+    private final ChatBotPool chatBotPool;
+    private final AuditService auditService;
 
     @Inject
     public ChatBotResource(ChatBotApiService chatBotApiService, ChatBotUIService chatBotUIService, Invoker invoker,
-                           TranscriptUtils transcriptUtils, InvokerConfiguration invokerConfiguration,
-                           ChatBotExtension chatBotExtension) {
+                           TranscriptUtils transcriptUtils,
+                           ChatBotExtension chatBotExtension, ChatBotPool chatBotPool, AuditService auditService) {
         this.chatBotApiService = chatBotApiService;
         this.chatBotUIService = chatBotUIService;
         this.invoker = invoker;
         this.transcriptUtils = transcriptUtils;
-        this.invokerConfiguration = invokerConfiguration;
         this.chatBotExtension = chatBotExtension;
+        this.chatBotPool = chatBotPool;
+        this.auditService = auditService;
     }
 
     /**
@@ -85,8 +87,10 @@ public class ChatBotResource {
     @GET
     @Path("/ui/{subpath: .*}")
     public Response getUIAssets(@HeaderParam("X-Krista-Original-URI") String uriPath,
+                                @HeaderParam("Accept-Encoding") String acceptEncoding,
                                 @PathParam("subpath") String subPath) throws IOException {
-        return chatBotUIService.getResponse(subPath, invoker);
+        ChatBotMetrics.recordApiRequest("ui");
+        return chatBotUIService.getResponse(subPath, invoker, acceptEncoding);
     }
 
     /**
@@ -102,12 +106,45 @@ public class ChatBotResource {
     @Path("/integration")
     @GET
     public Response integration() throws IOException {
+        ChatBotMetrics.recordApiRequest("integration");
         String basePath = invoker.getRoutingInfo().getRoutingURL(invoker.getRoutingInfo().getRoutingId(),
                 RoutingInfo.Type.APPLIANCE) + "/chatbot/";
-        String uiConfigJson = ChatBotUtil.getJsonConfig(invoker, chatBotExtension);
+        String uiConfigJson = ChatBotUtil.getJsonConfig(chatBotExtension);
         LOGGER.info("#####-INTEGRATION-UI Config JSON: {}", uiConfigJson);
         return Resources.getTranslatedResource(getClass(),
-                "integration/index.html", Map.of("_basePath_", basePath, "_uiConfigJson_", uiConfigJson));
+                "integration/index.html", Map.of("_basePath_", basePath, "_uiConfigJson_", uiConfigJson,
+                        "_defaultFallbackMessage_", Constants.DEFAULT_FALLBACK_MESSAGE,
+                        "_defaultWelcomeMessage_", Constants.DEFAULT_WELCOME_MESSAGE));
+    }
+
+    /**
+     * Serves a demo page that loads the chatbot exactly like a customer website:
+     * a sample host page containing the one-line launcher integration script.
+     *
+     * <p>Opened in a new tab from the Integration Settings page ("Try it live") so
+     * admins can exercise the full production path (launcher.js &rarr; bubble &rarr;
+     * chat iframe) with the saved settings. Chatting here creates a real session,
+     * exactly as it would on a customer site. The page is as public as the chatbot
+     * itself (guest-accessible by design), so the link can be shared for testing.
+     *
+     * <p>Freshness: this response carries no Cache-Control header, so
+     * {@link app.krista.extensions.essentials.collaboration.omnichatbot.filter.CacheControlResponseFilter}
+     * stamps it {@code no-store} &mdash; never cached by browser or CDN. The page sets
+     * {@code window.__chatbotPreviewMode}, which makes launcher-core (and, via the
+     * {@code chatbotPreview=1} iframe parameter, the chat app) fetch the uncached
+     * {@code /preview-config} endpoint, so just-saved settings always show.
+     *
+     * @return a Response containing the live-preview HTML page
+     * @throws IOException if the preview template cannot be read
+     */
+    @Produces("text/plain")
+    @Path("/preview")
+    @GET
+    public Response preview() throws IOException {
+        String basePath = invoker.getRoutingInfo().getRoutingURL(invoker.getRoutingInfo().getRoutingId(),
+                RoutingInfo.Type.APPLIANCE) + "/chatbot/";
+        return Resources.getTranslatedResource(getClass(), "integration/preview.html",
+                Map.of("_basePath_", basePath));
     }
 
     /**
@@ -121,30 +158,74 @@ public class ChatBotResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public String createSession(Map<String, String> sessionInput) {
+        ChatBotMetrics.recordApiRequest("session");
         String languageCode = sessionInput.get("languageCode");
-        return chatBotApiService.getOrCreateSession(languageCode);
+        String sessionInboxId = chatBotApiService.getOrCreateSession(languageCode);
+        ChatBotMetrics.recordGuestAccountCreated();
+        return sessionInboxId;
     }
 
     @GET
     @Path("/config")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getConfigurationGET() {
+        ChatBotMetrics.recordApiRequest("config");
         final Configuration configuration = chatBotApiService.getConfiguration();
-        return Response.ok(configuration).build();
+        // Customer-embed endpoint: config is user-independent (workspace/invoker-level)
+        // and rarely changes, so both browsers AND the CDN cache it 30 min. Admin saves
+        // can therefore take up to the cache TTLs to reach embeds — the Integration
+        // Settings live preview instead uses /preview-config, which is never cached.
+        return Response.ok(configuration)
+                .header("Cache-Control", Constants.resolveCacheControl(Constants.CACHE_PUBLIC_30MIN))
+                .build();
+    }
+
+    /**
+     * Preview-only config endpoint: identical payload to {@code /config} but never
+     * cached anywhere ({@code no-store} for both browser and CDN), so the Integration
+     * Settings live preview always reflects just-saved settings. A distinct top-level
+     * PATH ({@code /preview-config}, NOT a sub-path of {@code /config}) is used
+     * deliberately: it can never be matched by a CDN cache behavior scoped to
+     * {@code .../config*}, and it reads unambiguously as a separate endpoint.
+     * Consumed by launcher-core and the chat iframe when the preview page sets
+     * {@code window.__chatbotPreviewMode} / passes {@code chatbotPreview=1}.
+     */
+    @GET
+    @Path("/preview-config")
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response getConfigurationPreview() {
+        return Response.ok(chatBotApiService.getConfiguration())
+                .header("Cache-Control", Constants.CACHE_NO_STORE)
+                .build();
     }
 
     @GET
     @Path("/launcher-file")
     @Produces(MediaType.TEXT_PLAIN)
     public Response getCoreLauncherJs() {
-        return Response.ok(Constants.LAUNCHER_CORE_FILENAME).build();
+        ChatBotMetrics.recordApiRequest("launcher-file");
+        return Response.ok(Constants.LAUNCHER_CORE_FILENAME)
+                .header("Cache-Control", Constants.resolveCacheControl(Constants.CACHE_PUBLIC_30MIN))
+                .build();
     }
 
     @GET
     @Path("/supportedLanguages")
     @Produces(MediaType.APPLICATION_JSON)
-    public Set<Language> getSupportedLanguages() {
-        return chatBotApiService.getSupportedLanguages();
+    public Response getSupportedLanguages() {
+        ChatBotMetrics.recordApiRequest("supportedLanguages");
+        // Serialize to plain code/name maps exactly like the list inlined in /config
+        // (ChatBotApiService.getConfiguration): returning the raw kSDK Language set
+        // fails JSON serialization (HTTP 500) — a latent bug in this legacy-fallback
+        // endpoint that went unnoticed because the app prefers the inlined list.
+        final List<Map<String, String>> languages = chatBotApiService.getSupportedLanguages().stream()
+                .map(language -> Map.of("code", language.getCode(), "name", language.getName()))
+                .toList();
+        // Legacy-fallback endpoint (the app prefers the list inlined in /config):
+        // browser + CDN cached 30 min, same policy as /config.
+        return Response.ok(languages)
+                .header("Cache-Control", Constants.resolveCacheControl(Constants.CACHE_PUBLIC_30MIN))
+                .build();
     }
 
     /**
@@ -164,6 +245,7 @@ public class ChatBotResource {
             @QueryParam("inclusive") Boolean inclusive,
             @QueryParam("offset") String offset,
             @DefaultValue("20") @QueryParam("pageSize") int pageSize) {
+        ChatBotMetrics.recordApiRequest("inboxes/messages");
         return chatBotApiService.getMessages(inboxId, offset, inclusive, pageSize);
     }
 
@@ -182,6 +264,7 @@ public class ChatBotResource {
     public MessageDto submitMessage(@PathParam("inboxId") String inboxId,
                                     @PathParam("messageId") String messageId,
                                     FormResponse formResponse) {
+        ChatBotMetrics.recordApiRequest("inboxes/messages/submit");
         return chatBotApiService.submitAnswer(inboxId, messageId, formResponse);
     }
 
@@ -196,6 +279,7 @@ public class ChatBotResource {
     @Produces(MediaType.APPLICATION_JSON)
     @Consumes(MediaType.APPLICATION_JSON)
     public SearchEntitiesResponse searchEntity(SearchEntitiesRequest searchEntitiesRequest) {
+        ChatBotMetrics.recordApiRequest("entities/search");
         EntitySearchService entitySearchService = new EntitySearchService();
         return entitySearchService.searchEntity(searchEntitiesRequest);
     }
@@ -219,14 +303,13 @@ public class ChatBotResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response sendTranscript(String inboxIdJson) throws IOException {
-        LOGGER.info("#####-CHATBOT-Received JSON: {}", inboxIdJson);
-        String uiConfigJsonStr = ChatBotUtil.getJsonConfig(invoker, chatBotExtension);
+        ChatBotMetrics.recordApiRequest("sendTranscript");
+        String uiConfigJsonStr = ChatBotUtil.getJsonConfig(chatBotExtension);
         String dashboardCallbackUrl = null;
         JsonObject jsonObject = JsonParser.parseString(uiConfigJsonStr).getAsJsonObject();
         JsonElement callbackElement = jsonObject.get("Dashboard Callback Url");
         if (callbackElement != null && !callbackElement.isJsonNull()) {
             dashboardCallbackUrl = callbackElement.getAsString();
-            LOGGER.info("#####-CHATBOT-dashboardCallbackUrl : {}", dashboardCallbackUrl);
         }
         if (dashboardCallbackUrl == null || dashboardCallbackUrl.isEmpty()) {
             return Response.status(400).entity("Dashboard Callback URL is not configured. Add 'Dashboard Callback Url' to the uiConfigJson in the extension settings.").build();
@@ -237,15 +320,14 @@ public class ChatBotResource {
 
             String transcript = transcriptUtils.getTranscript(inboxId);
             String url = dashboardCallbackUrl + "/rest/api/transcript";
-            LOGGER.info("#####-CHATBOT-Calling dashboard callback url: {}", url);
             Map<String, Object> requestPayload = new HashMap<>();
             requestPayload.put("Transcript", transcript == null ? "" : transcript);
             requestPayload.put("SessionId", inboxId);
-            LOGGER.info("#####-CHATBOT-Request Payload: {}", requestPayload);
             transcriptUtils.sendPostRequest(url, requestPayload);
             return Response.status(200).build();
         } catch (Exception e) {
             LOGGER.error("#####-CHATBOT-Error extracting inboxId from JSON : {}", e.getMessage(), e);
+            ChatBotMetrics.recordError("ChatBotResource", e);
             return Response.status(400).entity("Failed to process transcript request. Ensure the request body contains valid JSON with an 'inboxId' field.").build();
         }
     }
@@ -255,6 +337,7 @@ public class ChatBotResource {
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
     public Response saveUIConfig(String uiConfigJson) {
+        ChatBotMetrics.recordApiRequest("saveUIConfig");
         // Validate that the input is valid
         try {
             ChatBotUtil.getConfigMap(uiConfigJson);
@@ -268,17 +351,16 @@ public class ChatBotResource {
 
         // Update both cache and database for data consistency
         chatBotExtension.updateUiConfig(uiConfigJson);
-        LOGGER.info("#####-CHATBOT UI CONFIG SAVED TO CACHE AND DATABASE: {}", uiConfigJson);
 
-        // Added following code to save the UI config in attributes as well.
-        // This will be used in case if we revert version of chatbot to previous version (from 2.0.17)
-        final Map<String, Object> updatedAttributes = new HashMap<>(invoker.getAttributes());
-        updatedAttributes.put(Constants.UI_CONFIG_JSON, uiConfigJson);
-        try {
-            invokerConfiguration.saveChanges(invoker.getWorkspaceId(), invoker.getInvokerId(), updatedAttributes, "live", false);
-        } catch (Exception e) {
-            LOGGER.error("Error saving UI config to attributes: {}", e.getMessage());
-        }
+        // Hand off to the sweep loop so the refill / drain runs in its own
+        // thread-local context (captured at pool construction time, has
+        // working KSDK auth). Doing this inline from saveUIConfig fails
+        // with MustAuthenticateException because the Studio admin request
+        // doesn't carry a chatbot-session-id cookie, so the chatbot's
+        // per-request AuthorizationContext is unauthenticated and any KSDK
+        // round-trip from a captured-and-replayed copy of it returns 500.
+        chatBotPool.wakeSweep();
+        auditService.recordConfigChanged();
 
         // Return success response with message
         Map<String, Object> successResponse = new HashMap<>();

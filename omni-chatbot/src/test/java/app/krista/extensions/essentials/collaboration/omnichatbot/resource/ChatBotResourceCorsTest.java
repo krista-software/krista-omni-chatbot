@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.resource;
@@ -21,10 +21,11 @@ package app.krista.extensions.essentials.collaboration.omnichatbot.resource;
 import app.krista.extension.executor.Invoker;
 import app.krista.extension.request.RoutingInfo;
 import app.krista.extensions.essentials.collaboration.omnichatbot.ChatBotExtension;
+import app.krista.extensions.essentials.collaboration.omnichatbot.ChatBotPool;
+import app.krista.extensions.essentials.collaboration.omnichatbot.audit.AuditService;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ChatBotApiService;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ChatBotUIService;
 import app.krista.extensions.essentials.collaboration.omnichatbot.utils.TranscriptUtils;
-import app.krista.ksdk.invoker.InvokerConfiguration;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -67,15 +68,18 @@ class ChatBotResourceCorsTest {
     private RoutingInfo routingInfo;
 
     @Mock
-    private InvokerConfiguration invokerConfiguration;
+    private ChatBotExtension chatBotExtension;
 
     @Mock
-    private ChatBotExtension chatBotExtension;
+    private ChatBotPool chatBotPool;
+
+    @Mock
+    private AuditService auditService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        resource = new ChatBotResource(chatBotApiService, chatBotUIService, invoker, transcriptUtils, invokerConfiguration, chatBotExtension);
+        resource = new ChatBotResource(chatBotApiService, chatBotUIService, invoker, transcriptUtils, chatBotExtension, chatBotPool, auditService);
 
         // Setup common mock behaviors
         when(invoker.getRoutingInfo()).thenReturn(routingInfo);
@@ -103,7 +107,7 @@ class ChatBotResourceCorsTest {
             configMap.put("title", "Test Chatbot");
             when(chatBotApiService.getConfiguration()).thenReturn(
                     new app.krista.extensions.essentials.collaboration.omnichatbot.resource.dto.Configuration(
-                            configMap, "ws1", "node1", "icon.png", false, "acc1"
+                            configMap, "ws1", "node1", "icon.png", false, "acc1", java.util.List.of()
                     )
             );
 
@@ -124,7 +128,7 @@ class ChatBotResourceCorsTest {
             configMap.put("title", "Test Chatbot");
             when(chatBotApiService.getConfiguration()).thenReturn(
                     new app.krista.extensions.essentials.collaboration.omnichatbot.resource.dto.Configuration(
-                            configMap, "ws1", "node1", "icon.png", false, "acc1"
+                            configMap, "ws1", "node1", "icon.png", false, "acc1", java.util.List.of()
                     )
             );
 
@@ -144,7 +148,7 @@ class ChatBotResourceCorsTest {
             Map<String, Object> configMap = new HashMap<>();
             when(chatBotApiService.getConfiguration()).thenReturn(
                     new app.krista.extensions.essentials.collaboration.omnichatbot.resource.dto.Configuration(
-                            configMap, "ws1", "node1", "icon.png", false, "acc1"
+                            configMap, "ws1", "node1", "icon.png", false, "acc1", java.util.List.of()
                     )
             );
 
@@ -191,10 +195,11 @@ class ChatBotResourceCorsTest {
             when(chatBotApiService.getSupportedLanguages()).thenReturn(languages);
 
             // When
-            Set<app.krista.ksdk.nlp.Language> response = resource.getSupportedLanguages();
+            Response response = resource.getSupportedLanguages();
 
             // Then
-            assertThat(response).isNotNull();
+            assertThat(response.getStatus()).isEqualTo(200);
+            assertThat(response.getEntity()).isNotNull();
         }
     }
 
@@ -242,9 +247,7 @@ class ChatBotResourceCorsTest {
         void shouldReturnResponseForSendTranscriptSuccess() throws IOException {
             // Given
             String inboxIdJson = "{\"inboxId\":\"inbox123\"}";
-            Map<String, Object> attributes = new HashMap<>();
-            attributes.put("uiConfigJson", "{\"Dashboard Callback Url\":\"https://test.com\"}");
-            when(invoker.getAttributes()).thenReturn(attributes);
+            when(chatBotExtension.getCachedUiConfig()).thenReturn("{\"Dashboard Callback Url\":\"https://test.com\"}");
             when(transcriptUtils.extractInboxIdValue(anyString())).thenReturn("inbox123");
             when(transcriptUtils.getTranscript(anyString())).thenReturn("Test transcript");
 
@@ -261,7 +264,7 @@ class ChatBotResourceCorsTest {
         void shouldReturnResponseForSendTranscriptMissingConfig() throws IOException {
             // Given
             String inboxIdJson = "{\"inboxId\":\"inbox123\"}";
-            when(invoker.getAttributes()).thenReturn(new HashMap<>());
+            when(chatBotExtension.getCachedUiConfig()).thenReturn(null);
 
             // When
             Response response = resource.sendTranscript(inboxIdJson);
@@ -277,9 +280,7 @@ class ChatBotResourceCorsTest {
         void shouldReturnResponseForSendTranscriptInvalidJson() throws IOException {
             // Given
             String inboxIdJson = "invalid json";
-            Map<String, Object> attributes = new HashMap<>();
-            attributes.put("uiConfigJson", "{\"Dashboard Callback Url\":\"https://test.com\"}");
-            when(invoker.getAttributes()).thenReturn(attributes);
+            when(chatBotExtension.getCachedUiConfig()).thenReturn("{\"Dashboard Callback Url\":\"https://test.com\"}");
             when(transcriptUtils.extractInboxIdValue(anyString())).thenThrow(new RuntimeException("Invalid JSON"));
 
             // When
@@ -301,10 +302,10 @@ class ChatBotResourceCorsTest {
         void shouldReturnResponseForGetUIAssets() throws IOException {
             // Given
             Response mockResponse = Response.ok("test content").build();
-            when(chatBotUIService.getResponse(anyString(),any())).thenReturn(mockResponse);
+            when(chatBotUIService.getResponse(anyString(), any(), any())).thenReturn(mockResponse);
 
             // When
-            Response response = resource.getUIAssets("https://test.com/ui/", "index.html");
+            Response response = resource.getUIAssets("https://test.com/ui/", "gzip", "index.html");
 
             // Then
             verifyCorsHeaders(response);

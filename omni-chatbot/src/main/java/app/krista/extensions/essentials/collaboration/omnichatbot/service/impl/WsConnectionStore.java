@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.service.impl;
@@ -22,8 +22,6 @@ import app.krista.extension.request.protos.ws.WsConnection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Objects;
 import java.util.AbstractMap;
@@ -36,11 +34,24 @@ import java.util.concurrent.ConcurrentHashMap;
  * a ConcurrentHashMap with an initial capacity of 128. It enables quick lookup
  * of connections by account ID or connection ID for message delivery.
  *
+ * <p>Two indices are kept in sync: {@link #connectionStore} maps
+ * {@code accountId → (connectionId, WsConnection)} for the primary write/read
+ * path, and {@link #connectionIdToAccountId} is a reverse index used by
+ * {@link #getAccountIdByWsConnectionId(String)} so that lookups by
+ * connectionId are O(1) instead of an O(N) scan of the primary map. The
+ * reverse index materially affects WS-upgrade latency under load — the
+ * authenticator calls it on every upgrade, and on a fresh connection the
+ * primary-map scan never matched but still walked every entry.
+ *
  * <p>Note: This store is local to each node. In a multi-node deployment,
  * each node maintains its own connection store.
  */
 public class WsConnectionStore {
     private static final Map<String, AbstractMap.SimpleEntry<String, WsConnection>> connectionStore = new ConcurrentHashMap<>(128);
+    private static final Map<String, String> connectionIdToAccountId = new ConcurrentHashMap<>(128);
+    // Connection-open timestamps (epoch millis) keyed by accountId, used by telemetry
+    // to compute connection lifetime for the chatbot.session.duration metric.
+    private static final Map<String, Long> connectionTimestamps = new ConcurrentHashMap<>(128);
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WsConnectionStore.class);
 
@@ -59,31 +70,29 @@ public class WsConnectionStore {
         if (Objects.isNull(accountId)) {
             throw new IllegalStateException("WebSocket connection failed: No authenticated account found for connection '" + wsConnection.getConnectionId() + "'. Ensure the user is authenticated before establishing a WebSocket connection.");
         }
-        LOGGER.warn("#####-CHATBOT-Adding connection details into the Local connection store map for accountId: {} and connectionId: {}", accountId, wsConnection.getConnectionId());
-        String hostname = null;
-        try {
-            hostname = InetAddress.getLocalHost().getHostName();
-        } catch (UnknownHostException e) {
-            LOGGER.error("#####-CHATBOT-Failed to resolve hostname");
+        AbstractMap.SimpleEntry<String, WsConnection> previous = connectionStore.put(
+                accountId, new AbstractMap.SimpleEntry<>(wsConnection.getConnectionId(), wsConnection));
+        if (previous != null && !Objects.equals(previous.getKey(), wsConnection.getConnectionId())) {
+            connectionIdToAccountId.remove(previous.getKey());
         }
-        LOGGER.warn("#####-CHATBOT-saveConnectionAuthorization | processId: {} and serverId: {}", ProcessHandle.current().pid(), hostname);
-        connectionStore.put(accountId, new AbstractMap.SimpleEntry<>(wsConnection.getConnectionId(), wsConnection));
-        LOGGER.warn("#####-CHATBOT-saveConnectionAuthorization | Connection store size: {}", connectionStore.size());
+        connectionIdToAccountId.put(wsConnection.getConnectionId(), accountId);
+        connectionTimestamps.put(accountId, System.currentTimeMillis());
     }
 
     /**
      * Retrieves the account ID associated with a WebSocket connection ID.
      *
-     * <p>Searches through all stored connections to find the account ID
-     * that owns the specified connection ID.
+     * <p>O(1) lookup via the {@link #connectionIdToAccountId} reverse index.
+     * The previous implementation streamed {@link #connectionStore} to find
+     * a matching connectionId, which scaled poorly under load — every WS
+     * upgrade calls this method, and on a fresh connectionId the scan
+     * iterated every entry without ever matching.
      *
      * @param connectionId the WebSocket connection ID to look up
      * @return the account ID associated with the connection, or {@code null} if not found
      */
     public static String getAccountIdByWsConnectionId(String connectionId) {
-        return connectionStore.entrySet().stream()
-                .filter(entry -> Objects.equals(connectionId, entry.getValue().getKey()))
-                .map(Map.Entry::getKey).findFirst().orElse(null);
+        return connectionIdToAccountId.get(connectionId);
     }
 
     /**
@@ -95,7 +104,6 @@ public class WsConnectionStore {
      */
     public static WsConnection getWsConnectionByAccountId(String accountId) {
         LOGGER.warn("Checking and returning websocket connection for the accountId: {}", accountId);
-        LOGGER.warn("Connection store size: {}", connectionStore.size());
         if (!Objects.isNull(accountId)) {
             AbstractMap.SimpleEntry<String, WsConnection> wsConnectionEntry = connectionStore.get(accountId);
             if (!Objects.isNull(wsConnectionEntry)) {
@@ -121,6 +129,36 @@ public class WsConnectionStore {
             throw new IllegalStateException("Cannot remove WebSocket connection: Account ID is required but was not provided.");
         }
         LOGGER.warn("Removing connection from the local cache for the accountId: {}", accountId);
-        connectionStore.remove(accountId);
+        AbstractMap.SimpleEntry<String, WsConnection> removed = connectionStore.remove(accountId);
+        if (removed != null) {
+            connectionIdToAccountId.remove(removed.getKey());
+        }
+        connectionTimestamps.remove(accountId);
+    }
+
+    /**
+     * Returns the number of active WebSocket connections on this node.
+     *
+     * @return the count of active connections
+     */
+    public static int getActiveConnectionCount() {
+        return connectionStore.size();
+    }
+
+    /**
+     * Returns the connection duration in seconds for the specified account.
+     *
+     * <p>Calculates the elapsed time since the connection was established.
+     * Returns -1 if no timestamp is recorded for the account.
+     *
+     * @param accountId the account ID to look up
+     * @return the duration in seconds, or -1 if not found
+     */
+    public static double getConnectionDurationSeconds(String accountId) {
+        Long connectTime = connectionTimestamps.get(accountId);
+        if (connectTime == null) {
+            return -1;
+        }
+        return (System.currentTimeMillis() - connectTime) / 1000.0;
     }
 }

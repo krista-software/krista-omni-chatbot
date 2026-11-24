@@ -1,0 +1,1098 @@
+/* Modern Chatbot Form Message Styling */
+.form-message-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.message-text {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  word-break: break-word;
+  white-space: pre-wrap;
+  font-family: "Roboto", "Helvetica", Arial, sans-serif;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+}
+
+/* User message (outgoing) - use white or theme textColor */
+:host-context(.user-message) .message-text {
+  color: var(--krista-user-text-color, white) !important;
+}
+
+/* User message form fields - make all text white for readability on blue background */
+/* Using both :host-context and direct class selectors for maximum compatibility */
+/* The CSS variable --krista-user-text-color is set by theme.service.ts:
+   - If textColor is provided in config -> use that color
+   - If textColor is NOT provided -> defaults to 'white' (line 62-63 of theme.service.ts)
+*/
+:host-context(.user-message) .krista-field .mat-mdc-form-field-label,
+:host-context(.user-message) .krista-field .mat-mdc-input-element,
+:host-context(.user-message) .krista-field .mat-mdc-select-value-text,
+:host-context(.user-message) .switch-field .switch-label,
+:host-context(.user-message) .checkboxes-field .checkboxes-label,
+:host-context(.user-message) .radio-field .radio-label,
+:host-context(.user-message) .rating-field .rating-label,
+:host-context(.user-message) .label-field .label-content,
+:host-context(.user-message) .file-field .file-label,
+:host-context(.user-message) .mat-mdc-checkbox-label,
+:host-context(.user-message) .mat-mdc-radio-button .mdc-label,
+.user-message .krista-field .mat-mdc-form-field-label,
+.user-message .krista-field .mat-mdc-input-element,
+.user-message .krista-field .mat-mdc-select-value-text,
+.user-message .switch-field .switch-label,
+.user-message .checkboxes-field .checkboxes-label,
+.user-message .radio-field .radio-label,
+.user-message .rating-field .rating-label,
+.user-message .label-field .label-content,
+.user-message .file-field .file-label,
+.user-message .mat-mdc-checkbox-label,
+.user-message .mat-mdc-radio-button .mdc-label {
+  color: var(--krista-user-text-color, #ffffff) !important;
+}
+
+/* Comprehensive override for all form field text in user messages */
+:host-context(.user-message) .form-field label,
+:host-context(.user-message) .form-field input,
+:host-context(.user-message) .form-field textarea,
+:host-context(.user-message) .form-field select,
+:host-context(.user-message) .form-field .mat-mdc-select-value,
+:host-context(.user-message) .form-field .mat-mdc-form-field-infix,
+:host-context(.user-message) .form-field .mdc-text-field__input,
+:host-context(.user-message) .field-label,
+.user-message .form-field label,
+.user-message .form-field input,
+.user-message .form-field textarea,
+.user-message .form-field select,
+.user-message .form-field .mat-mdc-select-value,
+.user-message .form-field .mat-mdc-form-field-infix,
+.user-message .form-field .mdc-text-field__input,
+.user-message .field-label {
+  color: var(--krista-user-text-color, #ffffff) !important;
+}
+
+/* Override all field-label elements specifically */
+:host-context(.user-message) .pick-one-field .field-label,
+:host-context(.user-message) .pick-many-field .field-label,
+:host-context(.user-message) .switch-field .field-label,
+.user-message .pick-one-field .field-label,
+.user-message .pick-many-field .field-label,
+.user-message .switch-field .field-label {
+  color: var(--krista-user-text-color, #ffffff) !important;
+}
+
+/* CRITICAL: Override CSS variable --krista-text-primary for user messages */
+/* The base styles use var(--krista-text-primary) which is always set to #212121 by theme.service.ts */
+/* We need to override the actual color property with !important to take precedence */
+:host-context(.user-message) .form-field,
+:host-context(.user-message) .krista-field,
+:host-context(.user-message) .switch-field,
+:host-context(.user-message) .rating-field,
+:host-context(.user-message) .checkboxes-field,
+:host-context(.user-message) .file-field,
+:host-context(.user-message) .label-field,
+:host-context(.user-message) .pick-one-field,
+:host-context(.user-message) .pick-many-field,
+.user-message .form-field,
+.user-message .krista-field,
+.user-message .switch-field,
+.user-message .rating-field,
+.user-message .checkboxes-field,
+.user-message .file-field,
+.user-message .label-field,
+.user-message .pick-one-field,
+.user-message .pick-many-field {
+  /* Override the CSS variable locally for user messages */
+  --krista-text-primary: var(--krista-user-text-color, #ffffff) !important;
+}
+
+/* Welcome message - use theme textColor */
+:host-context(.welcome-message) .message-text {
+  color: var(--krista-text-primary, white);
+}
+
+.form-content {
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  /*padding: 4px;*/
+}
+
+.form-fields {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  gap: 1rem 0.5rem;
+}
+
+.form-field {
+  overflow: visible;
+  max-width: 100%;
+}
+
+/* Fixed px widths matching React (Small=250, Medium=375, Large=500).
+   max-width: 100% prevents overflow on narrow screens.
+   Bubble uses fit-content so it naturally wraps around the fields. */
+.form-field.small {
+  width: 250px;
+}
+
+.form-field.medium {
+  width: 375px;
+}
+
+.form-field.large {
+  width: 500px;
+}
+
+.form-field.field-error .mat-mdc-form-field {
+  --mdc-outlined-text-field-error-outline-color: #f44336;
+  --mdc-outlined-text-field-error-focus-outline-color: #f44336;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.text-field,
+.location-field {
+  width: 100%;
+}
+
+.required-asterisk {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+/* Form submitted indicator */
+.form-submitted-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 16px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+  border: 1px solid #81c784;
+  border-radius: 12px;
+  color: #2e7d32;
+  box-shadow: 0 2px 8px rgba(76, 175, 80, 0.15);
+}
+
+.submitted-icon {
+  color: #4caf50;
+  margin-right: 10px;
+  font-size: 22px;
+  width: 22px;
+  height: 22px;
+}
+
+.submitted-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* Timer expired indicator for history messages */
+.timer-expired {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  min-height: 36px;
+  opacity: 0.7;
+}
+
+.timer-expired-wrapper {
+  position: relative;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+::ng-deep .timer-expired-spinner circle {
+  stroke: #f44336 !important;
+}
+
+.timer-expired-icon {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timer-expired-icon mat-icon {
+  font-size: 1rem;
+  width: 16px;
+  height: 16px;
+}
+
+.submit-button {
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+  background: var(--krista-primary, #0177C6) !important;
+  border-radius: 24px !important;
+  padding: 10px 24px !important;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: all 0.2s ease !important;
+}
+
+.submit-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+  filter: brightness(1.1);
+}
+
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.submit-button:disabled {
+  background: #e0e0e0 !important;
+  box-shadow: none;
+}
+
+.submit-button mat-icon {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+}
+
+/* Loader styling in submit button */
+.submit-button mat-spinner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.submit-button mat-spinner ::ng-deep circle {
+  stroke: var(--krista-text-primary, #212121);
+}
+
+.error-messages {
+  max-height: 3rem;
+  overflow: auto;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #f44336;
+  font-size: 0.75rem;
+  margin-bottom: 4px;
+}
+
+.error-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.error-text {
+  flex: 1;
+}
+
+/* Krista field styling to match original TextFieldStyled component exactly */
+.krista-field {
+  width: 100%;
+}
+
+/* Override outline appearance to look like standard variant */
+.krista-field .mat-mdc-form-field {
+  margin-top: 0;
+  font-size: var(--kr-font-size-sm);
+}
+
+/* Hide the outline and add bottom border like standard variant */
+.krista-field .mdc-notched-outline__leading,
+.krista-field .mdc-notched-outline__notch,
+.krista-field .mdc-notched-outline__trailing {
+  border: none !important;
+}
+
+.krista-field .mat-mdc-form-field-flex {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0;
+}
+
+.krista-field .mat-mdc-form-field-flex:hover {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.87);
+}
+
+.krista-field.mat-focused .mat-mdc-form-field-flex {
+  border-bottom: 2px solid var(--krista-primary);
+}
+
+/* Label styling to match original app exactly */
+.krista-field .mat-mdc-form-field-label {
+  white-space: initial !important;
+  position: relative !important;
+  transform: none !important;
+  font-size: 0.8125rem !important;
+  word-break: break-word;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87)) !important;
+  font-weight: 500 !important;
+  top: 0 !important;
+  left: 0 !important;
+}
+
+/* Override label color for user messages */
+:host-context(.user-message) .krista-field .mat-mdc-form-field-label,
+.user-message .krista-field .mat-mdc-form-field-label {
+  color: var(--krista-user-text-color, #ffffff) !important;
+}
+
+/* Input styling */
+.krista-field .mat-mdc-input-element {
+  padding: 6px 0 !important;
+  font-size: var(--kr-font-size-sm);
+  margin-top: 16px;
+}
+
+/* Override input element color for user messages */
+:host-context(.user-message) .krista-field .mat-mdc-input-element,
+.user-message .krista-field .mat-mdc-input-element {
+  color: var(--krista-user-text-color, #ffffff) !important;
+}
+
+/* Remove spinner arrows from number inputs */
+/* WebKit browsers (Chrome, Safari, Edge) */
+.krista-field input[type="number"]::-webkit-outer-spin-button,
+.krista-field input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+/* Firefox */
+.krista-field input[type="number"] {
+  -moz-appearance: textfield !important;
+}
+
+/* Additional number input styling */
+.number-field input[type="number"]::-webkit-outer-spin-button,
+.number-field input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none !important;
+  margin: 0 !important;
+}
+
+.number-field input[type="number"] {
+  -moz-appearance: textfield !important;
+}
+
+/* Helper text and error styling */
+.krista-field .mat-mdc-form-field-hint,
+.krista-field .mat-mdc-form-field-error {
+  letter-spacing: initial;
+}
+
+/* Required asterisk styling */
+.krista-field .required-asterisk {
+  color: #f44336;
+}
+
+/* Switch field styling */
+.switch-field .switch-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.switch-field .switch-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  margin: 0;
+}
+
+/* Override switch label color for user messages */
+:host-context(.user-message) .switch-field .switch-label,
+.user-message .switch-field .switch-label {
+  color: var(--krista-user-text-color, #ffffff) !important;
+}
+
+.switch-field .mat-mdc-slide-toggle {
+  width: 32px;
+  height: 18px;
+}
+
+.switch-field .field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+}
+
+/* Rating field styling */
+.rating-field .rating-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.rating-field .rating-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  margin: 0;
+}
+
+/* Override rating label color for user messages */
+:host-context(.user-message) .rating-field .rating-label,
+.user-message .rating-field .rating-label {
+  color: var(--krista-user-text-color, #ffffff) !important;
+}
+
+.rating-field .rating-stars {
+  display: flex;
+  gap: 4px;
+}
+
+.rating-field .star-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: rgba(0, 0, 0, 0.26);
+}
+
+.rating-field .star-button.filled {
+  color: #1976d2; /* Same blue color as toggle switch */
+}
+
+.rating-field .star-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.rating-field .star-button .mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.rating-field .field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+}
+
+/* Checkboxes field styling */
+.checkboxes-field .checkboxes-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.checkboxes-field .checkboxes-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  margin: 0;
+}
+
+/* Override checkboxes label color for user messages */
+:host-context(.user-message) .checkboxes-field .checkboxes-label,
+.user-message .checkboxes-field .checkboxes-label {
+  color: var(--krista-user-text-color, #ffffff) !important;
+}
+
+.checkboxes-field .checkbox-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checkboxes-field .mat-mdc-checkbox {
+  font-size: var(--kr-font-size-sm);
+}
+
+.checkboxes-field .field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+}
+
+/* File field styling */
+.file-field .file-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 16px 0;
+}
+
+.file-field .file-label {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  margin: 0;
+}
+
+/* Override file label color for user messages */
+:host-context(.user-message) .file-field .file-label,
+.user-message .file-field .file-label {
+  color: var(--krista-user-text-color, #ffffff) !important;
+}
+
+.file-field .mat-mdc-raised-button {
+  text-transform: none;
+  font-weight: 500;
+  border-radius: 4px;
+}
+
+.file-field .mat-mdc-raised-button .mat-icon {
+  margin-right: 8px;
+}
+
+.file-field .file-info {
+  font-size: var(--kr-font-size-sm);
+  color: rgba(0, 0, 0, 0.6);
+}
+
+.file-field .field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+}
+
+/* Label field styling */
+.label-field .label-content {
+  font-size: var(--kr-font-size-sm);
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  padding: 6px 0;
+  margin: 16px 0;
+}
+
+/* Override label field content color for user messages */
+:host-context(.user-message) .label-field .label-content,
+.user-message .label-field .label-content {
+  color: var(--krista-user-text-color, #ffffff) !important;
+}
+
+/* Location field specific styles */
+.location-field .mat-mdc-form-field-suffix {
+  display: flex;
+  align-items: center;
+}
+
+.location-field button[mat-icon-button] {
+  color: var(--krista-primary);
+}
+
+.location-field button[mat-icon-button]:hover {
+  background-color: rgba(1, 119, 198, 0.04);
+}
+
+/* Error state styling */
+.field-error input {
+  border-color: #f44336 !important;
+}
+
+.field-error .mat-mdc-form-field-label {
+  color: #f44336 !important;
+}
+
+/* Responsive: max-width: 100% on each .form-field.* already constrains
+   fields to their parent's width, matching the original React/MUI behaviour.
+   No hard breakpoint needed — fields scale smoothly as the bubble shrinks. */
+
+/* Custom Toggle Switch */
+.custom-toggle {
+  display: inline-block;
+  cursor: pointer;
+  user-select: none;
+  margin-top: 8px;
+}
+
+.custom-toggle.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.toggle-track {
+  width: 42px;
+  height: 24px;
+  background-color: #ccc;
+  border-radius: 12px;
+  position: relative;
+  transition: background-color 0.2s ease;
+  border: 2px solid #ccc;
+}
+
+.custom-toggle.checked .toggle-track {
+  background-color: #1976d2;
+  border-color: #1976d2;
+}
+
+.toggle-thumb {
+  width: 18px;
+  height: 18px;
+  background-color: white;
+  border-radius: 50%;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  transition: transform 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.custom-toggle.checked .toggle-thumb {
+  transform: translateX(18px);
+}
+
+.custom-toggle.disabled .toggle-track {
+  background-color: #e0e0e0;
+  border-color: #e0e0e0;
+}
+
+.custom-toggle.disabled .toggle-thumb {
+  background-color: #f5f5f5;
+}
+
+/* Pick One Field (Custom Radio buttons) */
+.pick-one-field .field-container {
+  margin-bottom: 16px;
+}
+
+/* No .field-label rules here. Label typography is owned by the shared
+   .field-label rule in shared-field-styles.css. Rules written here cannot
+   reach it anyway: this component uses emulated encapsulation, so its
+   selectors are scoped to its own _ngcontent id while the label element
+   belongs to the child field component's template. */
+
+.pick-one-field .radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pick-one-field .radio-option-wrapper {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 6px 0;
+  user-select: none;
+}
+
+.pick-one-field .radio-option-wrapper.disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.pick-one-field .radio-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.pick-one-field .radio-circle {
+  width: 20px;
+  height: 20px;
+  border: 2px solid #666;
+  border-radius: 50%;
+  margin-right: 12px;
+  position: relative;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.pick-one-field .radio-input:checked + .radio-circle {
+  border-color: #1976d2;
+}
+
+.pick-one-field .radio-input:checked + .radio-circle::after {
+  content: '';
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #1976d2;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.pick-one-field .radio-label {
+  font-size: var(--kr-font-size-sm);
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Override radio label color for user messages */
+:host-context(.user-message) .pick-one-field .radio-label,
+.user-message .pick-one-field .radio-label {
+  color: var(--krista-user-text-color, #ffffff) !important;
+}
+
+.pick-one-field .radio-option-wrapper:hover .radio-circle {
+  border-color: #1976d2;
+}
+
+.pick-one-field .radio-option-wrapper.disabled:hover .radio-circle {
+  border-color: #666;
+}
+
+/* Switch Field Styling */
+.switch-field .field-container {
+  margin-bottom: 16px;
+}
+
+/* Switch Field (Yes/No Toggle) */
+.switch-field .field-container {
+  margin-bottom: 16px;
+}
+
+.switch-field .toggle-switch {
+  margin-left: 0;
+}
+
+/* Custom toggle-like styling for checkbox in switch field */
+.switch-field .toggle-switch .mat-mdc-checkbox {
+  --mdc-checkbox-selected-icon-color: #fff;
+  --mdc-checkbox-selected-hover-icon-color: #fff;
+  --mdc-checkbox-selected-focus-icon-color: #fff;
+  --mdc-checkbox-selected-pressed-icon-color: #fff;
+}
+
+.switch-field .toggle-switch .mat-mdc-checkbox .mdc-checkbox {
+  width: 42px;
+  height: 24px;
+}
+
+.switch-field .toggle-switch .mat-mdc-checkbox .mdc-checkbox__native-control {
+  width: 42px;
+  height: 24px;
+}
+
+.switch-field .toggle-switch .mat-mdc-checkbox .mdc-checkbox__background {
+  width: 42px;
+  height: 24px;
+  border-radius: 12px;
+  border: 2px solid #ccc;
+  background-color: #ccc;
+  transition: all 0.2s ease;
+}
+
+.switch-field .toggle-switch .mat-mdc-checkbox.mdc-checkbox--selected .mdc-checkbox__background {
+  background-color: var(--mdc-theme-primary, #1976d2);
+  border-color: var(--mdc-theme-primary, #1976d2);
+}
+
+.switch-field .toggle-switch .mat-mdc-checkbox .mdc-checkbox__checkmark {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background-color: #fff;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.switch-field .toggle-switch .mat-mdc-checkbox.mdc-checkbox--selected .mdc-checkbox__checkmark {
+  transform: translateX(18px);
+}
+
+.switch-field .toggle-switch .mat-mdc-checkbox .mdc-checkbox__checkmark-path {
+  display: none;
+}
+
+/* Pick One Field (Radio buttons) */
+.pick-one-field .field-container {
+  margin-bottom: 16px;
+}
+
+.pick-one-field .radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pick-one-field .radio-option {
+  margin-left: -10px;
+  font-size: var(--kr-font-size-sm);
+}
+
+.pick-one-field .radio-option .mat-radio-label-content {
+  font-size: var(--kr-font-size-sm);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+}
+
+/* Pick Many Field (Checkboxes) - Match App */
+.pick-many-field .field-container {
+  margin-bottom: 16px;
+}
+
+.pick-many-field .checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pick-many-field .checkbox-option {
+  margin-left: -10px;
+  margin-right: 0;
+  font-size: var(--kr-font-size-sm);
+  max-width: 100%;
+  word-break: normal;
+}
+
+/* Match original app checkbox styling - All States (Updated for Angular Material 19) */
+.pick-many-field .checkbox-option {
+  margin-left: -10px;
+  margin-right: 0;
+  font-size: var(--kr-font-size-sm);
+  max-width: 100%;
+  word-break: normal;
+}
+
+/* Main checkbox container */
+.pick-many-field .checkbox-option .mat-mdc-checkbox {
+  padding: 6px 0;
+  --mdc-checkbox-state-layer-size: 40px;
+  --mdc-checkbox-selected-icon-color: #fff;
+  --mdc-checkbox-selected-hover-icon-color: #fff;
+  --mdc-checkbox-selected-focus-icon-color: #fff;
+  --mdc-checkbox-selected-pressed-icon-color: #fff;
+  --mdc-checkbox-unselected-icon-color: rgba(0, 0, 0, 0.54);
+  --mdc-checkbox-unselected-hover-icon-color: #1976d2;
+  --mdc-checkbox-unselected-focus-icon-color: #1976d2;
+  --mdc-checkbox-unselected-pressed-icon-color: rgba(0, 0, 0, 0.54);
+  --mdc-checkbox-selected-checkmark-color: #fff;
+  --mdc-checkbox-selected-focus-state-layer-color: #1976d2;
+  --mdc-checkbox-selected-hover-state-layer-color: #1976d2;
+  --mdc-checkbox-selected-pressed-state-layer-color: #1976d2;
+  --mdc-checkbox-unselected-focus-state-layer-color: rgba(0, 0, 0, 0.12);
+  --mdc-checkbox-unselected-hover-state-layer-color: rgba(0, 0, 0, 0.04);
+  --mdc-checkbox-unselected-pressed-state-layer-color: rgba(0, 0, 0, 0.12);
+}
+
+/* Checkbox size and spacing */
+.pick-many-field .checkbox-option .mat-mdc-checkbox .mdc-checkbox {
+  width: 18px;
+  height: 18px;
+  padding: 6px;
+}
+
+/* Unchecked state */
+.pick-many-field .checkbox-option .mat-mdc-checkbox:not(.mat-mdc-checkbox-checked) {
+  --mdc-checkbox-unselected-icon-color: rgba(0, 0, 0, 0.54);
+}
+
+/* Checked state */
+.pick-many-field .checkbox-option .mat-mdc-checkbox.mat-mdc-checkbox-checked {
+  --mdc-checkbox-selected-icon-color: #1976d2;
+  --mdc-checkbox-selected-checkmark-color: #fff;
+}
+
+/* Hover effects */
+.pick-many-field .checkbox-option .mat-mdc-checkbox:hover:not(.mat-mdc-checkbox-checked) {
+  --mdc-checkbox-unselected-hover-icon-color: #1976d2;
+  --mdc-checkbox-unselected-hover-state-layer-color: rgba(25, 118, 210, 0.04);
+}
+
+.pick-many-field .checkbox-option .mat-mdc-checkbox:hover.mat-mdc-checkbox-checked {
+  --mdc-checkbox-selected-hover-icon-color: #1565c0;
+  --mdc-checkbox-selected-hover-state-layer-color: rgba(21, 101, 192, 0.12);
+}
+
+/* Focus effects */
+.pick-many-field .checkbox-option .mat-mdc-checkbox:focus.mat-mdc-checkbox-checked {
+  --mdc-checkbox-selected-focus-state-layer-color: rgba(25, 118, 210, 0.12);
+}
+
+.pick-many-field .checkbox-option .mat-mdc-checkbox:focus:not(.mat-mdc-checkbox-checked) {
+  --mdc-checkbox-unselected-focus-state-layer-color: rgba(0, 0, 0, 0.12);
+}
+
+/* Ripple effects */
+.pick-many-field .checkbox-option .mat-mdc-checkbox .mat-mdc-checkbox-ripple {
+  color: #1976d2;
+}
+
+.pick-many-field .checkbox-option .mat-mdc-checkbox.mat-mdc-checkbox-checked .mat-mdc-checkbox-ripple {
+  color: #1976d2;
+}
+
+/* Label styling */
+.pick-many-field .checkbox-option .mat-mdc-checkbox .mdc-label {
+  font-size: var(--kr-font-size-sm);
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  word-break: normal;
+}
+
+/* Alternative label selector for different Angular Material versions */
+.pick-many-field .checkbox-option .mat-mdc-checkbox .mat-mdc-checkbox-label {
+  font-size: var(--kr-font-size-sm);
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  word-break: normal;
+}
+
+/* Override checkbox label colors for user messages */
+:host-context(.user-message) .pick-many-field .checkbox-option .mat-mdc-checkbox .mdc-label,
+:host-context(.user-message) .pick-many-field .checkbox-option .mat-mdc-checkbox .mat-mdc-checkbox-label,
+.user-message .pick-many-field .checkbox-option .mat-mdc-checkbox .mdc-label,
+.user-message .pick-many-field .checkbox-option .mat-mdc-checkbox .mat-mdc-checkbox-label {
+  color: var(--krista-user-text-color, #ffffff) !important;
+}
+
+/* Disabled state */
+.pick-many-field .checkbox-option .mat-mdc-checkbox.mat-mdc-checkbox-disabled {
+  --mdc-checkbox-disabled-selected-icon-color: rgba(0, 0, 0, 0.26);
+  --mdc-checkbox-disabled-unselected-icon-color: rgba(0, 0, 0, 0.26);
+  opacity: 0.6;
+}
+
+/* Disabled label */
+.pick-many-field .checkbox-option .mat-mdc-checkbox.mat-mdc-checkbox-disabled .mdc-label,
+.pick-many-field .checkbox-option .mat-mdc-checkbox.mat-mdc-checkbox-disabled .mat-mdc-checkbox-label {
+  color: rgba(0, 0, 0, 0.38);
+  cursor: not-allowed;
+}
+
+/* Active/pressed state */
+.pick-many-field .checkbox-option .mat-mdc-checkbox:active {
+  --mdc-checkbox-selected-pressed-state-layer-color: rgba(25, 118, 210, 0.12);
+  --mdc-checkbox-unselected-pressed-state-layer-color: rgba(0, 0, 0, 0.12);
+}
+
+/* Ensure proper spacing and alignment */
+.pick-many-field .checkbox-option .mat-mdc-checkbox .mdc-checkbox {
+  margin-right: 8px;
+}
+
+/* Force checkbox colors using !important if needed */
+.pick-many-field .checkbox-option .mat-mdc-checkbox.mat-mdc-checkbox-checked .mdc-checkbox__native-control:enabled ~ .mdc-checkbox__background {
+  background-color: #1976d2 !important;
+  border-color: #1976d2 !important;
+}
+
+.pick-many-field .checkbox-option .mat-mdc-checkbox:not(.mat-mdc-checkbox-checked) .mdc-checkbox__native-control:enabled ~ .mdc-checkbox__background {
+  background-color: transparent !important;
+  border-color: rgba(0, 0, 0, 0.54) !important;
+}
+
+/* Required asterisk styling for radio and checkbox fields */
+.required-asterisk {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+/* No options message styling */
+.no-options-message {
+  margin-top: 8px;
+  color: rgba(0, 0, 0, 0.6);
+  font-size: var(--kr-font-size-sm);
+  font-style: italic;
+}
+
+/* Consistent error message styling for all fields */
+.field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+  margin-top: 4px;
+}
+
+/* Field-specific error message styling (override if needed) */
+.text-field .field-error-message,
+.number-field .field-error-message,
+.phone-field .field-error-message,
+.email-field .field-error-message,
+.paragraph-field .field-error-message,
+.date-field .field-error-message,
+.time-field .field-error-message,
+.location-field .field-error-message,
+.pick-one-field .field-error-message,
+.pick-many-field .field-error-message,
+.switch-field .field-error-message,
+.rating-field .field-error-message,
+.file-field .field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  letter-spacing: initial;
+  margin-top: 4px;
+}
+
+/* Date Picker Styling - White Background */
+.date-field .mat-mdc-form-field {
+  background-color: white;
+}
+
+/* Global date picker popup styling */
+::ng-deep .mat-datepicker-popup {
+  background-color: white !important;
+}
+
+::ng-deep .mat-datepicker-content {
+  background-color: white !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+::ng-deep .mat-calendar {
+  background-color: white !important;
+}
+
+::ng-deep .mat-calendar-header {
+  background-color: white !important;
+}
+
+::ng-deep .mat-calendar-table {
+  background-color: white !important;
+}
+
+::ng-deep .mat-calendar-body {
+  background-color: white !important;
+}
+
+::ng-deep .mat-calendar-body-cell {
+  background-color: white !important;
+}
+
+::ng-deep .mat-calendar-body-cell-content {
+  background-color: transparent;
+}
+
+::ng-deep .mat-calendar-body-selected {
+  background-color: #1976d2 !important;
+  color: white !important;
+}
+
+::ng-deep .mat-calendar-body-today:not(.mat-calendar-body-selected) {
+  border-color: #1976d2 !important;
+}

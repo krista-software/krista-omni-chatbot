@@ -1,0 +1,125 @@
+/* Fill the layout-container so the content can center vertically. */
+:host {
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+}
+
+.waiting-screen {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  width: 100%;
+  gap: 24px;
+  padding: 24px 16px;
+  text-align: center;
+  background: #ffffff;
+}
+
+.waiting-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  /* Light tint of the brand colour (progressive enhancement; falls back to a fixed tint). */
+  background: #eaf2fa;
+  background: color-mix(in srgb, var(--krista-primary, #0169be) 10%, #ffffff);
+}
+
+.waiting-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  max-width: 324px;
+}
+
+.waiting-title {
+  margin: 0;
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 500;
+  color: var(--krista-text-primary, #1a1a1a);
+}
+
+.waiting-message {
+  margin: 0;
+  width: 100%;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+  color: var(--krista-text-secondary, #434343);
+}
+
+.queue-position-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px;
+  max-width: 324px;
+  background: #ffffff;
+  border: 1px solid var(--krista-divider, #e5e7eb);
+  border-radius: 8px;
+}
+
+.queue-position-value {
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 600;
+  color: var(--krista-primary, #0169be);
+  font-variant-numeric: tabular-nums;
+}
+
+.queue-position-label {
+  font-size: 12px;
+  line-height: 14px;
+  font-weight: 500;
+  color: var(--krista-text-primary, #212121);
+}
+
+.waiting-close-btn {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 324px;
+  height: 38px;
+  padding: 0 24px;
+  border: none;
+  border-radius: 8px;
+  background: var(--krista-primary, #0169be);
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: filter 0.2s ease;
+  font-family: inherit;
+}
+
+.waiting-close-btn:hover {
+  filter: brightness(0.92);
+}
+
+.waiting-close-btn:focus-visible {
+  outline: 2px solid var(--krista-primary, #0169be);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .waiting-close-btn {
+    transition: none;
+  }
+}

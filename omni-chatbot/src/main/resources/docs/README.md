@@ -26,7 +26,7 @@ The Krista Chatbot Extension with Omni-Channel functionality provides a seamless
 
 1. **Install Authentication Extension** - Set up Guest Authentication extension as a prerequisite
 2. **Add Chatbot Extension** - Navigate to Essential Ecosystem → Collaboration Domain
-3. **Configure Extension** - Set up welcome conversation, UI config, and fallback conversation
+3. **Configure Extension** - Set up UI config, fallback conversation, and (optionally) a welcome conversation
 4. **Embed Widget** - Add the chatbot script to your website
 5. **Test Integration** - Use the Krista Hosted Extension preview to test functionality
 
@@ -43,7 +43,7 @@ The Krista Chatbot Extension with Omni-Channel functionality provides a seamless
 - [Get Transcript of the Conversation](pages/get-transcript-of-the-conversation.md) - Retrieve conversation transcripts
 
 ### Integration Operations
-- [Get Script Element](pages/get-script-element.md) - Generate a chatbot integration script
+- [Get Integration Information](pages/get-integration-script.md) - Get the embed script and a direct chatbot link
 - [Get Last User Message](pages/get-last-user-message.md) - Fetch the last message from the user
 - [Get Session Info by Email](pages/get-session-info-by-email.md) - Retrieve session information by email
 
@@ -52,7 +52,7 @@ The Krista Chatbot Extension with Omni-Channel functionality provides a seamless
 
 ## Support & Resources
 
-- **Extension Version**: 2.0.17
+- **Extension Version**: 4.0.0
 - **Ecosystem**: Essentials
 - **Domain**: Collaboration
 - **Krista Service APIs Java**: 1.0.117

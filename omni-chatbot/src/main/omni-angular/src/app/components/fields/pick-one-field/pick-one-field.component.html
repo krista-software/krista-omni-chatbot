@@ -1,0 +1,109 @@
+<div class="pick-one-field">
+  <div class="field-container">
+    <label *ngIf="shouldShowLabel() && getFieldLabel()"
+           class="field-label"
+           [attr.id]="'pick-one-label-' + field.name">
+      {{ getFieldLabel() }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+
+    <!-- Secured mode: show masked value -->
+    <div *ngIf="isSecured() && field.value" class="readonly-value secured-value" role="status">
+      ••••••••
+    </div>
+
+    <!-- No options available message -->
+    <div *ngIf="!isSecured() && options.length === 0" class="no-options-message" role="status">
+      <em>{{ isFieldReadOnly() ? 'No option selected.' : 'Options not available.' }}</em>
+    </div>
+
+    <!-- Readonly display - plain text, mirroring pick-many. calculateOptions()
+         filters the readonly option list down to the single selected value, so a
+         radio here would always be a lone checked control carrying no more
+         information than its label — and its brand-coloured dot is invisible
+         against the brand-coloured outgoing bubble. -->
+    <div *ngIf="!isSecured() && isFieldReadOnly() && options.length > 0" class="readonly-value">
+      {{ getSelectedLabel() }}
+    </div>
+
+    <!-- Dropdown mode with search for more than 5 options -->
+    <div *ngIf="!isSecured() && options.length > 0 && useDropdown" class="dropdown-field">
+      <div class="dropdown-with-clear">
+        <mat-select
+          [value]="field.value"
+          [disabled]="isFieldReadOnly()"
+          [required]="isFieldRequired()"
+          [attr.aria-labelledby]="'pick-one-label-' + field.name"
+          [attr.aria-describedby]="config.hasError ? 'pick-one-error-' + field.name : null"
+          (selectionChange)="onDropdownChange($event)"
+          (openedChange)="onSelectOpenedChange($event)"
+          panelClass="pick-one-select-panel"
+          placeholder="Search or select an option"
+          disableOptionCentering>
+          <!-- Search input inside the dropdown -->
+          <div class="select-search-wrapper" (click)="$event.stopPropagation()">
+            <input
+              class="select-search-input"
+              type="text"
+              placeholder="Search..."
+              [value]="searchText"
+              (input)="filterOptions($any($event.target).value)"
+              (keydown)="$event.stopPropagation()">
+            <mat-icon *ngIf="searchText" class="search-clear-icon" (click)="filterOptions('')">close</mat-icon>
+          </div>
+          <mat-option *ngFor="let option of filteredOptions; trackBy: trackByValue"
+                      [value]="option.value">
+            {{ option.label }}
+          </mat-option>
+          <div *ngIf="filteredOptions.length === 0" class="no-results-message">
+            No matching options
+          </div>
+        </mat-select>
+        <button *ngIf="hasValue() && !isFieldReadOnly() && !isFieldRequired()"
+                type="button"
+                class="clear-button"
+                (click)="clearSelection($event)"
+                aria-label="Clear selection"
+                title="Clear selection">
+          <mat-icon class="clear-icon">close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Radio buttons for options (5 or fewer) -->
+    <div *ngIf="!isSecured() && !isFieldReadOnly() && options.length > 0 && !useDropdown"
+         class="radio-group"
+         role="radiogroup"
+         [attr.aria-labelledby]="'pick-one-label-' + field.name"
+         [attr.aria-required]="isFieldRequired()"
+         [attr.aria-describedby]="config.hasError ? 'pick-one-error-' + field.name : null">
+      <label
+        *ngFor="let option of options; trackBy: trackByValue"
+        class="radio-option-wrapper"
+        [class.disabled]="isFieldReadOnly()"
+        [class.selected]="isOptionSelected(option.value)"
+        [title]="option.label">
+        <input
+          type="radio"
+          [name]="'radio_' + field.name"
+          [attr.id]="'radio_' + field.name + '_' + option.value"
+          [value]="option.value"
+          [checked]="isOptionSelected(option.value)"
+          [disabled]="isFieldReadOnly()"
+          [attr.aria-checked]="isOptionSelected(option.value)"
+          (change)="onRadioChange(option.value)"
+          class="radio-input">
+        <span class="radio-circle" [class.selected]="isOptionSelected(option.value)" aria-hidden="true"></span>
+        <span class="radio-label">{{ option.label }}</span>
+      </label>
+    </div>
+
+    <!-- Error message -->
+    <div *ngIf="!isFieldReadOnly()" class="field-error-message"
+         [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+         role="alert"
+         [attr.id]="'pick-one-error-' + field.name">
+      {{ config.errorMessage }}
+    </div>
+  </div>
+</div>

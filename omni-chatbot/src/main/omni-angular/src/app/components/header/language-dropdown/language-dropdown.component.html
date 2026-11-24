@@ -1,0 +1,32 @@
+<!-- Lightweight language dropdown (matches original app: Header.tsx MUI Select) -->
+<div class="language-dropdown-container">
+  <!-- Dropdown trigger button -->
+  <button
+    class="language-dropdown-trigger"
+    (click)="toggleDropdown()"
+    [attr.aria-expanded]="isOpen"
+    aria-label="Select Language"
+    type="button">
+    <span class="language-dropdown-value">{{ getSelectedLanguageName() }}</span>
+    <svg class="language-dropdown-arrow" focusable="false" aria-hidden="true" viewBox="0 0 24 24">
+      <path d="M7 10l5 5 5-5z"></path>
+    </svg>
+  </button>
+
+  <!-- Dropdown menu - pre-rendered for instant first-open -->
+  <div class="language-dropdown-menu"
+       [class.dropdown-visible]="isOpen"
+       [class.dropdown-hidden]="!isOpen"
+       [attr.aria-hidden]="!isOpen">
+    <div
+      *ngFor="let lang of languages; trackBy: trackByCode"
+      class="language-dropdown-option"
+      [class.selected]="lang.code === selectedLanguage"
+      (click)="selectLanguage(lang.code)"
+      role="option"
+      [attr.aria-selected]="lang.code === selectedLanguage">
+      {{ lang.name }}
+    </div>
+  </div>
+</div>
+

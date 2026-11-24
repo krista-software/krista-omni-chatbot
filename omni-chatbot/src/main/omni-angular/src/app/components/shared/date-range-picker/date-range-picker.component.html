@@ -1,0 +1,140 @@
+<div class="date-picker-container">
+    <!-- Header: Selected Date Display -->
+    <div class="date-picker-header">
+        <div class="header-label">{{ range ? 'Selected Range' : 'Selected Date' }}</div>
+        <div class="header-value">{{ getDateSelectionString() }}</div>
+    </div>
+
+    <!-- Month/Year Navigation -->
+    <div class="navigation-bar">
+        <div class="nav-group">
+            <button class="nav-btn" [disabled]="disablePreviousMonth()" (click)="goToPreviousMonth()">
+                <span class="nav-icon">&#8249;</span>
+            </button>
+            <button class="month-selector" [disabled]="months.length === 0" (click)="toggleMonths()">
+                <span *ngIf="months.includes(selectedMonth)">{{ selectedMonth }}</span>
+                <span *ngIf="!months.includes(selectedMonth)" class="placeholder">Months</span>
+                <span class="dropdown-icon">{{ showMonthSelection ? '▲' : '▼' }}</span>
+            </button>
+            <button class="nav-btn" [disabled]="disableNextMonth()" (click)="goToNextMonth()">
+                <span class="nav-icon">&#8250;</span>
+            </button>
+        </div>
+        <div class="nav-group">
+            <button class="nav-btn" [disabled]="disablePreviousYear()" (click)="goToPreviousYear()">
+                <span class="nav-icon">&#8249;</span>
+            </button>
+            <button class="year-selector" [disabled]="years.length === 0" (click)="toggleYears()">
+                <span *ngIf="years.includes(selectedYear)">{{ selectedYear }}</span>
+                <span *ngIf="!years.includes(selectedYear)" class="placeholder">Years</span>
+                <span class="dropdown-icon">{{ showYearSelection ? '▲' : '▼' }}</span>
+            </button>
+            <button class="nav-btn" [disabled]="disableNextYear()" (click)="goToNextYear()">
+                <span class="nav-icon">&#8250;</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="calendar-container">
+        <!-- Week Days Header -->
+        <div class="calendar-row week-days">
+            <div *ngFor="let i of [0, 1, 2, 3, 4, 5, 6]; trackBy: trackByIndex" class="calendar-cell week-day">
+                {{ mmt(displayedMonth).day(i).format('dddd').substring(0, 3) }}
+            </div>
+        </div>
+
+        <!-- Calendar Days -->
+        <div *ngFor="let week of weeks; let weekIndex = index; trackBy: trackByIndex" class="calendar-row">
+            <div *ngFor="let day of week; let dayIndex = index; trackBy: trackByDay"
+                 class="calendar-cell range-cell"
+                 [class.selected-range]="day && day.selectedRange"
+                 [class.start-date]="day && day.startDate"
+                 [class.end-date]="day && day.endDate"
+                 [class.select-date]="day && day.selectDate"
+                 [class.disabled]="day && day.disabled"
+                 [class.today]="day && !day.selectDate && day.isToday"
+                 (click)="day && selectDate(day)">
+                <div class="date-wrapper">
+                    <button *ngIf="day && day.date" class="date-btn" [disabled]="day && day.disabled">
+                        {{ day.date }}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Time Selector (if allowTime is true) -->
+        <div *ngIf="allowTime && (range ? (startDate || endDate) : date)" class="time-selector">
+            <div class="time-label">Time</div>
+            <div class="time-value" (click)="picker.open()">
+                <app-time-display [timeString]="timeSelection || ''"></app-time-display>
+            </div>
+            <ngx-material-timepicker
+                [enableKeyboardInput]="false"
+                [cancelBtnTmpl]="cancelButton"
+                [confirmBtnTmpl]="okButton"
+                [defaultTime]="timeSelection || ''"
+                [format]="12"
+                (timeSet)="onSetTime($event)"
+                #picker>
+            </ngx-material-timepicker>
+        </div>
+
+        <!-- Hint Messages -->
+        <div class="hints-container">
+            <div *ngIf="selectionHintMessage" class="hint-message">
+                <span class="hint-icon">ℹ</span>
+                <div class="hint-text" [innerHTML]="selectionHintMessage"></div>
+            </div>
+            <ul *ngIf="maxDaysSelection" class="constraint-list">
+                <li>Select maximum {{ maxDaysSelection }} days</li>
+            </ul>
+            <ul *ngIf="maxHourSelection" class="constraint-list">
+                <li>Select maximum {{ maxHourSelection }} hours</li>
+            </ul>
+        </div>
+
+        <!-- Month Selection Dropdown -->
+        <div class="month-dropdown" *ngIf="showMonthSelection">
+            <div *ngFor="let month of months; trackBy: trackByMonth"
+                 class="dropdown-item"
+                 [class.selected]="selectedMonth === month"
+                 (click)="onMonthChange(month)">
+                <span *ngIf="selectedMonth === month" class="check-icon">✓</span>
+                {{ month }}
+            </div>
+        </div>
+
+        <!-- Year Selection Dropdown -->
+        <div class="year-dropdown" *ngIf="showYearSelection">
+            <div *ngFor="let year of years; trackBy: trackByYear"
+                 class="year-item"
+                 [class.selected]="selectedYear === year"
+                 (click)="onYearChange(year)">
+                {{ year }}
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer Actions -->
+    <div class="footer-actions">
+        <ng-container *ngIf="!(showMonthSelection || showYearSelection)">
+            <button class="btn btn-text" (click)="onRemove()">Remove</button>
+            <button class="btn btn-outline" (click)="onCancel()">Cancel</button>
+            <button class="btn btn-primary" (click)="saveDates()">Save</button>
+        </ng-container>
+        <button *ngIf="showMonthSelection || showYearSelection" class="btn btn-outline" (click)="closeMonthsAndYears()">
+            Cancel
+        </button>
+    </div>
+</div>
+
+<!-- Time Picker Button Templates -->
+<ng-template #okButton>
+    <button class="btn btn-primary btn-sm">Save</button>
+</ng-template>
+
+<ng-template #cancelButton>
+    <button class="btn btn-outline btn-sm">Cancel</button>
+</ng-template>
+

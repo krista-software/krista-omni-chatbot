@@ -1,0 +1,46 @@
+/* Text Field Styling - Imports shared styles */
+@import '../shared-field-styles.css';
+
+/* Text Field Specific Styling */
+.text-field {
+}
+
+.text-field .mat-mdc-form-field {
+  width: 100%;
+}
+
+/* All text fields use textarea with auto-resize (matches original multiline behavior) */
+::ng-deep .text-field textarea.mat-mdc-input-element {
+  resize: none; /* Disable manual resize - auto-resize handles it */
+  overflow-y: auto; /* Keep scrolling functional when content exceeds max-rows */
+  overflow-x: hidden; /* Hide horizontal scrollbar */
+  line-height: 1.5; /* Standard line height (matches original) */
+  word-wrap: break-word; /* Break long words to prevent horizontal scroll */
+  white-space: pre-wrap; /* Preserve whitespace and wrap text */
+  /* cdkTextareaAutosize sizes height to exactly fit content, so on fractional-DPI
+     displays sub-pixel rounding makes scrollHeight > clientHeight by <1px, which
+     paints a PHANTOM scrollbar even on an empty field. Hide the track by default;
+     the component re-enables it via .is-scrollable only on REAL overflow (>4 rows).
+     Scroll stays functional via wheel/keyboard regardless. */
+  scrollbar-width: none; /* Firefox */
+}
+
+::ng-deep .text-field textarea.mat-mdc-input-element::-webkit-scrollbar {
+  width: 0; /* Chrome / Safari / Edge - hidden until real overflow */
+}
+
+/* Genuine overflow past max-rows: show a thin scrollbar */
+::ng-deep .text-field textarea.mat-mdc-input-element.is-scrollable {
+  scrollbar-width: thin; /* Firefox */
+}
+
+::ng-deep .text-field textarea.mat-mdc-input-element.is-scrollable::-webkit-scrollbar {
+  width: 6px;
+}
+
+::ng-deep .text-field textarea.mat-mdc-input-element.is-scrollable::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 3px;
+}
+
+/* Responsive: scales naturally via max-width: 100% on parent. */

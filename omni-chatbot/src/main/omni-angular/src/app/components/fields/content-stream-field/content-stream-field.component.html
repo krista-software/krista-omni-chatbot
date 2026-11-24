@@ -1,0 +1,35 @@
+<div class="stream-field-container">
+  <div class="stream-content">
+    <!-- Display streamed content with typing effect -->
+    <div class="stream-text" [innerHTML]="displayedContent"></div>
+    
+    <!-- Blinking dot indicator when streaming -->
+    <span *ngIf="isStreamInQueue && !isCancelled" class="blinking-dot"></span>
+  </div>
+
+  <!-- Pause/Resume controls -->
+  <div class="stream-controls" *ngIf="isStreamInQueue || isCancelled">
+    <!-- Pause button -->
+    <button
+      *ngIf="isStreamInQueue && !isCancelled"
+      mat-icon-button
+      color="primary"
+      (click)="pauseStreaming()"
+      aria-label="Pause streaming"
+      class="control-button">
+      <mat-icon>pause</mat-icon>
+    </button>
+
+    <!-- Resume button -->
+    <button
+      *ngIf="isCancelled"
+      mat-icon-button
+      color="primary"
+      (click)="resumeStreaming()"
+      aria-label="Resume streaming"
+      class="control-button">
+      <mat-icon>play_arrow</mat-icon>
+    </button>
+  </div>
+</div>
+

@@ -1,0 +1,90 @@
+/* Time Field Styling - Imports shared styles */
+@import '../shared-field-styles.css';
+
+/* CSS Variables - use theme color with fallback */
+:host {
+  --kr-color-secondary: var(--krista-primary, #F6AF1E);
+  --kr-color-border: #e4e4e4;
+  --kr-text-color-primary: #212121;
+  --kr-text-color-secondary: #434343;
+}
+
+/* Time Field Specific Styling */
+.time-field {
+  width: 100%;
+}
+
+/* Time picker container */
+.time-picker-container {
+  width: 100%;
+}
+
+/* .field-label intentionally not overridden here — see shared-field-styles.css. */
+
+.time-picker-container .field-label .required-asterisk {
+  color: #f44336;
+  margin-left: 2px;
+}
+
+/* Time input wrapper - bottom border only, matching date field */
+.time-input-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  background-color: transparent;
+  border: none;
+  border-bottom: 1px solid var(--kr-color-border);
+  border-radius: 0;
+  cursor: pointer;
+  height: 48px;
+}
+
+/* Icon matching date field - 20px */
+.time-input-wrapper .time-icon {
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  opacity: 0.6;
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  margin-left: 8px;
+}
+
+/* Placeholder text when no time selected - matching date field */
+.time-placeholder {
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+  opacity: 0.6;
+  font-size: var(--kr-font-size-sm);
+  font-weight: 400;
+}
+
+.flex-1{
+flex:1
+}
+
+/* Error state */
+.time-picker-container.has-error .time-input-wrapper {
+  border-bottom-color: #f44336;
+}
+
+.time-picker-container .field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  margin-top: 4px;
+}
+
+/* Timezone caption */
+.timezone-caption {
+  display: block;
+  font-size: 0.75rem;
+  color: var(--krista-text-secondary, rgba(0, 0, 0, 0.6));
+  margin-top: 5px;
+  line-height: 1.4;
+}
+
+/* Ensure no picker icons show in readonly mode */
+.readonly-field .mat-icon {
+  display: none !important;
+}
+
+/* Responsive: scales naturally via max-width: 100% on parent. */

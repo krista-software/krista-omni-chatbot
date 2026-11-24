@@ -1,0 +1,282 @@
+<div class="table-field">
+  <!-- Field Label with Tooltip -->
+  <div class="field-label-container">
+    <label class="field-label"
+           [attr.id]="'table-label-' + field.name"
+           [title]="getTooltip()">
+      {{ field.displayName || field.name }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+  </div>
+
+  <!-- Readonly mode with no data -->
+  <div *ngIf="isFieldReadOnly() && !hasRows()" class="readonly-empty" role="status">
+    <em class="no-data-message">No data</em>
+  </div>
+
+  <!-- Table Actions (Add, Delete, Toggle Deleted) -->
+  <div *ngIf="showTableActions()" class="table-actions">
+    <ng-container *ngIf="!showDeleted">
+      <!-- Entity Search Button -->
+      <button *ngIf="allowEntitySearch && allowAdd"
+              type="button"
+              class="action-button search-button"
+              (click)="openEntitySearchModal()"
+              [attr.aria-label]="'Search entities for ' + field.name"
+              matTooltip="Search"
+              matTooltipPosition="above">
+        <mat-icon>search</mat-icon>
+        <span class="button-text">Search</span>
+      </button>
+
+      <!-- Add Row Button -->
+      <button *ngIf="allowAdd"
+              type="button"
+              class="action-button add-button"
+              (click)="addRow()"
+              [attr.aria-label]="'Add row to ' + field.name"
+              matTooltip="Add Row"
+              matTooltipPosition="above">
+        <mat-icon>add</mat-icon>
+        <span class="button-text">Add Row</span>
+      </button>
+
+      <!-- Delete Selected Rows Button -->
+      <button *ngIf="allowDelete"
+              type="button"
+              class="action-button delete-button"
+              [disabled]="selectedRows.size === 0"
+              (click)="deleteSelectedRows()"
+              [attr.aria-label]="'Delete selected rows from ' + field.name"
+              matTooltip="Delete Selected"
+              matTooltipPosition="above">
+        <mat-icon>delete</mat-icon>
+        <span class="button-text">Delete ({{ selectedRows.size }})</span>
+      </button>
+
+      <!-- Show Deleted Rows Button -->
+      <button *ngIf="deletedRows.length > 0"
+              type="button"
+              class="action-button deleted-button"
+              (click)="toggleDeletedView()"
+              matTooltip="View Deleted Rows"
+              matTooltipPosition="above">
+        <mat-icon>visibility</mat-icon>
+        <span class="button-text">Deleted ({{ deletedRows.length }})</span>
+      </button>
+    </ng-container>
+
+    <ng-container *ngIf="showDeleted">
+      <!-- Back to Data Rows Button -->
+      <button type="button"
+              class="action-button back-button"
+              (click)="toggleDeletedView()"
+              matTooltip="Back to Data"
+              matTooltipPosition="above">
+        <mat-icon>arrow_back</mat-icon>
+        <span class="button-text">Back</span>
+      </button>
+
+      <!-- Restore Selected Rows Button -->
+      <button type="button"
+              class="action-button restore-button"
+              [disabled]="selectedRows.size === 0"
+              (click)="restoreSelectedRows()"
+              matTooltip="Restore Selected"
+              matTooltipPosition="above">
+        <mat-icon>undo</mat-icon>
+        <span class="button-text">Restore ({{ selectedRows.size }})</span>
+      </button>
+    </ng-container>
+  </div>
+
+  <!-- Table Container - Show if has rows OR if not readonly (so users can add rows) -->
+  <div *ngIf="hasRows() || !isFieldReadOnly()" class="table-container" role="region" [attr.aria-labelledby]="'table-label-' + field.name">
+    <div class="table-scroll-wrapper">
+      <table class="data-table" role="grid" [attr.aria-describedby]="config.hasError ? 'table-error-' + field.name : null">
+        <!-- Table Header -->
+        <thead>
+          <!-- Header aggregate rows (totals, averages, etc.) - rendered above column labels -->
+          <tr *ngFor="let aggRow of headerDataRows; let rowIdx = index" class="aggregate-row header-aggregate-row">
+            <td *ngIf="!isFieldReadOnly() && allowDelete" class="selection-cell"></td>
+            <td *ngFor="let cell of aggRow.cells; let colIdx = index" class="aggregate-cell">
+              <ng-container *ngIf="cell">
+                <app-dynamic-field
+                  [field]="cell"
+                  [basicFieldConfig]="{ readOnly: isFieldReadOnly(), hasError: false, errorMessage: '', showLabel: false }"
+                  [compact]="true"
+                  (valueChange)="onAggregateValueChange('header', rowIdx, colIdx, $event)">
+                </app-dynamic-field>
+              </ng-container>
+            </td>
+          </tr>
+
+          <!-- Multi-level headers for MultiField/Composite columns -->
+          <tr *ngFor="let headerRow of headerMatrix; let rowIndex = index; trackBy: trackByIndex">
+            <!-- Selection Column Header (only in first row) -->
+            <th *ngIf="!isFieldReadOnly() && allowDelete && rowIndex === 0"
+                class="selection-header"
+                scope="col"
+                [attr.rowspan]="headerMatrix.length">
+              <mat-checkbox
+                [checked]="isAllSelected()"
+                [indeterminate]="selectedRows.size > 0 && !isAllSelected()"
+                (change)="toggleAllRows()"
+                [attr.aria-label]="'Select all rows'">
+              </mat-checkbox>
+            </th>
+
+            <!-- Column Headers -->
+            <th *ngFor="let header of headerRow; trackBy: trackByHeaderCell"
+                class="column-header"
+                scope="col"
+                [attr.colspan]="header.colSpan"
+                [attr.rowspan]="header.rowSpan">
+              {{ header.displayName }}
+              <span *ngIf="header.required && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+            </th>
+          </tr>
+        </thead>
+
+        <!-- Table Body -->
+        <tbody>
+          <tr *ngFor="let row of getVisibleRows(); trackBy: trackByRowId" class="data-row">
+            <!-- Selection Checkbox -->
+            <td *ngIf="!isFieldReadOnly() && allowDelete" class="selection-cell">
+              <mat-checkbox
+                [checked]="isRowSelected(row.rowId)"
+                (change)="toggleRowSelection(row.rowId)"
+                [attr.aria-label]="'Select row'">
+              </mat-checkbox>
+            </td>
+
+            <!-- Data Cells -->
+            <td *ngFor="let column of columns; trackBy: trackByColumnName" class="data-cell">
+              <!-- Complex fields (MultiField/Composite/EntityReference) show "Open" button -->
+              <ng-container *ngIf="isComplexField(column); else normalCell">
+                <button
+                  type="button"
+                  class="open-complex-field-button"
+                  (click)="openComplexFieldModal(row, column)"
+                  [attr.aria-label]="'Open ' + (column.displayName || column.name)"
+                  title="Open in dialog">
+                  <mat-icon>open_in_new</mat-icon>
+                </button>
+                <div *ngIf="getCellFieldConfig(row, column) as cellConfig"
+                     class="cell-error-message"
+                     [style.display]="cellConfig.hasError ? 'block' : 'none'"
+                     role="alert">
+                  {{ cellConfig.errorMessage }}
+                </div>
+              </ng-container>
+
+              <!-- Normal fields render inline -->
+              <ng-template #normalCell>
+                <app-dynamic-field
+                  [field]="getCellField(row, column)"
+                  [basicFieldConfig]="getCellFieldConfig(row, column)"
+                  [kristaFields]="kristaFields"
+                  [hasAttemptedSubmit]="hasAttemptedSubmit"
+                  [workspaceId]="workspaceId"
+                  [clientSessionId]="clientSessionId"
+                  [compact]="true"
+                  (valueChange)="onCellValueChange(row.rowId, column.name, $event)">
+                </app-dynamic-field>
+              </ng-template>
+            </td>
+          </tr>
+
+          <!-- Empty State -->
+          <tr *ngIf="getVisibleRows().length === 0" class="empty-row">
+            <td [attr.colspan]="columns.length + (allowDelete && !isFieldReadOnly() ? 1 : 0)" class="empty-cell">
+              <em class="no-data-message">
+                {{ showDeleted ? 'No deleted rows' : 'No data' }}
+              </em>
+            </td>
+          </tr>
+        </tbody>
+
+        <!-- Table Footer (aggregate rows like totals) -->
+        <tfoot *ngIf="footerDataRows.length > 0 && !showDeleted">
+          <tr *ngFor="let aggRow of footerDataRows; let rowIdx = index" class="aggregate-row footer-aggregate-row">
+            <td *ngIf="!isFieldReadOnly() && allowDelete" class="selection-cell"></td>
+            <td *ngFor="let cell of aggRow.cells; let colIdx = index" class="aggregate-cell">
+              <ng-container *ngIf="cell">
+                <app-dynamic-field
+                  [field]="cell"
+                  [basicFieldConfig]="{ readOnly: isFieldReadOnly(), hasError: false, errorMessage: '', showLabel: false }"
+                  [compact]="true"
+                  (valueChange)="onAggregateValueChange('footer', rowIdx, colIdx, $event)">
+                </app-dynamic-field>
+              </ng-container>
+            </td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="pagination-container">
+      <button type="button"
+              class="pagination-button"
+              [disabled]="currentPage === 1"
+              (click)="previousPage()"
+              title="Previous Page">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
+
+      <span class="pagination-info">
+        Page {{ currentPage }} of {{ totalPages }}
+      </span>
+
+      <button type="button"
+              class="pagination-button"
+              [disabled]="currentPage === totalPages"
+              (click)="nextPage()"
+              title="Next Page">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+    </div>
+  </div>
+
+  <!-- Error Message. Not rendered in readonly: the placeholder is kept visible-but-hidden
+       to reserve space so the form does not jump when a message appears while editing,
+       and a readonly field has nothing to validate. -->
+  <div *ngIf="!isFieldReadOnly()" class="field-error-message"
+       [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+       role="alert"
+       [attr.id]="'table-error-' + field.name">
+    {{ config.errorMessage }}
+  </div>
+</div>
+
+<!-- Entity Search Modal.
+     [field] is the whole TABLE field (com.krista.fields.Table), matching the 2.0.16
+     app verbatim (TableFieldRenderer passed fieldState.field = the table's raw field
+     JSON): the backend EntitySearchService has a dedicated table branch that extracts
+     meta.entity itself. The search button is gated on meta.entity carrying
+     entityTypeDomain (2.0.16's EntitySelectorMeta.hasEntity) — without it, no
+     backend branch can resolve the entity, so the button is hidden. -->
+<app-entity-search-modal
+  *ngIf="entitySearchModalOpen && entitySelectorMeta"
+  [field]="field"
+  [entitySelectorMeta]="entitySelectorMeta"
+  (save)="onEntitySearchSave($event)"
+  (close)="closeEntitySearchModal()">
+</app-entity-search-modal>
+
+<!-- Complex Field Modal -->
+<app-complex-field-modal
+  *ngIf="complexFieldModalOpen && complexFieldModalField"
+  [field]="complexFieldModalField"
+  [subFields]="complexFieldModalSubFields"
+  [kristaFields]="kristaFields!"
+  [hasAttemptedSubmit]="hasAttemptedSubmit || false"
+  [workspaceId]="workspaceId || ''"
+  [clientSessionId]="clientSessionId || ''"
+  (close)="closeComplexFieldModal()"
+  (valueChange)="onComplexFieldValueChange($event)"
+  (subFieldValueChange)="onComplexFieldSubFieldChange($event)"
+  (subFieldBlur)="onComplexFieldSubFieldBlur($event)">
+</app-complex-field-modal>
+

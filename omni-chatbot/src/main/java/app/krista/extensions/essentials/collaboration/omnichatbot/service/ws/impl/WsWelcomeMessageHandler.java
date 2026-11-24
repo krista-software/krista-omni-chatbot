@@ -13,53 +13,40 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.impl;
 
-import app.krista.extension.util.InvokerAttributeProvider;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.WsPayloadRequestHandler;
 import app.krista.omni.sdk.medium.api.message.MediumInfo;
-import app.krista.omni.sdk.medium.interactive.InteractiveMediumService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 
 /**
- * Handler for welcome message payloads.
+ * Handler for the legacy {@code "welcome"} WS payload.
  *
- * <p>This handler is triggered when a client sends a "welcome" payload type.
- * It executes the configured welcome conversation for the user's inbox.
+ * <p><b>Deliberate no-op.</b> The welcome conversation is now triggered
+ * server-side in {@code WsConnectionOpenedHandler.triggerWelcomeConversation},
+ * gated to fire exactly once per session via {@code SessionDto.welcomeExecuted}.
+ * Any client still sending the legacy {@code "welcome"} payload — e.g. a tab
+ * cached from before commit {@code daa00472c7} which dropped the frontend's
+ * welcome handshake — is silently ignored here so the welcome conversation
+ * cannot be re-fired on a WS reconnect by a stale client.
+ *
+ * <p>The class and its registration in {@code WsPayloadHandlerRegistry} are
+ * kept on purpose: the payload dispatcher needs a handler for the
+ * {@code "welcome"} type so that an unexpected payload doesn't cause a
+ * dispatch error. The handler simply does nothing.
  */
 public class WsWelcomeMessageHandler implements WsPayloadRequestHandler {
-    private final InteractiveMediumService mediumService;
-    private final InvokerAttributeProvider<String> welcomeConversationProvider;
-    private static final Logger LOGGER = LoggerFactory.getLogger(WsWelcomeMessageHandler.class);
 
-    public WsWelcomeMessageHandler(InteractiveMediumService mediumService, InvokerAttributeProvider<String> welcomeConversationProvider) {
-        this.mediumService = mediumService;
-        this.welcomeConversationProvider = welcomeConversationProvider;
+    public WsWelcomeMessageHandler() {
     }
 
-    /**
-     * Handles the welcome message payload by executing the welcome conversation.
-     *
-     * <p>Extracts the inbox ID from the payload and triggers the configured
-     * welcome conversation for that inbox.
-     *
-     * @param payload the message payload containing the inbox ID
-     * @param mediumInfo the medium information for the chatbot
-     */
-    @SuppressWarnings("unchecked")
     @Override
     public void handle(Map<String, Object> payload, MediumInfo mediumInfo) {
-        String conversationName = this.welcomeConversationProvider.get();
-        LOGGER.warn("#####-CHATBOT-Received the welcome message executing welcome conversation: {}", conversationName);
-        Map<String, Object> innerPayload = (Map<String, Object>) payload.get("payload");
-        String inboxId = (String) innerPayload.get("inboxId");
-        this.mediumService.executeConversation(inboxId, conversationName);
-        LOGGER.warn("#####-CHATBOT-Welcome conversation Executed successfully for inboxId: {}", inboxId);
+        // Deliberate no-op: welcome execution is owned by the WS-open auto-trigger
+        // in WsConnectionOpenedHandler. See class javadoc for rationale.
     }
 }

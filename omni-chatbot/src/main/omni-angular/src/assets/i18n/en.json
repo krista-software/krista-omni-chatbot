@@ -1,0 +1,191 @@
+{
+  "general": {
+    "defaultApiErrorMessage": "Something went wrong. Please try again later.",
+    "retry": "Retry",
+    "close": "Close"
+  },
+  "footer": {
+    "sendMessage": "Send a message",
+    "poweredBy": "Powered by",
+    "termsAndConditions": "Terms & Conditions"
+  },
+  "authProvider": {
+    "failedToLogin": "Login failed. For further assistance, contact support."
+  },
+  "loginCallback": {
+    "loginFailed": "Login failed. Try again. If persists contact support team.",
+    "loginProgress": "Login in process. Please wait..."
+  },
+  "initializerProvider": {
+    "fetching": "Fetching configuration.",
+    "initializing": "Initializing.",
+    "initFail": "Initialization of the chatbot failed. Please retry. If the issue persists, reach out to our support team.",
+    "reason": "Reason: {{errorMessage}}",
+    "loadingConfiguration": "Loading configuration...",
+    "authenticating": "Authenticating...",
+    "creatingSession": "Creating session...",
+    "loadingConversationHistory": "Loading conversation history..."
+  },
+  "unknownMessageComponent": {
+    "message": "Unknown message type"
+  },
+  "responseAckCompRenderer": {
+    "unnamed": "anonymous user",
+    "responseAck": "{{_responseCount}} response. {{_contactName}} has responded to {{_conversationName}} at {{_time}}",
+    "loading": "Loading..."
+  },
+  "banner": {
+    "unread": "Unread Messages"
+  },
+  "newMessagesBtn": {
+    "newMessages": "New messages"
+  },
+  "agent": {
+    "joined": "{{name}} joined",
+    "left": "{{name}} left"
+  },
+  "placeholder": {
+    "enter": "Enter {{fieldName}}",
+    "select": "Select {{fieldName}}",
+    "set": "Set {{fieldName}}"
+  },
+  "fields": {
+    "stream": {
+      "pauseStreaming": "Pause streaming",
+      "resumeStreaming": "Resume streaming"
+    },
+    "location": {
+      "selectLocationPlaceholder": "Search for a location..."
+    }
+  },
+  "concurrency": {
+    "waiting": {
+      "ariaLabel": "Waiting for a chat slot",
+      "title": "You're in the queue",
+      "message": "All agents are busy right now. We'll connect you as soon as one is free.",
+      "positionLabel": "Queue Position",
+      "estimatedWaitLabel": "Estimated wait:",
+      "estimatedWaitValue": "~{{minutes}} min",
+      "closeBtn": "Leave Queue",
+      "closeBtnAria": "Close the chat window"
+    },
+    "idleWarning": {
+      "title": "Session Expiring",
+      "message": "We'll end this conversation due to inactivity unless you'd like to continue.",
+      "secondsLabel": "seconds",
+      "stillHereBtn": "Continue Session",
+      "stillHereBtnAria": "Continue your session to keep the conversation active"
+    },
+    "disconnected": {
+      "title": "Session Ended",
+      "message": "This session ended due to inactivity.",
+      "reconnectBtn": "Start a New Session",
+      "reconnectBtnAria": "Start a new chat session",
+      "closeBtn": "Close",
+      "closeBtnAria": "Close the chat window"
+    }
+  },
+  "krista": {
+    "general": {
+      "defaultErrorMessage": "Something went wrong. Please try again later.",
+      "ok": "Ok",
+      "search": "Search",
+      "cancel": "Cancel",
+      "clear": "Clear",
+      "remove": "Remove",
+      "delete": "Delete",
+      "save": "Save",
+      "noResults": "No entries found.",
+      "selectAll": "Select all",
+      "unknownField": "Unknown Field",
+      "enterCorrectValues": "Ensure that you enter appropriate values."
+    },
+    "address": {
+      "street": "Street",
+      "street2": "Street2",
+      "city": "City",
+      "state": "State",
+      "country": "Country",
+      "postalCode": "Postal Code"
+    },
+    "table": {
+      "deletedRows": "Deleted Rows",
+      "selectedRows": "Selected rows:",
+      "rowsPerPage": "Rows per page:",
+      "noData": "No rows available to display.",
+      "confirmDelete": "Are you sure you want to delete permanently?"
+    },
+    "entity": {
+      "authRequired": "Authentication Required. Click 'Authenticate' below, to proceed.",
+      "searchAgainAfterAuth": "After authentication is complete, come back to this window. Search again to view the results.",
+      "authenticate": "Authenticate",
+      "selectAllHelpText": "Select all options on this page",
+      "selected": "Selected"
+    },
+    "file": {
+      "atLeastOneUploadOption": "There should be at least one upload option selected in the file settings.",
+      "unknownFormat": "Could not upload {{filename}}. Unknown file format.",
+      "unknownFileFormat": "Could not upload file. Unknown file format.",
+      "notSupported": "Could not upload {{filename}}. File format not supported, compress it into a ZIP file and upload again.",
+      "typeNotSupported": "Could not upload {{filename}}. File type not supported.",
+      "minSize": "Could not upload {{filename}}. File size must be more than {{size}}",
+      "maxSize": "Could not upload {{filename}}. File size must be less than {{size}}",
+      "uploadInProgress": "File upload is in progress."
+    },
+    "location": {
+      "grantPermission": "Grant location permission.",
+      "selectLocation": "Select Location",
+      "selectedLocation": "Selected Location",
+      "searchPlaceholder": "Search for a location..."
+    },
+    "date": {
+      "selectAfter": "Select a date after {{date}}",
+      "selectOnOrAfter": "Select a date on or after {{date}}",
+      "select": "Select {{date}}",
+      "selectBefore": "Select a date before {{date}}",
+      "selectOnOrBefore": "Select a date on or before {{date}}",
+      "selectBeforeOrAfterDate": "Select a date before or after {{date}}",
+      "selectBeforeDateOrAfterDate": "Select a date before {{before}} or after {{after}}",
+      "selectBetween": "Select a date between {{min}} and {{max}}"
+    },
+    "dateRange": {
+      "selectBetween": "Select a date range between {{min}} and {{max}}",
+      "selectOnOrAfter": "Select a date range on or after {{min}}",
+      "selectOnOrBefore": "Select a date range on or before {{max}}",
+      "selectMaxDays": "Select maximum {{days}} day(s)",
+      "selectMaxHours": "Select maximum {{hours}} hour(s)",
+      "rulesConflict": "Selected rules conflict, please adjust to allow a valid date range."
+    },
+    "radio": {
+      "noSelection": "No option selected.",
+      "noOptions": "Options not available."
+    },
+    "validators": {
+      "required": "This field is required.",
+      "noSelection": "No option selected.",
+      "noOptions": "Options not available.",
+      "invalidEmail": "Invalid email address.",
+      "invalidPhoneNumber": "Invalid phone number.",
+      "enterCorrectValues": "Please enter correct values.",
+      "minLength": "Length should be greater than or equal to {{length}}.",
+      "maxLength": "Length should be less than or equal to {{length}}.",
+      "minValue": "Value should be greater than or equal to {{min}}.",
+      "maxValue": "Value should be less than or equal to {{max}}.",
+      "minSelection": "Select at least {{count}} options.",
+      "maxSelection": "Cannot select more than {{count}} options.",
+      "pattern": "Value is not matching with required pattern: {{pattern}}",
+      "allowedEmailDomains": "Allowed domains: {{domains}}.",
+      "startDateLessThanEndDate": "Start date should be less than the End date.",
+      "maxDateRangeInDays": "Range should not exceed {{days}} day(s).",
+      "maxDateRangeInHours": "Range should not exceed {{hours}} hour(s)."
+    }
+  },
+  "bootFailed": {
+    "title": "Chat Unavailable",
+    "message": "We couldn't start the chat. Please try again.",
+    "retryBtn": "Try Again",
+    "retryBtnAria": "Try starting the chat again",
+    "closeBtn": "Close",
+    "closeBtnAria": "Close the chat window"
+  }
+}

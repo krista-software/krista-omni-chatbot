@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot;
@@ -21,15 +21,19 @@ package app.krista.extensions.essentials.collaboration.omnichatbot;
 import app.krista.extension.authorization.RequestAuthenticator;
 import app.krista.extension.executor.Invoker;
 import app.krista.extension.impl.anno.*;
-import app.krista.extension.request.ProtoRequest;
-import app.krista.extension.request.ProtoResponse;
-import app.krista.extension.request.protos.http.HttpProtocol;
+import app.krista.extension.request.RoutingInfo;
+import app.krista.extension.util.InvokerAttributes;
 import app.krista.extension.util.ServiceRegistry;
+import app.krista.extensions.essentials.collaboration.omnichatbot.auth.AttributeParameterValidator;
+import app.krista.extensions.essentials.collaboration.omnichatbot.auth.AuthConstants;
+import app.krista.extensions.essentials.collaboration.omnichatbot.concurrency.ConcurrencyManager;
 import app.krista.extensions.essentials.collaboration.omnichatbot.contants.Constants;
+import app.krista.extensions.essentials.collaboration.omnichatbot.filter.CorsResponseFilter;
 import app.krista.extensions.essentials.collaboration.omnichatbot.listener.InboxMessageListenerImpl;
+import app.krista.extensions.essentials.collaboration.omnichatbot.metrics.ChatBotMetrics;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ChatBotMessageSender;
+import app.krista.extensions.essentials.collaboration.omnichatbot.service.ChatBotUIService;
 import app.krista.extensions.essentials.collaboration.omnichatbot.store.ConnectionStore;
-import app.krista.extensions.essentials.collaboration.omnichatbot.utils.ChatBotUtil;
 import app.krista.extensions.util.KeyValueStore;
 import app.krista.ksdk.authentication.AuthenticationSettings;
 import app.krista.ksdk.context.ExecutionMode;
@@ -43,7 +47,6 @@ import app.krista.omni.sdk.medium.text.util.CommonInvokerParameters;
 import app.krista.omni.sdk.spi.OmniChannelService;
 import app.krista.omni.sdk.spi.impl.monitor.SessionTimeoutMonitor;
 import app.krista.omni.sdk.spi.impl.services.ConversationsSearch;
-import app.krista.omni.sdk.spi.impl.store.SessionStore;
 import com.kristasoft.common.holders.ThreadLocalProxy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,31 +58,37 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 
 @Java(version = Java.Version.JAVA_21)
-@Field.Text(value = Constants.WELCOME_CONVERSATION_NAME)
-@Field.Text(value = Constants.UI_CONFIG_JSON, required = false)
+@Field.Text(value = Constants.WELCOME_CONVERSATION_NAME, required = false)
 @Field.Text(value = CommonInvokerParameters.FALLBACK_CONVERSATION, required = false)
+@Field(name = CommonInvokerParameters.SESSION_TIMEOUT, type = "Number", required = false)
+@Field.Text(value = AuthConstants.DEFAULT_ROLE_KEY, required = false)
+@Field.Text(value = AuthConstants.ATTRIBUTE_PARAMETERS, required = false)
 @Domain(id = "catEntryDomain_5fa2fc97-4b17-44cf-b98f-aa91a459a091",
         name = "Collaboration",
         ecosystemId = "catEntryEcosystem_84b53163-327b-4b1b-8c96-9334d292f9f5",
         ecosystemName = "Essentials",
         ecosystemVersion = "788a7124-4da2-4afd-b394-62d9fccd0c80")
+// Authentication (guest-auth) dependency: re-introduced ONLY for this version so
+// upgrading customers can migrate their existing Default Role / Session Timeout /
+// Attribute Parameters values from the Guest Auth invoker into the chatbot invoker.
+// Once migrated, the chatbot invoker is authoritative and this dependency can be
+// removed in the next release.
 @Dependency(name = "Authentication", domainId = "catEntryDomain_db053e8f-a194-4dde-aa6f-701ef7a6b3a7",
-        description = "Extension dependency for authentication.")
+        description = "Extension dependency for authentication. Temporary — used to migrate Guest Auth attributes into the chatbot invoker on upgrade.")
 @Domain(id = "catEntryDomain_db053e8f-a194-4dde-aa6f-701ef7a6b3a7",
         name = "Authentication",
         ecosystemId = "catEntryEcosystem_d3b05047-07b0-4b06-95a3-9fb8f7f608d9",
         ecosystemName = "Krista",
         ecosystemVersion = "279b35ac-aeee-4136-840d-6884f52d0737")
-@Extension(version = "2.0.17", jaxrsId = Constants.JAX_RS_ID, implementingDomainIds = "catEntryDomain_5fa2fc97-4b17-44cf-b98f-aa91a459a091", requireWorkspaceAdminRights = true, supportingModes = app.krista.extension.request.ExecutionMode.LIVE, name = "Omni Chatbot")
+@Extension(version = "4.0.0", jaxrsId = Constants.JAX_RS_ID, implementingDomainIds = "catEntryDomain_5fa2fc97-4b17-44cf-b98f-aa91a459a091", requireWorkspaceAdminRights = true, supportingModes = app.krista.extension.request.ExecutionMode.LIVE, name = "Omni Chatbot")
+@ChangeLog(file = "docs/pages/change-log.md")
 @StaticResource(path = "docs", file = "docs")
 public class ChatBotExtension {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ChatBotExtension.class);
     private final Invoker invoker;
-    private final Invoker authenticatorInvoker;
     private final ChatBotAuthenticator requestAuthenticator;
     private final InvInbox invokerInbox;
     private final AuthenticationSettings authenticationSettings;
@@ -92,19 +101,29 @@ public class ChatBotExtension {
     private SessionTimeoutMonitor sessionTimeoutMonitor;
     public final KeyValueStore keyValueStore;
     private final InvokerConfiguration invokerConfiguration;
+    private final ChatBotPool chatBotPool;
+    private final AttributeParameterValidator attributeParameterValidator;
+    private final ChatBotUIService chatBotUIService;
+    private final ConcurrencyManager concurrencyManager;
+    // Bound Authentication (Guest Auth) invoker — temporary, only used during
+    // onInvokerLoad to migrate the old Default Role / Session Timeout / Attribute
+    // Parameters attributes from the Guest Auth invoker into this chatbot invoker
+    // for upgrading customers. Once migrated the chatbot invoker is authoritative.
+    private final Invoker authenticationInvoker;
 
     // In-memory cache for UI_CONFIG_JSON to avoid repeated database reads
     private final Map<String, String> configCache = new ConcurrentHashMap<>();
 
     @Inject
-    public ChatBotExtension(@Named("self") Invoker invoker,
-                            @Named("Authentication") Invoker authenticatorInvoker,
-                            ChatBotAuthenticator requestAuthenticator,
-                            AuthenticationSettings authenticationSettings,
-                            RequestContext requestContext, app.krista.extensions.essentials.collaboration.omnichatbot.store.SessionStore sessionStore,
-                            ConnectionStore connectionStore, ChatBotMessageSender messageSender, KeyValueStore keyValueStore, InvokerConfiguration invokerConfiguration) {
+    public ChatBotExtension(Invoker invoker, ChatBotAuthenticator requestAuthenticator,
+                            AuthenticationSettings authenticationSettings, RequestContext requestContext,
+                            app.krista.extensions.essentials.collaboration.omnichatbot.store.SessionStore sessionStore,
+                            ConnectionStore connectionStore, ChatBotMessageSender messageSender,
+                            KeyValueStore keyValueStore, InvokerConfiguration invokerConfiguration, ChatBotPool chatBotPool,
+                            AttributeParameterValidator attributeParameterValidator, ChatBotUIService chatBotUIService,
+                            ConcurrencyManager concurrencyManager,
+                            @Named("Authentication") Invoker authenticationInvoker) {
         this.invoker = invoker;
-        this.authenticatorInvoker = authenticatorInvoker;
         this.requestAuthenticator = requestAuthenticator;
         this.sessionStore = sessionStore;
         this.connectionStore = connectionStore;
@@ -116,7 +135,11 @@ public class ChatBotExtension {
         this.requestContext = requestContext;
         this.mediumService = InteractiveMediumService.getInstance();
         this.messageSender = messageSender;
-        System.out.println("#####-CHATBOT EXTENSION CONSTRUCTED...");
+        this.chatBotPool = chatBotPool;
+        this.attributeParameterValidator = attributeParameterValidator;
+        this.chatBotUIService = chatBotUIService;
+        this.concurrencyManager = concurrencyManager;
+        this.authenticationInvoker = authenticationInvoker;
     }
 
     /**
@@ -136,12 +159,22 @@ public class ChatBotExtension {
     @InvokerRequest(InvokerRequest.Type.VALIDATE_ATTRIBUTES)
     public void validateAttributes(Map<String, Object> setupAttributes) {
         String welcomeConversation = (String) setupAttributes.get(Constants.WELCOME_CONVERSATION_NAME);
-        isConversationFound(welcomeConversation, Constants.WELCOME_CONVERSATION_NAME);
+        // Welcome Conversation is optional: when left blank the chatbot greets with the
+        // Welcome Message instead, so only validate the conversation exists when one is set.
+        if (welcomeConversation != null && !welcomeConversation.isEmpty()) {
+            isConversationFound(welcomeConversation, Constants.WELCOME_CONVERSATION_NAME);
+        }
 
         String fallbackConversation = (String) setupAttributes.get(Constants.FALLBACK_CONVERSATION);
         if (fallbackConversation != null && !fallbackConversation.isEmpty()) {
             isConversationFound(fallbackConversation, Constants.FALLBACK_CONVERSATION);
         }
+
+        validateAttributeParameters(setupAttributes);
+    }
+
+    private void validateAttributeParameters(Map<String, Object> setupAttributes) {
+        attributeParameterValidator.validate(setupAttributes);
     }
 
     /**
@@ -193,88 +226,155 @@ public class ChatBotExtension {
      */
     @InvokerRequest(InvokerRequest.Type.INVOKER_LOADED)
     public void onInvokerLoad() {
-        LOGGER.info("#####-CHATBOT INVOKER LOADED...");
+        long loadStart = System.nanoTime();
+        LOGGER.info("#####-CHATBOT INVOKER LOAD START invokerId={}", invoker.getInvokerId());
+        long step = loadStart;
 
-        // Migrate uiConfigJson from attributes to keyValueStore (one-time migration)
-        migrateUiConfigToKeyValueStore();
+        // Initialise span-based telemetry (events exported via the extension-owned tracer).
+        ChatBotMetrics.initialize(invoker.getWorkspaceId(), invoker.getInvokerId());
+        ChatBotMetrics.recordInvokerLoaded();
+
+        // Register this chatbot's public host so embed analytics can exclude its own
+        // iframe/app/launcher traffic (Host at the origin is internal behind CloudFront).
+        registerEmbedSelfHost();
+        step = logLoadStep("registerEmbedSelfHost", step);
+
+        // Register the message sender on invoker load to ensure messages work correctly
+        // after a version upgrade (the sender must be registered before any messages are sent)
+        mediumService.registerSender(messageSender);
+        step = logLoadStep("registerSender", step);
 
         // Load UI config from database to cache for fast access
         loadUiConfigToCache();
+        step = logLoadStep("loadUiConfigToCache", step);
+
+        // Load Guest Auth attributes
+        migrateGuestAuthAttributesIfNeeded();
+        step = logLoadStep("migrateGuestAuthAttributesIfNeeded", step);
 
         invokerInbox.ensureExists();
         invokerInbox.setMessageListener(new InboxMessageListenerImpl());
+        step = logLoadStep("invokerInboxSetup", step);
         if (!isDomainSupported()) {
             authenticationSettings.addSupportedDomains("omni.com");
         }
-
-        SessionStore sessionStore = SessionStore.create(ServiceRegistry.getInstance());
-        // Check if the cleanup has been done already
-        if (!sessionStore.isCleanupDone()) {
-            sessionStore.deleteAllSession();
-            sessionStore.markCleanupDone(); // Mark the cleanup as done
-            LOGGER.info("#####-CHATBOT-clean up is done..");
-        }
+        step = logLoadStep("domainCheck", step);
 
         if (requestContext.getExecutionMode().equals(ExecutionMode.LIVE)) {
+            OmniChannelService omniChannelService = OmniChannelService.getInstance();
             this.sessionTimeoutMonitor = SessionTimeoutMonitor.create(
-                    OmniChannelService.getInstance(),
+                    omniChannelService,
                     ServiceRegistry.getInstance(),
-                    ThreadLocalProxy.getAll(), authenticatorInvoker);
-            sessionTimeoutMonitor.start();
-            sessionTimeoutMonitor.setName("SESSION TIMEOUT " + requestContext.getExecutionMode() + " " + requestContext.getInvokerId());
+                    ThreadLocalProxy.getAll(), invoker);
+            String monitorKey = requestContext.getExecutionMode() + " " + requestContext.getInvokerId();
+            sessionTimeoutMonitor.startAndRegister(monitorKey);
             LOGGER.info("#####-SESSION TIMEOUT MONITOR STARTED SUCCESSFULLY FOR INSTANCE (InvokerId: {})",
                     requestContext.getInvokerId());
         }
+        step = logLoadStep("sessionTimeoutMonitor", step);
 
-        this.loadDefaultValueOfUiConfig();
+        chatBotPool.changeDefaultRoleAsync();
+
+        // Start the concurrent-user rate-limiting subsystem. rehydrate() rebuilds the
+        // queue read-cache from the distributed store (covers extension/proxy restarts);
+        // start() launches the background reaper. Both no-op while the feature flag is
+        // off, so this is safe to run unconditionally and a later admin toggle activates
+        // it without an invoker reload. Independent of the SessionTimeoutMonitor above.
+        concurrencyManager.rehydrate();
+        step = logLoadStep("concurrencyRehydrate", step);
+        concurrencyManager.start();
+        step = logLoadStep("concurrencyStart", step);
+
+        // Pre-warm UI asset cache so the first user does not pay cold-cache cost
+        // (read + transform + gzip on a 2.9 MB Angular bundle). Runs on a virtual
+        // thread to keep invoker boot fast.
+        Thread.startVirtualThread(() -> {
+            try {
+                chatBotUIService.warmCache(invoker);
+            } catch (Exception cause) {
+                LOGGER.warn("#####-CHATBOT-UI cache warm-up failed: {}", cause.getMessage());
+            }
+        });
+
+        // Total synchronous load time = the invoker's unavailability window for a reload.
+        // Async work (warmCache on a virtual thread, changeDefaultRoleAsync) is not counted.
+        LOGGER.info("#####-CHATBOT INVOKER LOAD COMPLETE invokerId={} totalElapsedMs={}",
+                invoker.getInvokerId(), (System.nanoTime() - loadStart) / 1_000_000L);
     }
 
     /**
-     * Migrate uiConfigJson from attributes to keyValueStore (one-time migration).
-     * This method checks if the value exists in keyValueStore. If not, it retrieves
-     * the value from attributes and stores it in keyValueStore.
-     * Also updates the cache after migration.
+     * Logs the elapsed time of one synchronous invoker-load step and returns the current
+     * nanoTime to seed the next step's start. Runs once per invoker load (upgrade/restart),
+     * so INFO volume is negligible. Together these quantify the invoker's unavailability
+     * window and reveal which init step dominates it (useful for diagnosing 499 bursts
+     * seen at the proxy during upgrades).
      */
-    private void migrateUiConfigToKeyValueStore() {
-        // Check if the value already exists in keyValueStore
-        String existingValue = (String) keyValueStore.get(Constants.UI_CONFIG_JSON);
+    private long logLoadStep(String stepName, long stepStartNanos) {
+        long now = System.nanoTime();
+        LOGGER.info("#####-CHATBOT-LOAD invokerId={} step={} elapsedMs={}",
+                invoker.getInvokerId(), stepName, (now - stepStartNanos) / 1_000_000L);
+        return now;
+    }
 
-        if (existingValue == null) {
-            // Value doesn't exist in keyValueStore, try to get it from attributes
-            Object attributeValue = invoker.getAttributes().get(Constants.UI_CONFIG_JSON);
-
-            if (attributeValue != null) {
-                String uiConfigJson = attributeValue.toString();
-                try {
-                    ChatBotUtil.getConfigMap(uiConfigJson);
-                    keyValueStore.put(Constants.UI_CONFIG_JSON, uiConfigJson);
-                    // Update cache after migration
-                    configCache.put(Constants.UI_CONFIG_JSON, uiConfigJson);
-                    LOGGER.info("#####-CHATBOT-UI CONFIG MIGRATED AND CACHED");
-                } catch (Exception cause) {
-                    LOGGER.error("#####-CHATBOT-INVALID JSON FORMAT FOR UI CONFIG: {}", cause.getMessage());
-                }
-            } else {
-                LOGGER.info("#####-CHATBOT-NO UI CONFIG JSON FOUND IN ATTRIBUTES TO MIGRATE");
-            }
-        } else {
-            LOGGER.info("#####-CHATBOT-UI CONFIG JSON ALREADY EXISTS IN KEY VALUE STORE, SKIPPING MIGRATION");
+    /**
+     * Registers this chatbot's own public host (derived from the invoker routing URL) and
+     * invoker id with {@link CorsResponseFilter} so the embed-analytics logging can exclude
+     * the chatbot's own iframe/app/launcher traffic and tag entries with the invoker id.
+     * This is needed because, behind CloudFront + the hosted-invoker proxy, the {@code Host}
+     * header the extension sees is the internal origin and {@code X-Forwarded-Host} is not
+     * always present.
+     */
+    private void registerEmbedSelfHost() {
+        try {
+            RoutingInfo routingInfo = invoker.getRoutingInfo();
+            String routingUrl = routingInfo.getRoutingURL(routingInfo.getRoutingId(), RoutingInfo.Type.APPLIANCE);
+            CorsResponseFilter.registerSelfHost(routingUrl);
+            CorsResponseFilter.registerInvokerId(invoker.getInvokerId());
+        } catch (Exception cause) {
+            LOGGER.warn("#####-CHATBOT-EMBED failed to register self host for embed analytics", cause);
         }
     }
 
-    // In case if we have to revert back from 17 to 16, then this will be useful (KR-19839)
-    // In future we can remove this method completely.
-    private void loadDefaultValueOfUiConfig() {
-        final Object oldUiConfig = invoker.getAttributes().get(Constants.UI_CONFIG_JSON);
-        if (oldUiConfig == null) {
-            final Map<String, Object> updatedAttributes = new HashMap<>(invoker.getAttributes());
-            updatedAttributes.put(Constants.UI_CONFIG_JSON, "{}");
-            try {
-                final boolean saved = invokerConfiguration.saveChanges(invoker.getWorkspaceId(), invoker.getInvokerId(), updatedAttributes, "live", false);
-                LOGGER.info("#####-CHATBOT: DEFAULT VALUE OF UI CONFIG SAVED TO EMPTY JSON {}", saved);
-            } catch (Exception e) {
-                LOGGER.error("#####-CHATBOT: ERROR SAVING DEFAULT VALUE OF UI CONFIG: {}", e.getMessage());
-            }
+    /**
+     * One-time migration: copies Default Role / Session Timeout / Attribute
+     * Parameters from the bound Authentication (Guest Auth) invoker onto this
+     * chatbot invoker, so upgrading customers keep the settings they
+     * previously configured on the Guest Auth invoker. Once the chatbot
+     * invoker has {@code default_role} set, this method short-circuits and
+     * the admin's edits on the chatbot invoker become authoritative.
+     */
+    private void migrateGuestAuthAttributesIfNeeded() {
+        if (invoker.getAttributes().get(AuthConstants.DEFAULT_ROLE_KEY) != null ||
+                AuthConstants.DUMMY_INVOKER_ID.equals(authenticationInvoker.getInvokerId())) {
+            return;
+        }
+        try {
+            Map<String, Object> authAttrs = authenticationInvoker.getAttributes();
+            Map<String, Object> updatedAttributes = new HashMap<>(invoker.getAttributes());
+            putIfPresent(updatedAttributes, authAttrs, AuthConstants.DEFAULT_ROLE_KEY);
+            putIfPresent(updatedAttributes, authAttrs, CommonInvokerParameters.SESSION_TIMEOUT);
+            putIfPresent(updatedAttributes, authAttrs, AuthConstants.ATTRIBUTE_PARAMETERS);
+            boolean saved = invokerConfiguration.saveChanges(invoker.getWorkspaceId(), invoker.getInvokerId(), updatedAttributes, "live", false);
+            LOGGER.info("#####-CHATBOT GUEST AUTH MIGRATION: copied default_role / session_timeout / attribute_parameters from Authentication invoker (saved={})", saved);
+        } catch (Exception cause) {
+            LOGGER.warn("#####-CHATBOT GUEST AUTH MIGRATION failed", cause);
+        }
+    }
+
+    private static void putIfPresent(Map<String, Object> target, Map<String, Object> source, String key) {
+        Object value = source.get(key);
+        if (value != null) {
+            target.put(key, value);
+        }
+    }
+
+    @InvokerRequest(InvokerRequest.Type.INVOKER_UPDATED)
+    public void onInvokerAttributesUpdated(Map<String, Object> oldAttributes, Map<String, Object> newAttributes) {
+
+        String oldRole = InvokerAttributes.getStringOrNull(oldAttributes, AuthConstants.DEFAULT_ROLE_KEY);
+        String newRole = InvokerAttributes.getStringOrNull(newAttributes, AuthConstants.DEFAULT_ROLE_KEY);
+        if (!Objects.equals(oldRole, newRole)) {
+            chatBotPool.changeDefaultRoleAsync();
         }
     }
 
@@ -286,12 +386,17 @@ public class ChatBotExtension {
      */
     @InvokerRequest(InvokerRequest.Type.INVOKER_UNLOADED)
     public void onInvokerUnload() {
-        LOGGER.info("#####-CHATBOT INVOKER UNLOADED...");
-        System.out.println("#####-CHATBOT ATTRIBUTES:" + invoker.getAttributes());
+        long unloadStart = System.nanoTime();
+        LOGGER.info("#####-CHATBOT INVOKER UNLOAD START invokerId={}", invoker.getInvokerId());
+        ChatBotMetrics.shutdown();
         stopSessionTimeoutMonitor();
+        concurrencyManager.shutdown();
+        chatBotPool.shutdown();
         this.invokerInbox.unsetMessageListener();
         this.messageSender.closeMessageProducerSession();
-        LOGGER.info("#####-CHATBOT-Successfully closed the message producer session on invoker unload: {}", invoker.getInvokerId());
+        // Total unload time = start of the invoker's unavailability window on a reload.
+        LOGGER.info("#####-CHATBOT INVOKER UNLOAD COMPLETE invokerId={} elapsedMs={} (producer session closed)",
+                invoker.getInvokerId(), (System.nanoTime() - unloadStart) / 1_000_000L);
     }
 
     @InvokerRequest(InvokerRequest.Type.AUTHENTICATOR)
@@ -301,7 +406,11 @@ public class ChatBotExtension {
 
     @InvokerRequest(InvokerRequest.Type.CUSTOM_TABS)
     public Map<String, String> getCustomTabs() {
-        return Map.of("Documentation", "static/docs", "Integration Settings", "chatbot/integration/");
+        return Map.of(
+                "Documentation", "static/docs",
+                "Integration Settings", "chatbot/integration/",
+                "Analytics & Audit", "chatbot/audit/"
+        );
     }
 
     @InvokerRequest(InvokerRequest.Type.PREPARE_CHANGE_ROUTING_ID)
@@ -323,30 +432,12 @@ public class ChatBotExtension {
     @InvokerRequest(InvokerRequest.Type.INVOKER_REMOVED)
     public void onInvokerRemoved() {
         stopSessionTimeoutMonitor();
+        concurrencyManager.shutdown();
         mediumService.deleteAccounts();
-        LOGGER.warn("#####-CHATBOT-Successfully deleted all the accounts on invoker remove: {}", invoker.getInvokerId());
         connectionStore.deleteAll();
-        LOGGER.warn("#####-CHATBOT-Successfully removed all the connection from connection store on invoker remove: {}", invoker.getInvokerId());
         sessionStore.deleteAll();
-        LOGGER.warn("#####-CHATBOT-Successfully removed all the sessions from session store on invoker remove: {}", invoker.getInvokerId());
+        chatBotPool.deleteAllEntries();
         messageSender.closeMessageProducerSession();
-        LOGGER.warn("#####-CHATBOT-Successfully closed the message producer session on invoker remove: {}", invoker.getInvokerId());
-    }
-
-    /**
-     * Forwards authentication requests to the Authentication extension.
-     *
-     * <p>This method delegates authentication API requests to the bound
-     * Authentication extension invoker for processing.
-     *
-     * @param request the protocol request to forward
-     * @return the protocol response from the Authentication extension
-     * @throws ExecutionException if the request execution fails
-     * @throws InterruptedException if the request is interrupted
-     */
-    @ApiRequest(pathElement = "authn", protocol = HttpProtocol.PROTOCOL_NAME)
-    public ProtoResponse forward(ProtoRequest request) throws ExecutionException, InterruptedException {
-        return authenticatorInvoker.handleApiRequest("authn", request).get();
     }
 
     /**
@@ -375,13 +466,36 @@ public class ChatBotExtension {
     }
 
     /**
-     * Gets the cached UI config JSON value.
-     * Returns null if not cached.
+     * Returns the UI config JSON, preferring the in-memory cache and falling back to the
+     * distributed {@link KeyValueStore} (the durable source of truth) on a cache miss.
      *
-     * @return The cached UI config JSON string, or null if not found in cache
+     * <p>The KVS fallback is essential right after an invoker upgrade: a freshly created
+     * extension instance starts with an empty cache until {@link #loadUiConfigToCache()}
+     * runs during {@code onInvokerLoad}. A read that races that window — the Integration
+     * Settings page or {@code /config} — would otherwise see no config and render defaults
+     * even though a saved config exists in the store. On a cache miss the fetched value is
+     * cached so subsequent reads stay in-memory.
+     *
+     * @return the UI config JSON string, or {@code null} if none has ever been saved
      */
     public String getCachedUiConfig() {
-        return configCache.get(Constants.UI_CONFIG_JSON);
+        String cached = configCache.get(Constants.UI_CONFIG_JSON);
+        if (cached != null) {
+            return cached;
+        }
+        String stored = (String) keyValueStore.get(Constants.UI_CONFIG_JSON);
+        if (stored != null) {
+            configCache.put(Constants.UI_CONFIG_JSON, stored);
+        }
+        return stored;
+    }
+
+    public ChatBotPool getChatBotPool() {
+        return chatBotPool;
+    }
+
+    public ConcurrencyManager getConcurrencyManager() {
+        return concurrencyManager;
     }
 
     /**
@@ -393,7 +507,7 @@ public class ChatBotExtension {
     public void updateUiConfig(String uiConfigJson) {
         configCache.put(Constants.UI_CONFIG_JSON, uiConfigJson);
         keyValueStore.put(Constants.UI_CONFIG_JSON, uiConfigJson);
-        LOGGER.info("#####-CHATBOT UI CONFIG UPDATED IN CACHE AND DATABASE");
+        chatBotPool.refreshCreatePoolUsersFlag(uiConfigJson);
     }
 
     /**
@@ -404,9 +518,6 @@ public class ChatBotExtension {
         String uiConfigJson = (String) keyValueStore.get(Constants.UI_CONFIG_JSON);
         if (uiConfigJson != null) {
             configCache.put(Constants.UI_CONFIG_JSON, uiConfigJson);
-            LOGGER.info("#####-CHATBOT UI CONFIG LOADED TO CACHE FROM DATABASE");
-        } else {
-            LOGGER.info("#####-CHATBOT NO UI CONFIG FOUND IN DATABASE TO LOAD TO CACHE");
         }
     }
 }

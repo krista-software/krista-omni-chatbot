@@ -1,0 +1,52 @@
+==================================================================
+ CHATBOT LOAD TEST — SUMMARY
+==================================================================
+ Host             : extension.us-prod-01.krista.app
+ Type             : Chatbot EP (Extension Proxy)
+ Total users      : 100
+ Concurrent users : 100
+ Test window      : 2026-06-12 09:39:28 -> 2026-06-12 09:41:31  (2m 3s)
+ Generated        : 2026-06-12 09:42:01
+
+ FUNNEL
+ ----------------------------------------------------------------
+   Total threads        : 100
+   Auth success         :   100  (100.0%)
+   Session created      :   100  (100.0%)
+   WebSocket established :   100  (100.0%)
+   Conversation (>=1)   :    98  (98.0%)
+
+   Auth path: pool=100  fallback=0
+
+ TIMINGS (seconds)
+ ----------------------------------------------------------------
+   Stage                 count     min     avg     p50     p90     p95     max
+   Full Boot (UI + Auth)    100    1.15   1.437    1.32   1.815   2.094    2.69
+   WebSocket Open          100    0.79   0.842     0.8    0.88    0.89    1.81
+   WebSocket Established    100     0.0   0.014    0.01    0.03    0.04    0.09
+
+   Chatbot message response times:
+   Bot Reply 1             100    10.0  10.001    10.0   10.01   10.01   10.02
+   Bot Reply 2              98    0.02    0.61   0.595   1.026    1.06    1.35
+
+ ASSET & BOOT-API LOAD TIMES (seconds)
+ ----------------------------------------------------------------
+   Asset / API               count     min     avg     p50     p90     p95     max
+   UI HTML (index)             100   0.332   0.452   0.373   0.814   0.865    0.89
+   styles-DUYLOU4O.css         100   0.029   0.041   0.034   0.044   0.114   0.123
+   main-UOLQXA7C.js            100   0.155   0.219   0.191   0.295   0.317   0.647
+   polyfills-B6TNHZQ6.js       100    0.03   0.042   0.036   0.047   0.104   0.127
+   i18n (en.json)              100   0.269   0.354    0.28   0.734    0.77   0.815
+   Config API                  100   0.275   0.347     0.3   0.376   0.744   0.768
+   Pool-entry API              100   0.272   0.333   0.284   0.367   0.744   0.822
+
+ DROP-OFFS
+ ----------------------------------------------------------------
+   Auth failures        : 0
+   WS-establish failures: 0
+
+ MESSAGES RECEIVED PER USER
+ ----------------------------------------------------------------
+    0 msgs :     2  
+    2 msgs :    98  #######################################
+==================================================================

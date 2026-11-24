@@ -1,0 +1,107 @@
+<div class="file-field" [class.compact]="compact">
+  <div class="field-container">
+    <label *ngIf="shouldShowLabel()" class="field-label" [attr.id]="'file-label-' + field.name">
+      {{ field.displayName || field.name }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+
+    <!-- File input area -->
+    <div class="file-input-area"
+         [class.has-file]="hasFile"
+         [class.disabled]="isFieldReadOnly()"
+         [attr.aria-labelledby]="'file-label-' + field.name"
+         [attr.aria-describedby]="(config.hasError ? 'file-error-' + field.name + ' ' : '') + (uploadError ? 'file-upload-error-' + field.name : '')">
+      <!-- Loading indicator -->
+      <div *ngIf="isUploading" class="file-upload-loading" role="status" aria-live="polite">
+        <mat-spinner [diameter]="compact ? 24 : 40" aria-hidden="true"></mat-spinner>
+        <div class="upload-text">
+          <span class="primary-text">Uploading file...</span>
+          <span class="secondary-text" *ngIf="!compact">Please wait</span>
+        </div>
+      </div>
+
+      <!-- File upload button -->
+      <div *ngIf="!hasFile && !isUploading" class="file-upload-zone">
+        <input
+          type="file"
+          [attr.id]="'file-input-' + field.name"
+          [name]="field.name"
+          [accept]="acceptedFileTypes"
+          [disabled]="isFieldReadOnly()"
+          [attr.aria-required]="isFieldRequired()"
+          [attr.aria-invalid]="config.hasError"
+          [attr.aria-describedby]="config.hasError ? 'file-error-' + field.name : null"
+          (change)="onFileChange($event)"
+          class="file-input"
+          #fileInput>
+
+        <div class="upload-content"
+             (click)="!isFieldReadOnly() && fileInput.click()"
+             (keydown.enter)="!isFieldReadOnly() && fileInput.click()"
+             (keydown.space)="!isFieldReadOnly() && fileInput.click(); $event.preventDefault()"
+             [attr.role]="isFieldReadOnly() ? null : 'button'"
+             [attr.tabindex]="isFieldReadOnly() ? null : 0"
+             [attr.aria-label]="'Upload file for ' + (field.displayName || field.name)">
+          <mat-icon class="upload-icon" aria-hidden="true">cloud_upload</mat-icon>
+          <div class="upload-text">
+            <span class="primary-text">{{ isFieldReadOnly() ? 'No file selected' : 'Click to upload file' }}</span>
+            <span class="secondary-text" *ngIf="!isFieldReadOnly()">or drag and drop</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- File preview -->
+      <div *ngIf="hasFile" class="file-preview" role="status">
+        <div class="file-info">
+          <mat-icon class="file-icon" aria-hidden="true">description</mat-icon>
+          <div class="file-details">
+            <div class="file-name">{{ isSecured() ? '••••••••' : fileName }}</div>
+            <div class="file-size">{{ isSecured() ? '••••' : fileSize }}</div>
+          </div>
+        </div>
+
+        <!-- Download button for readonly files -->
+        <button
+          *ngIf="isFieldReadOnly() && canDownload"
+          mat-icon-button
+          color="primary"
+          type="button"
+          (click)="downloadFile()"
+          class="download-file-button"
+          aria-label="Download file"
+          title="Download file">
+          <mat-icon aria-hidden="true">download</mat-icon>
+        </button>
+
+        <!-- Remove button for editable files -->
+        <button
+          *ngIf="!isFieldReadOnly()"
+          mat-icon-button
+          color="primary"
+          type="button"
+          (click)="removeFile()"
+          class="remove-file-button"
+          aria-label="Remove file"
+          title="Remove file">
+          <mat-icon aria-hidden="true">close</mat-icon>
+        </button>
+      </div>
+    </div>
+
+    <!-- Error message -->
+    <div *ngIf="!isFieldReadOnly()" class="field-error-message"
+         [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+         role="alert"
+         [attr.id]="'file-error-' + field.name">
+      {{ config.errorMessage }}
+    </div>
+
+    <!-- Upload error message -->
+    <div *ngIf="!isFieldReadOnly()" class="field-error-message"
+         [style.visibility]="uploadError ? 'visible' : 'hidden'"
+         role="alert"
+         [attr.id]="'file-upload-error-' + field.name">
+      {{ uploadError }}
+    </div>
+  </div>
+</div>

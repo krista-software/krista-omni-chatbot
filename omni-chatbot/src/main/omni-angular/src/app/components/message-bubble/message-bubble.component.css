@@ -1,0 +1,300 @@
+/* Modern Chatbot Message Bubble Styling */
+.message-bubble {
+  display: flex;
+  flex-direction: column;
+  padding: 6px 0;
+  width: fit-content;
+  max-width: 80%;
+  min-width: 120px;
+}
+
+.message-bubble.user-message {
+  align-items: flex-end;
+  margin-left: auto;
+}
+
+.message-bubble.bot-message {
+  align-items: flex-start;
+  margin-right: auto;
+}
+
+.message-wrapper {
+    display: inline-flex;
+    flex-direction: column;
+    max-width: 100%;
+}
+
+/* No forced width for form bubbles — fields use fixed px widths (like React)
+   so the bubble naturally sizes to fit via fit-content + max-width: 80%. */
+
+/* Header row */
+.top-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 4px;
+    padding: 0 6px;
+}
+
+.top-container:has(.header-time):not(:has(.sender-name)) {
+    justify-content: flex-end;
+}
+
+/* Sender Name Styling - matches original app pattern */
+.sender-name {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--krista-text-primary, #212121);  /* Use theme textColor */
+  margin-bottom: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  /*max-width: 200px;*/
+}
+
+.header-time {
+    font-size: 0.65rem;
+    /* Use consistent muted color for timestamps on both sides */
+    color: var(--krista-text-primary, #212121);
+    opacity: 0.7;
+    padding-left: 8px;
+    white-space: nowrap;
+}
+
+.message-content {
+  background: var(--krista-background-paper);
+  padding: 10px;
+  position: relative;
+  width: 100%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s ease;
+}
+
+.message-content:hover {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+}
+
+.user-message .message-content {
+  background: var(--krista-primary, #0177C6);
+  border-radius: 18px 18px 4px 18px;
+  min-width: 60px;
+  /* Use theme textColor if provided, otherwise default to white for user messages */
+  color: var(--krista-user-text-color, white) !important;
+}
+
+.bot-message .message-content {
+  background: #ffffff;
+  color: var(--krista-text-primary);
+  border-radius: 18px 18px 18px 4px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.welcome-message .message-content {
+  color: var(--krista-text-primary, white);
+  border: none;
+}
+
+/* WhatsApp-style message text wrapper */
+.message-text-wrapper {
+  display: inline;
+  word-break: break-word;
+}
+
+.message-text {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  word-break: break-word;
+  white-space: pre-wrap;
+  font-family: "Roboto", "Helvetica", Arial, sans-serif;
+}
+
+.user-message .message-text {
+  /* Use theme textColor if provided, otherwise default to white for user messages */
+  color: var(--krista-user-text-color, white) !important;
+}
+
+.bot-message .message-text {
+  color: var(--krista-text-primary, rgba(0, 0, 0, 0.87));
+}
+
+.welcome-message .message-text {
+  color: var(--krista-text-primary, white);  /* Use theme textColor for welcome message */
+}
+
+/* Remove default paragraph margins - matches original app (MessageTextRenderer line 80) */
+/* Use ::ng-deep to penetrate view encapsulation for dynamically inserted HTML */
+.message-text ::ng-deep p {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* WhatsApp-style inline timestamp */
+.message-time-inline {
+  font-size: 0.65rem;
+  opacity: 0.7;
+  font-family: "Roboto", "Helvetica", Arial, sans-serif;
+  line-height: 1;
+  margin-left: 8px;
+  float: none;
+  margin-top: 8px;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  white-space: nowrap;
+}
+
+.message-time-inline:hover {
+  opacity: 1;
+}
+
+.user-message .message-time-inline {
+  /* Use theme textColor if provided, otherwise default to white for user messages */
+  color: var(--krista-user-text-color, white) !important;
+  opacity: 0.75;
+}
+
+.bot-message .message-time-inline {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+/* Form message wrapper for timestamp positioning */
+.form-message-wrapper {
+  position: relative;
+}
+
+/* Form message timestamp - positioned at bottom right */
+.form-message-wrapper .message-time-inline.form-time {
+  display: block;
+  float: none;
+  text-align: right;
+  width: fit-content;
+  margin-top: 8px;
+  margin-left: 0;
+}
+
+/* Authentication message timestamp */
+.authentication-message {
+  position: relative;
+}
+
+.authentication-message .message-time-inline {
+  display: block;
+  float: none;
+  text-align: right;
+  margin-top: 8px;
+  margin-left: 0;
+  color: rgba(133, 100, 4, 0.7);
+}
+
+/* Response ack message timestamp */
+.response-ack-message {
+  position: relative;
+}
+
+.response-ack-message .message-time-inline {
+  display: block;
+  float: none;
+  text-align: right;
+  margin-top: 8px;
+  margin-left: 0;
+  color: rgba(12, 84, 96, 0.7);
+}
+
+/* System event message timestamp */
+.system-event-message {
+  position: relative;
+}
+
+.system-event-message .message-time-inline {
+  display: block;
+  float: none;
+  text-align: right;
+  margin-top: 8px;
+  margin-left: 0;
+  color: rgba(108, 117, 125, 0.7);
+}
+
+/* Krista Button Styling */
+.message-text krista-button {
+  display: inline-block;
+  margin: 4px 4px 4px 0;
+}
+
+/* Responsive: bubble uses max-width: 85% which scales naturally with
+   the viewport — no hard breakpoint needed. */
+
+/* Authentication Message Styles */
+.authentication-message {
+  padding: 16px;
+  background: linear-gradient(135deg, #fff9e6 0%, #fff3cd 100%);
+  border: 1px solid #ffeaa7;
+  border-radius: 12px;
+  margin: 8px 0;
+}
+
+.auth-content h4 {
+  margin: 0 0 8px 0;
+  color: #856404;
+  font-size: 0.95rem;
+}
+
+.auth-content p {
+  margin: 0 0 12px 0;
+  color: #856404;
+  font-size: var(--kr-font-size-sm);
+}
+
+/* Response Acknowledgment Message Styles */
+.response-ack-message {
+  padding: 16px;
+  background: linear-gradient(135deg, #e8f4f8 0%, #d1ecf1 100%);
+  border: 1px solid #bee5eb;
+  border-radius: 12px;
+  margin: 8px 0;
+}
+
+.response-content h4 {
+  margin: 0 0 8px 0;
+  color: #0c5460;
+  font-size: 0.95rem;
+}
+
+.response-content p {
+  margin: 0 0 8px 0;
+  color: #0c5460;
+  font-size: var(--kr-font-size-sm);
+}
+
+.responder-info small {
+  color: #6c757d;
+}
+
+/* System Event Message Styles */
+.system-event-message {
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border: 1px solid #dee2e6;
+  border-radius: 12px;
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.system-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #6c757d;
+  font-size: var(--kr-font-size-sm);
+}
+
+.event-details {
+  margin-left: auto;
+}
+
+.event-details small {
+  color: #6c757d;
+}

@@ -1,0 +1,21 @@
+{
+    "chatbot_type": "Chatbot EP (Extension Proxy)",
+
+    "extension_url": "extension.us-prod-01.krista.app",
+    "routing_id": "p7KXM2HIJs9IKaJXRwY2Mw_e_e",
+    "base_api_path": "/extension/api",
+    "websocket_path": "/extension/api",
+    "initial_message": "Calculator",
+
+    "request_timeout": 120,
+    "user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36",
+
+    "num_users": 1000,
+    "ws_thread_timeout_sec": 100,
+    "max_concurrent_threads": 100,
+    "sleep_sec_after_max_concurrent": 30,
+    "expected_msg_count": 3,
+    "close_connection_on_expected_msg_reached": false,
+
+    "ws_header_format": "list"
+}

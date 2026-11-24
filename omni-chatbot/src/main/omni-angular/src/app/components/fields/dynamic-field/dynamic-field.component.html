@@ -1,0 +1,208 @@
+<!-- Dynamic Field Renderer - Renders the appropriate field component based on field type -->
+<ng-container [ngSwitch]="getFieldCategory()">
+  
+  <!-- Text Fields (Text, Email, Phone, Paragraph, etc.) -->
+  <app-text-field
+    *ngSwitchCase="'text'"
+    [field]="field"
+    [config]="getTextConfig()"
+    (valueChange)="onValueChange($event)"
+    (blur)="onBlur($event)"
+    (focus)="onFocus()"
+    (keyPress)="onKeyPress($event)">
+  </app-text-field>
+
+  <!-- Number Fields (Number, Currency, Unit, Percentage) -->
+  <app-number-field
+    *ngSwitchCase="'number'"
+    [field]="field"
+    [config]="getNumberConfig()"
+    (valueChange)="onValueChange($event)"
+    (focus)="onFocus()"
+    (blur)="onBlur($event)"
+    (keyPress)="onKeyPress($event)">
+  </app-number-field>
+
+  <!-- Rich Text Field (WYSIWYG editor with formatting) -->
+  <app-rich-text-field
+    *ngSwitchCase="'richText'"
+    [field]="field"
+    [config]="getRichTextConfig()"
+    (valueChange)="onValueChange($event)"
+    (blur)="onBlur($event)"
+    (focus)="onFocus()">
+  </app-rich-text-field>
+
+  <!-- Address Field (Compound field with street, city, state, etc.) -->
+  <app-address-field
+    *ngSwitchCase="'address'"
+    [field]="field"
+    [addressValue]="getAddressValue()"
+    [config]="getAddressConfig()"
+    (valueChange)="onValueChange($event)"
+    (subFieldBlur)="onSubFieldBlur($event)"
+    (keyPress)="onKeyPress($event)">
+  </app-address-field>
+
+  <!-- MultiField / Composite Field (Container with multiple sub-fields) -->
+  <app-multi-field
+    *ngSwitchCase="'multi'"
+    [field]="field"
+    [subFields]="subFields || []"
+    [config]="multiFieldConfig || basicFieldConfig!"
+    [kristaFields]="kristaFields!"
+    [hasAttemptedSubmit]="hasAttemptedSubmit || false"
+    [workspaceId]="workspaceId || ''"
+    [clientSessionId]="clientSessionId || ''"
+    (subFieldValueChange)="onSubFieldValueChange($event)"
+    (subFieldBlur)="onSubFieldBlur($event)"
+    (keyPress)="onKeyPress($event)">
+  </app-multi-field>
+
+  <!-- Date Field -->
+  <app-date-field
+    *ngSwitchCase="'date'"
+    [field]="field"
+    [config]="basicFieldConfig!"
+    (valueChange)="onValueChange($event)">
+  </app-date-field>
+
+  <!-- Date Range Field -->
+  <app-date-range-field
+    *ngSwitchCase="'dateRange'"
+    [field]="field"
+    [config]="basicFieldConfig!"
+    (valueChange)="onValueChange($event)">
+  </app-date-range-field>
+
+  <!-- Date Time Range Field -->
+  <app-date-time-range-field
+    *ngSwitchCase="'dateTimeRange'"
+    [field]="field"
+    [config]="basicFieldConfig!"
+    (valueChange)="onValueChange($event)">
+  </app-date-time-range-field>
+
+  <!-- Time Field -->
+  <app-time-field
+    *ngSwitchCase="'time'"
+    [field]="field"
+    [config]="basicFieldConfig!"
+    (valueChange)="onValueChange($event)">
+  </app-time-field>
+
+  <!-- Location Field -->
+  <app-location-field
+    *ngSwitchCase="'location'"
+    [field]="field"
+    [config]="getLocationConfig()"
+    (valueChange)="onValueChange($event)">
+  </app-location-field>
+
+  <!-- Switch Field (Yes/No Toggle) -->
+  <app-switch-field
+    *ngSwitchCase="'switch'"
+    [field]="field"
+    [config]="basicFieldConfig!"
+    (valueChange)="onValueChange($event)">
+  </app-switch-field>
+
+  <!-- Rating Field -->
+  <app-rating-field
+    *ngSwitchCase="'rating'"
+    [field]="field"
+    [config]="basicFieldConfig!"
+    (valueChange)="onValueChange($event)">
+  </app-rating-field>
+
+  <!-- Pick One Field (Radio buttons) -->
+  <app-pick-one-field
+    *ngSwitchCase="'pickOne'"
+    [field]="field"
+    [config]="basicFieldConfig!"
+    (valueChange)="onValueChange($event)">
+  </app-pick-one-field>
+
+  <!-- Pick Many Field (Checkboxes) -->
+  <app-pick-many-field
+    *ngSwitchCase="'pickMany'"
+    [field]="field"
+    [config]="basicFieldConfig!"
+    (valueChange)="onValueChange($event)">
+  </app-pick-many-field>
+
+  <!-- File Field -->
+  <app-file-field
+    *ngSwitchCase="'file'"
+    [field]="field"
+    [config]="getFileConfig()"
+    [compact]="compact"
+    (valueChange)="onValueChange($event)">
+  </app-file-field>
+
+  <!-- Content Stream Field -->
+  <div *ngSwitchCase="'contentStream'" class="content-stream-wrapper">
+    <app-content-stream-field
+      *ngIf="getStreamValue()?.streamId"
+      [streamId]="getStreamValue()!.streamId"
+      [fieldId]="field.fieldId || field.name"
+      [streamProvider]="getStreamProvider()"
+      [firstEvent]="getStreamValue()!.firstEvent">
+    </app-content-stream-field>
+  </div>
+
+  <!-- Label Field (Read-only display). Two modes, mirroring the toolkit's
+       kr-label-field: image mode (displayImage attr) renders the configured
+       image; otherwise the HTML text content renders as before. -->
+  <div *ngSwitchCase="'label'" class="label-field">
+    <img
+      *ngIf="isLabelImage() && getLabelImageConfig() as img"
+      class="label-image"
+      [ngClass]="'image--' + img.align"
+      [src]="img.src"
+      [alt]="field.name"
+      [ngStyle]="{'object-fit': img.fit, 'width': img.width, 'height': img.height}">
+    <div *ngIf="!isLabelImage()" class="label-content" [innerHTML]="getLabelFieldContent()"></div>
+  </div>
+
+  <!-- Entity Selection Field -->
+  <app-entity-selector-field
+    *ngSwitchCase="'entitySelection'"
+    [field]="field"
+    [config]="getEntitySelectorFieldConfig()"
+    [workspaceId]="workspaceId || ''"
+    [clientSessionId]="clientSessionId || ''"
+    (valueChange)="onValueChange($event)">
+  </app-entity-selector-field>
+
+  <!-- List Field -->
+  <app-list-field
+    *ngSwitchCase="'list'"
+    [field]="field"
+    [config]="basicFieldConfig!"
+    [kristaFields]="kristaFields!"
+    [hasAttemptedSubmit]="hasAttemptedSubmit || false"
+    [workspaceId]="workspaceId || ''"
+    [clientSessionId]="clientSessionId || ''"
+    (valueChange)="onValueChange($event)">
+  </app-list-field>
+
+  <!-- Table Field -->
+  <app-table-field
+    *ngSwitchCase="'table'"
+    [field]="field"
+    [config]="basicFieldConfig!"
+    [kristaFields]="kristaFields!"
+    [hasAttemptedSubmit]="hasAttemptedSubmit || false"
+    [workspaceId]="workspaceId || ''"
+    [clientSessionId]="clientSessionId || ''"
+    (valueChange)="onValueChange($event)">
+  </app-table-field>
+
+  <!-- Unknown field type -->
+  <div *ngSwitchDefault class="unknown-field">
+    <em>Unsupported field type: {{ field.fieldType }}</em>
+  </div>
+
+</ng-container>
+

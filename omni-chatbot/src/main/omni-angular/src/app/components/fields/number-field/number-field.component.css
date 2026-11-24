@@ -1,0 +1,39 @@
+/* Number Field Styling - Imports shared styles */
+@import '../shared-field-styles.css';
+
+/* Number Field Specific Styling */
+.number-field {
+}
+
+/* Numeric input styling - left-aligned for input, tabular numbers for consistency */
+.numeric-input {
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Numeric field specific styling */
+.numeric-field {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Error state styling */
+.error {
+  border-color: #f44336 !important;
+}
+
+/* Material form field customization */
+::ng-deep .numeric-field .mat-mdc-form-field-error {
+  font-size: 12px;
+}
+
+::ng-deep .numeric-field .mat-mdc-text-field-wrapper {
+  padding-bottom: 0;
+}
+
+/* Ensure numeric input is left-aligned in Material form field */
+::ng-deep .numeric-field input.numeric-input {
+  text-align: left;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Responsive: scales naturally via max-width: 100% on parent. */

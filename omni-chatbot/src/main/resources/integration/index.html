@@ -20,19 +20,28 @@
         }
 
         .container {
-            margin: 20px 40px;
+            padding: 20px;
         }
 
         .main-content {
             display: grid;
-            grid-template-columns: 1fr 400px;
+            grid-template-columns: 1fr 540px;
+            /* grid-template-rows:100% forces the single row to fill the JS-set
+               container height. Without it, align-items:stretch only stretches
+               items to the row's auto height (= tallest content), not to the
+               container height — causing the outer page to scroll. */
+            grid-template-rows: 100%;
             gap: 30px;
-            align-items: start;
+            align-items: stretch;
+            /* No overflow:hidden — it clips the columns' box-shadows at the grid
+               edges (both columns sit flush with the grid bottom). Shadows never
+               cause scrollbars, and content overflow is prevented by the
+               min-height:0 chain inside each column. */
         }
 
         @media (max-width: 1200px) {
             .main-content {
-                grid-template-columns: 1fr 400px;
+                grid-template-columns: 1fr 440px;
             }
         }
 
@@ -56,35 +65,54 @@
             overflow: hidden;
         }
 
+        /* Shared top-level card header style (Configuration, Integration Script,
+           Live Preview): blue material icon + 18px/500 title + 13px subtitle. */
         .panel-header {
+            flex-shrink: 0; /* static height — only .panel-body scrolls */
             background: white;
             color: #212121;
-            padding: 20px 24px;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
             border-bottom: 1px solid rgba(0, 0, 0, 0.12);
         }
 
-        .panel-header h2 {
-            margin: 0 0 4px 0;
+        .panel-header .material-icons {
             font-size: 20px;
+            color: #009BF4;
+        }
+
+        .panel-header h2 {
+            margin: 0 0 3px 0;
+            font-size: 15px;
             font-weight: 500;
             color: #212121;
         }
 
         .panel-header p {
             margin: 0;
-            font-size: 14px;
+            font-size: 12px;
             color: rgba(0, 0, 0, 0.6);
         }
 
         .panel-body {
-            padding: 24px;
-            max-height: calc(100vh - 300px);
+            padding: 14px 16px;
             overflow-y: auto;
         }
 
         .sticky-sidebar {
-            position: sticky;
-            top: 20px;
+            /* height:100% fills the grid row (set to match left column by align-items:stretch) */
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        .sticky-sidebar > .integration-card {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            min-height: 0;
         }
 
         .integration-card {
@@ -92,13 +120,13 @@
             border-radius: 4px;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
             overflow: hidden;
-            margin-bottom: 20px;
+            margin-bottom: 2px;
         }
 
         .integration-header {
             background: white;
             color: #212121;
-            padding: 20px 24px;
+            padding: 10px 20px;
             display: flex;
             align-items: center;
             gap: 12px;
@@ -106,63 +134,133 @@
         }
 
         .integration-header .material-icons {
-            font-size: 24px;
+            font-size: 20px;
             color: #009BF4;
         }
 
         .integration-header h3 {
             margin: 0;
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 500;
             color: #212121;
         }
 
-        .integration-body {
-            padding: 18px;
+        .main-column {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            /* No overflow:hidden — it clips children's box-shadows (config-panel
+               sits flush with the column bottom via flex:1). Overflow is already
+               prevented by min-height:0 + the internal .panel-body scroll. */
+            min-height: 0;
+        }
+        /* Config panel: flex:1 fills remaining left-column height; panel-body
+           scrolls internally so the save button is always visible at the bottom. */
+        .config-panel {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .config-panel .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            min-height: 0;
+        }
+
+        /* Integration Script strip (slim collapsible bar above the configuration
+           panel — the script is one-time setup, so it stays out of the way while
+           the Copy button remains one click away without expanding). */
+        .integration-strip {
+            flex-shrink: 0; /* static height — never compressed by the flex column */
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24);
+            padding: 10px 20px;
+            margin-bottom: 12px;
+        }
+
+        .integration-strip-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .integration-strip-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .integration-strip-info .material-icons {
+            font-size: 20px;
+            color: #009BF4;
+        }
+
+        .integration-strip-info h3 {
+            margin: 0 0 3px 0;
+            font-size: 15px;
+            font-weight: 500;
+            color: #212121;
+        }
+
+        .integration-strip-info p {
+            margin: 0;
+            font-size: 12px;
+            color: rgba(0, 0, 0, 0.6);
+        }
+
+        .integration-strip .copy-button {
+            position: static;
+            flex-shrink: 0;
+        }
+
+        .integration-strip .section-chevron {
+            flex-shrink: 0;
+        }
+
+        .integration-strip-code {
+            display: none;
+            margin: 10px 0 4px 0;
+        }
+
+        .integration-strip.expanded .integration-strip-code {
+            display: block;
         }
 
         .code-block {
-            background: linear-gradient(135deg, #2d2d2d 0%, #1a1a1a 100%);
-            border-radius: 10px;
+            background: #f6f8fa;
+            border-radius: 8px;
             padding: 12px;
             position: relative;
             margin-bottom: 16px;
-            border: 2px solid #3d3d3d;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            border: 1px solid #d0d7de;
         }
 
         .code-block pre {
-            color: #e8e8e8;
+            margin: 0;
+            color: #24292f;
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             font-size: 14px;
             line-height: 1.8;
             overflow-x: auto;
         }
 
-        .code-block code {
-            color: #4fc3f7;
-            text-shadow: 0 0 10px rgba(79, 195, 247, 0.3);
-        }
-
         .code-tag {
-            color: #f92672;
+            color: #cf222e;
         }
 
         .code-attr {
-            color: #a6e22e;
+            color: #116329;
         }
 
         .code-value {
-            color: #e6db74;
-        }
-
-        .code-keyword {
-            color: #c586c0;
-            font-weight: 500;
-        }
-
-        .code-function {
-            color: #dcdcaa;
+            color: #0a3069;
         }
 
         .copy-button {
@@ -203,12 +301,12 @@
         }
 
         .save-button-container {
-            position: sticky;
-            bottom: 0;
+            flex-shrink: 0;
             background: white;
-            padding: 20px 24px;
-            border-top: 2px solid #e0e0e0;
+            padding: 14px 24px;
+            border-top: 1px solid #e0e0e0;
             display: flex;
+            align-items: center;
             gap: 12px;
             justify-content: flex-end;
         }
@@ -290,7 +388,7 @@
         }
 
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .form-group select {
@@ -299,14 +397,14 @@
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
+            margin-bottom: 5px;
             font-weight: 600;
-            font-size: 13px;
+            font-size: 12px;
             color: #333;
         }
 
         .form-group-checkbox {
-            margin-bottom: 20px;
+            margin-bottom: 14px;
         }
 
         .checkbox-wrapper {
@@ -509,7 +607,7 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 20px;
+            padding: 11px 16px;
             background: #fafafa;
             cursor: pointer;
             user-select: none;
@@ -523,24 +621,24 @@
         .section-header-left {
             display: flex;
             align-items: center;
-            gap: 14px;
+            gap: 10px;
         }
 
         .section-icon {
-            font-size: 24px;
-            width: 28px;
+            font-size: 18px;
+            width: 22px;
             text-align: center;
         }
 
         .section-title {
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 500;
             color: #212121;
-            margin: 0 0 2px 0;
+            margin: 0 0 3px 0;
         }
 
         .section-subtitle {
-            font-size: 12px;
+            font-size: 11px;
             color: rgba(0, 0, 0, 0.6);
             margin: 0;
         }
@@ -557,7 +655,7 @@
         }
 
         .section-content {
-            padding: 24px;
+            padding: 16px;
             display: none;
             border-top: 2px solid #f0f0f0;
             animation: expandSection 0.3s ease;
@@ -582,6 +680,479 @@
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 16px;
         }
+
+        /* ===== Live Preview (mini-site simulator) ===== */
+        .preview-body {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 18px;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* #previewFrameHome is a direct flex child of .preview-body; it must
+           also be a flex container so the flex:1 chain reaches .preview-frame. */
+        #previewFrameHome {
+            flex: 1;
+            min-height: 0;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .preview-frame {
+            position: relative;
+            flex: 1;
+            min-height: 300px;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 8px;
+            background: #eef1f4;
+            overflow: hidden;
+        }
+
+        .preview-site {
+            padding: 14px;
+        }
+
+        .preview-site-bar {
+            height: 10px;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.08);
+            margin-bottom: 10px;
+        }
+
+        .preview-site-bar.wide { width: 90%; }
+        .preview-site-bar.medium { width: 70%; }
+        .preview-site-bar.narrow { width: 45%; }
+
+        .preview-note {
+            margin: 10px 0 0 0;
+            font-size: 12px;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        /* Bubble replica (mirrors launcher.css .chat-bubble/.bubble-btn) */
+        .preview-bubble {
+            position: absolute;
+            z-index: 2;
+        }
+
+        .preview-bubble.bottomRight { bottom: 14px; right: 14px; }
+        .preview-bubble.bottomLeft { bottom: 14px; left: 14px; }
+        .preview-bubble.topRight { top: 14px; right: 14px; }
+        .preview-bubble.topLeft { top: 14px; left: 14px; }
+        .preview-bubble.centerRight { top: 50%; right: 14px; transform: translateY(-50%); }
+        .preview-bubble.centerLeft { top: 50%; left: 14px; transform: translateY(-50%); }
+
+        .preview-bubble-btn {
+            cursor: pointer;
+            display: flex;
+            background: white;
+            border-radius: 999px;
+            border-style: solid;
+            border-color: #4fd7ed;
+            border-width: 1px;
+            padding: 1px;
+        }
+
+        /* Real launcher dimensions (launcher.css: 50px icon, 16px text) */
+        .preview-bubble-text {
+            line-height: 50px;
+            padding: 0 16px;
+            font-size: 16px;
+            font-weight: 500;
+            color: #434343;
+        }
+
+        .preview-bubble-icon {
+            display: flex;
+            min-width: 50px;
+            height: 50px;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: #4fd7ed;
+            color: #4fd7ed;
+        }
+
+        /* Chat window replica (mirrors launcher.css .chatbot-container + Angular app shell) */
+        .preview-window {
+            position: absolute;
+            display: none;
+            flex-direction: column;
+            width: calc(100% - 24px);
+            top: 12px;
+            bottom: 12px;
+            background: #fff;
+            border: 1px solid rgba(0, 0, 0, 0.12);
+            border-radius: 10px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            z-index: 3;
+        }
+
+        .preview-window.open { display: flex; }
+        .preview-window.bottomRight, .preview-window.centerRight, .preview-window.topRight { right: 12px; }
+        .preview-window.bottomLeft, .preview-window.centerLeft, .preview-window.topLeft { left: 12px; }
+        .preview-window.fullSize { top: 0; bottom: 0; left: 0; right: 0; width: auto; border-radius: 0; }
+
+        /* Header replica — values from header.component.css (border is FIXED
+           rgba(0,0,0,0.12) in the real app, NOT the theme dividerColor) */
+        .preview-window-header {
+            display: flex;
+            align-items: center;
+            padding: 0 12px;
+            min-height: 64px;
+            background: #fff;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+            flex-shrink: 0;
+        }
+
+        .preview-logo {
+            max-height: 48px;
+            max-width: 138px;
+            object-fit: contain;
+            flex-shrink: 0;
+        }
+
+        .preview-bot-info {
+            flex: 1;
+            min-width: 0;
+            overflow: hidden;
+            padding: 0 12px;
+        }
+
+        .preview-bot-info.text-align-left { text-align: left; }
+        .preview-bot-info.text-align-center { text-align: center; }
+        .preview-bot-info.text-align-right { text-align: right; }
+
+        .preview-bot-name {
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .preview-bot-subtitle {
+            margin-top: 4px;
+            font-size: 14px;
+            line-height: 1.2;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .preview-header-actions {
+            display: flex;
+            align-items: center;
+            margin-left: auto;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .preview-action-btn {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .preview-action-btn .material-icons {
+            font-size: 24px;
+        }
+
+        .preview-lang-select {
+            display: flex;
+            align-items: center;
+            height: 36px;
+            padding: 0 6px 0 16px;
+            margin-right: 8px;
+            border: 1px solid #f0f0f0;
+            border-radius: 4px;
+            font-size: 14px;
+            color: rgba(0, 0, 0, 0.87);
+            white-space: nowrap;
+        }
+
+        .preview-lang-select .material-icons {
+            font-size: 20px;
+            color: rgba(0, 0, 0, 0.54);
+        }
+
+        #previewMinimize {
+            cursor: pointer;
+        }
+
+        /* Body replica — chat background is --krista-background-default #f6f6f7;
+           bubble values from message-bubble.component.css */
+        .preview-window-body {
+            flex: 1;
+            padding: 12px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: #f6f6f7;
+        }
+
+        .preview-msg {
+            max-width: 80%;
+            min-width: 120px;
+            padding: 10px;
+            font-size: 14px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        .preview-msg.bot {
+            align-self: flex-start;
+            background: #ffffff;
+            color: #212121;
+            border: 1px solid rgba(0, 0, 0, 0.06);
+            border-radius: 18px 18px 18px 4px;
+        }
+
+        .preview-msg.bot.welcome {
+            border: none;
+        }
+
+        .preview-msg.user {
+            align-self: flex-end;
+            background: #0177C6;
+            color: #fff;
+            border-radius: 18px 18px 4px 18px;
+        }
+
+        .preview-msg-time {
+            font-size: 0.65rem;
+            opacity: 0.7;
+            margin-left: 8px;
+            white-space: nowrap;
+        }
+
+        /* Footer replica — values from footer.component.css (border is FIXED
+           rgba(0,0,0,0.06) in the real app, NOT the theme dividerColor) */
+        .preview-window-footer {
+            padding: 12px 16px 8px;
+            background: #fff;
+            border-top: 1px solid rgba(0, 0, 0, 0.06);
+            flex-shrink: 0;
+        }
+
+        .preview-input {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8f9fa;
+            border-radius: 24px;
+            padding: 8px 8px 8px 16px;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            font-size: 14px;
+            color: #9e9e9e;
+        }
+
+        .preview-input > span:first-child {
+            flex: 1;
+        }
+
+        .preview-send-btn {
+            width: 40px;
+            height: 40px;
+            min-width: 40px;
+            border-radius: 50%;
+            background: #0177C6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        .preview-send-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: #fff;
+        }
+
+        /* Footer branding row (mirrors footer.component.css: "Powered by Krista"
+           centered, T&C link pinned right with fixed #259de1) */
+        .preview-branding {
+            position: relative;
+            min-height: 20px;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .preview-powered-by {
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+
+        .preview-powered-by span {
+            font-size: 11px;
+            line-height: 16px;
+            flex-shrink: 0;
+            opacity: 0.5;
+        }
+
+        .preview-powered-by img {
+            max-width: 40px;
+            height: auto;
+            flex-shrink: 0;
+        }
+
+        .preview-tnc {
+            position: absolute;
+            right: 0; /* footer has 16px padding -> 16px from window edge, like the real right:16px */
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 11px;
+            white-space: nowrap;
+            text-decoration: underline;
+            color: #259de1;
+            cursor: default;
+        }
+
+        /* Full size: the real app hides the header (app.facade hideHeader = isFullSize) */
+        .preview-window.fullSize .preview-window-header {
+            display: none;
+        }
+
+        /* Full-screen expanded mode: real end-user dimensions */
+        .preview-expand-btn {
+            margin-left: auto;
+            cursor: pointer;
+            color: #666;
+        }
+
+        .preview-expand-btn:hover {
+            color: #009BF4;
+        }
+
+        .preview-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            background: #fff;
+            flex-direction: column;
+        }
+
+        .preview-overlay.open {
+            display: flex;
+        }
+
+        .preview-overlay-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            border-bottom: 1px solid #e0e0e0;
+            flex-shrink: 0;
+        }
+
+        .preview-overlay-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #212121;
+        }
+
+        .preview-overlay-hint {
+            font-size: 12px;
+            color: #888;
+            flex: 1;
+        }
+
+        #previewCollapseBtn {
+            cursor: pointer;
+            color: #666;
+        }
+
+        #previewCollapseBtn:hover {
+            color: #d32f2f;
+        }
+
+        .preview-overlay-host {
+            flex: 1;
+            padding: 12px;
+            min-height: 0;
+        }
+
+        .preview-frame.expanded {
+            height: 100%;
+            border-radius: 4px;
+        }
+
+        /* Real launcher bubble offsets (launcher.css .chat-bubble positions) */
+        .preview-frame.expanded .preview-bubble.bottomRight { bottom: 30px; right: 30px; }
+        .preview-frame.expanded .preview-bubble.bottomLeft { bottom: 30px; left: 30px; }
+        .preview-frame.expanded .preview-bubble.topRight { top: 35px; right: 30px; }
+        .preview-frame.expanded .preview-bubble.topLeft { top: 35px; left: 30px; }
+        .preview-frame.expanded .preview-bubble.centerRight { right: 30px; }
+        .preview-frame.expanded .preview-bubble.centerLeft { left: 30px; }
+
+        /* Real window size: ~30% of screen width (min 300px), 16px offsets (launcher.css .chatbot-container) */
+        .preview-frame.expanded .preview-window {
+            width: max(300px, 30%);
+            top: 16px;
+            bottom: 16px;
+        }
+
+        .preview-frame.expanded .preview-window.bottomRight,
+        .preview-frame.expanded .preview-window.centerRight,
+        .preview-frame.expanded .preview-window.topRight { right: 16px; }
+        .preview-frame.expanded .preview-window.bottomLeft,
+        .preview-frame.expanded .preview-window.centerLeft,
+        .preview-frame.expanded .preview-window.topLeft { left: 16px; }
+        .preview-frame.expanded .preview-window.fullSize { top: 0; bottom: 0; left: 0; right: 0; width: auto; }
+
+        /* Real chat app type scale in expanded mode */
+        /* No expanded-mode typography overrides: the replica uses the real app's
+           sizes at every frame size (real chat UI does not scale with window). */
+
+        /* "Try it live" (integration strip): opens a generated demo host page in
+           a NEW TAB that loads the real launcher script with SAVED settings. */
+        .try-live-button {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 4px;
+            border: 1px solid #009BF4;
+            background: #fff;
+            color: #009BF4;
+            font-weight: 500;
+            font-size: 13px;
+            cursor: pointer;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+
+        .try-live-button:hover {
+            background: #e3f2fd;
+        }
+
+        .try-live-button .material-icons {
+            font-size: 18px;
+        }
     </style>
 </head>
 
@@ -589,11 +1160,40 @@
 <div class="container">
     <!-- Main Content Grid -->
     <div class="main-content">
-        <!-- Configuration Panel (Left) -->
+        <!-- Left Column: Integration Script strip + Configuration -->
+        <div class="main-column">
+        <!-- Integration Script (slim collapsible strip; Copy works without expanding) -->
+        <div class="integration-strip" id="integrationStrip">
+            <div class="integration-strip-row" onclick="toggleIntegrationScript()">
+                <div class="integration-strip-info">
+                    <span class="material-icons">code</span>
+                    <div>
+                        <h3>Integration Script</h3>
+                        <p>One-time setup — copy this script into your website's HTML &lt;head&gt; tag.</p>
+                    </div>
+                </div>
+                <button class="copy-button" onclick="event.stopPropagation(); copyIntegrationCode()">
+                    <span class="material-icons">content_copy</span>
+                    <span id="copyIntegrationButtonText">Copy</span>
+                </button>
+                <button type="button" class="try-live-button" onclick="event.stopPropagation(); openLiveChatbotTab()" title="Opens a demo page with your live chatbot (saved settings) in a new tab — chatting there creates a real session">
+                    <span class="material-icons">open_in_new</span>
+                    <span>Try it live</span>
+                </button>
+                <span class="material-icons section-chevron" id="integrationStrip-chevron">keyboard_arrow_down</span>
+            </div>
+            <div class="code-block integration-strip-code">
+                <pre><code><span class="code-tag">&lt;script</span> <span class="code-attr">src</span>=<span class="code-value">"_basePath_ui/launcher.js"</span><span class="code-tag">&gt;&lt;/script&gt;</span></code></pre>
+            </div>
+        </div>
+        <!-- Configuration Panel -->
         <div class="config-panel">
             <div class="panel-header">
-                <h2>⚙️ Configuration</h2>
-                <p>Customize your chatbot appearance and behavior</p>
+                <span class="material-icons">settings</span>
+                <div>
+                    <h2>Configuration</h2>
+                    <p>Customize your chatbot appearance and behavior</p>
+                </div>
             </div>
             <div class="panel-body">
                 <form id="configForm">
@@ -609,7 +1209,7 @@
                             </div>
                             <span class="material-icons section-chevron" id="chatbotBubble-chevron">keyboard_arrow_down</span>
                         </div>
-                        <div class="section-content expanded" id="chatbotBubble-content">
+                        <div class="section-content" id="chatbotBubble-content">
                             <div class="form-row">
                                 <div class="form-group">
                                     <div class="label-with-help">
@@ -675,12 +1275,12 @@
                                 <textarea id="bubbleIcon" name="chatBubble.icon" rows="6" placeholder="<svg>...</svg>" style="font-family: 'Consolas', monospace;"></textarea>
                             </div>
 
-                            <!-- Custom CSS Instructions -->
+                            <!-- Additional Information -->
                             <div class="info-card">
                                 <span class="material-icons">info</span>
                                 <div class="info-card-content">
-                                    <h4>Custom CSS Styling</h4>
-                                    <p>If you want to apply custom CSS styles to the chatbot bubble, you can modify the <code style="background-color: rgba(0, 0, 0, 0.08); padding: 2px 6px; border-radius: 3px; font-family: 'Consolas', monospace; font-size: 12px;">bubble-btn</code> CSS class accordingly in your website's stylesheet.</p>
+                                    <p>For custom CSS styles, you can modify the <code style="background-color: rgba(0, 0, 0, 0.08); padding: 2px 6px; border-radius: 3px; font-family: 'Consolas', monospace; font-size: 12px;">bubble-btn</code> CSS class in your website's stylesheet.</p>
+                                    <p style="margin-top: 8px; font-size: 12px; color: #666;"><strong>Note for legacy integrations:</strong> If you're using an older integration script with chatbot bubble properties (text, position, backgroundColor, borderWidth, icon) defined directly in the script options, those values will override these UI settings.</p>
                                 </div>
                             </div>
                         </div>
@@ -698,15 +1298,31 @@
                             </div>
                             <span class="material-icons section-chevron" id="basicSettings-chevron">keyboard_arrow_down</span>
                         </div>
-                        <div class="section-content expanded" id="basicSettings-content">
-                            <div class="form-group">
-                                <div class="label-with-help">
-                                    <div class="label-row">
-                                        <label for="botName">Bot Name</label>
-                                        <span class="help-text">Title of the chatbot window</span>
+                        <div class="section-content" id="basicSettings-content">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <div class="label-with-help">
+                                        <div class="label-row">
+                                            <label for="botName">Bot Name</label>
+                                            <span class="help-text">Title of the chatbot window</span>
+                                        </div>
                                     </div>
+                                    <input type="text" id="botName" name="botName" placeholder="Krista">
                                 </div>
-                                <input type="text" id="botName" name="botName" placeholder="Krista">
+
+                                <div class="form-group">
+                                    <div class="label-with-help">
+                                        <div class="label-row">
+                                            <label for="botNamePosition">Bot Name Position</label>
+                                            <span class="help-text">Header alignment</span>
+                                        </div>
+                                    </div>
+                                    <select id="botNamePosition" name="botNamePosition">
+                                        <option value="left">Left</option>
+                                        <option value="center">Center</option>
+                                        <option value="right">Right</option>
+                                    </select>
+                                </div>
                             </div>
 
                             <div class="form-group">
@@ -722,26 +1338,32 @@
                             <div class="form-group">
                                 <div class="label-with-help">
                                     <div class="label-row">
+                                        <label for="welcomeMessage">Welcome Message</label>
+                                        <span class="help-text">Shown as the first bubble when a new chat starts and no Welcome Conversation is set. Leave empty for a default.</span>
+                                    </div>
+                                </div>
+                                <input type="text" id="welcomeMessage" name="welcomeMessage" placeholder="_defaultWelcomeMessage_">
+                            </div>
+
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
+                                        <label for="fallbackMessage">Fallback Message</label>
+                                        <span class="help-text">Shown when the Welcome Conversation can't run. Leave empty for a default.</span>
+                                    </div>
+                                </div>
+                                <input type="text" id="fallbackMessage" name="fallbackMessage" placeholder="_defaultFallbackMessage_">
+                            </div>
+
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
                                         <label for="logo">Logo URL</label>
                                         <span class="help-text">Chatbot logo image URL</span>
                                     </div>
                                 </div>
                                 <input type="url" id="logo" name="logo" placeholder="https://yourdomain.com/logo.png">
                                 <div class="field-error" id="logo-error">Please enter a valid URL</div>
-                            </div>
-
-                            <div class="form-group">
-                                <div class="label-with-help">
-                                    <div class="label-row">
-                                        <label for="botNamePosition">Bot Name Position</label>
-                                        <span class="help-text">Header alignment</span>
-                                    </div>
-                                </div>
-                                <select id="botNamePosition" name="botNamePosition">
-                                    <option value="left">Left</option>
-                                    <option value="center">Center</option>
-                                    <option value="right">Right</option>
-                                </select>
                             </div>
                         </div>
                     </div>
@@ -758,7 +1380,7 @@
                         </div>
                         <span class="material-icons section-chevron" id="appearance-chevron">keyboard_arrow_down</span>
                     </div>
-                    <div class="section-content expanded" id="appearance-content">
+                    <div class="section-content" id="appearance-content">
                         <div class="form-row">
                             <div class="form-group">
                                 <div class="label-with-help">
@@ -864,7 +1486,7 @@
                         </div>
                         <span class="material-icons section-chevron" id="behavior-chevron">keyboard_arrow_down</span>
                     </div>
-                    <div class="section-content expanded" id="behavior-content">
+                    <div class="section-content" id="behavior-content">
                         <div class="checkbox-grid">
                             <div class="form-group-checkbox">
                                 <div class="checkbox-wrapper">
@@ -915,6 +1537,61 @@
                                     <span class="help-text">Shows language selector</span>
                                 </div>
                             </div>
+
+                            <div class="form-group-checkbox">
+                                <div class="checkbox-wrapper">
+                                    <div class="checkbox-header">
+                                        <input type="checkbox" id="createPoolUsers" name="createPoolUsers">
+                                        <label for="createPoolUsers">Faster Startup</label>
+                                    </div>
+                                    <span class="help-text">Pre-warms resources in the background so new chats open instantly instead of waiting for first-time setup. Recommended for high-traffic bots.</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Concurrency & Idle Section -->
+                <div class="config-section">
+                    <div class="section-header" onclick="toggleSection('concurrency')">
+                        <div class="section-header-left">
+                            <span class="section-icon">🚦</span>
+                            <div>
+                                <h3 class="section-title">Active Users & Inactivity</h3>
+                                <p class="section-subtitle">Limit how many people can chat at once and automatically end inactive chats</p>
+                            </div>
+                        </div>
+                        <span class="material-icons section-chevron" id="concurrency-chevron">keyboard_arrow_down</span>
+                    </div>
+                    <div class="section-content" id="concurrency-content">
+                        <div class="form-group-checkbox">
+                            <div class="checkbox-wrapper">
+                                <div class="checkbox-header">
+                                    <input type="checkbox" id="concurrencyControlEnabled" name="concurrencyControlEnabled">
+                                    <label for="concurrencyControlEnabled">Limit active users</label>
+                                </div>
+                                <span class="help-text">When turned off, everyone can chat right away with no waiting line, and inactive chats stay open.</span>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
+                                        <label for="maxConcurrentUsers">Maximum active users</label>
+                                        <span class="help-text">Minimum 1. Extra visitors wait in line and join in the order they arrived.</span>
+                                    </div>
+                                </div>
+                                <input type="number" id="maxConcurrentUsers" name="maxConcurrentUsers" min="1" step="1" placeholder="100">
+                            </div>
+                            <div class="form-group">
+                                <div class="label-with-help">
+                                    <div class="label-row">
+                                        <label for="idleDisconnectSeconds">Inactivity timeout (secs)</label>
+                                        <span class="help-text">Minimum 30. Inactive chats end after this time, with a warning shown 2 minutes before.</span>
+                                    </div>
+                                </div>
+                                <input type="number" id="idleDisconnectSeconds" name="idleDisconnectSeconds" min="30" step="1" placeholder="300">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -931,7 +1608,7 @@
                         </div>
                         <span class="material-icons section-chevron" id="links-chevron">keyboard_arrow_down</span>
                     </div>
-                    <div class="section-content expanded" id="links-content">
+                    <div class="section-content" id="links-content">
                         <div class="form-group">
                             <div class="label-with-help">
                                 <div class="label-row">
@@ -974,98 +1651,142 @@
                 </button>
             </div>
         </div>
+        </div>
 
-        <!-- Integration Sidebar (Right) -->
+        <!-- Live Preview Sidebar (Right) -->
         <div class="sticky-sidebar">
-            <!-- Integration Code Card -->
+            <!-- Live Preview Card -->
             <div class="integration-card">
                 <div class="integration-header">
-                    <span class="material-icons">code</span>
-                    <h3>Integration Code</h3>
+                    <span class="material-icons">visibility</span>
+                    <h3>Live Preview</h3>
+                    <span class="material-icons preview-expand-btn" id="previewExpandBtn" title="Expand preview to full screen (real end-user size)">open_in_full</span>
                 </div>
-                <div class="integration-body">
-                    <div class="info-card">
-                        <span class="material-icons">info</span>
-                        <div class="info-card-content">
-                            <h4>Quick Integration</h4>
-                            <p>Copy the code below and paste it into your website's HTML in two steps.</p>
+                <div class="preview-body">
+                    <div id="previewFrameHome">
+                    <div class="preview-frame" id="previewFrame">
+                        <div class="preview-site" aria-hidden="true">
+                            <div class="preview-site-bar wide"></div>
+                            <div class="preview-site-bar medium"></div>
+                            <div class="preview-site-bar narrow"></div>
+                            <div class="preview-site-bar medium"></div>
+                            <div class="preview-site-bar wide"></div>
+                            <div class="preview-site-bar narrow"></div>
                         </div>
-                    </div>
-
-                    <!-- Head Tag Section -->
-                    <div style="margin-bottom: 12px;">
-                        <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #333;">Step 1: Add to the &lt;head&gt; tag</h4>
-                        <div class="code-block">
-                            <button class="copy-button" onclick="copyHeadCode()">
-                                <span class="material-icons">content_copy</span>
-                                <span id="copyHeadButtonText">Copy</span>
+                        <div class="preview-bubble bottomRight" id="previewBubble" title="Click to open the chat window">
+                            <button type="button" class="preview-bubble-btn">
+                                <span class="preview-bubble-text" id="previewBubbleText">Talk to us</span>
+                                <span class="preview-bubble-icon" id="previewBubbleIcon"></span>
                             </button>
-                            <pre><code>
-<span class="code-tag">&lt;link</span> <span class="code-attr">rel</span>=<span class="code-value">"stylesheet"</span> <span class="code-attr">href</span>=<span class="code-value">"_basePath_ui/launcher.css"</span><span class="code-tag">/&gt;</span>
-<span class="code-tag">&lt;script</span> <span class="code-attr">src</span>=<span class="code-value">"_basePath_ui/launcher.js"</span><span class="code-tag">&gt;&lt;/script&gt;</span></code></pre>
+                        </div>
+                        <div class="preview-window bottomRight" id="previewWindow">
+                            <div class="preview-window-header" id="previewHeader">
+                                <img class="preview-logo" id="previewLogo" alt="Bot logo">
+                                <div class="preview-bot-info text-align-center" id="previewBotInfo">
+                                    <div class="preview-bot-name" id="previewBotName">Krista</div>
+                                    <div class="preview-bot-subtitle" id="previewBotSubtitle" style="display: none;"></div>
+                                </div>
+                                <div class="preview-header-actions" id="previewHeaderActions">
+                                    <span class="preview-lang-select" id="previewLangIcon" style="display: none;" title="Language selector">English<span class="material-icons">arrow_drop_down</span></span>
+                                    <span class="preview-action-btn" title="Restart Conversation"><span class="material-icons">refresh</span></span>
+                                    <span class="preview-action-btn" id="previewMinimize" title="Minimize Chat"><span class="material-icons">remove</span></span>
+                                </div>
+                            </div>
+                            <div class="preview-window-body">
+                                <div class="preview-msg bot welcome" id="previewWelcomeMsg" style="display: none;"></div>
+                                <div class="preview-msg user" id="previewUserMsg">Hi, I need some help.<span class="preview-msg-time">09:41 AM</span></div>
+                                <div class="preview-msg bot">Sure, I can help with that!<span class="preview-msg-time">09:41 AM</span></div>
+                            </div>
+                            <div class="preview-window-footer" id="previewFooter">
+                                <div class="preview-input" id="previewInput">
+                                    <span>Type your message...</span>
+                                    <span class="preview-send-btn" id="previewSendBtn"><svg viewBox="0 0 20 20" width="18" height="18" aria-hidden="true"><path d="M5.6 10.7391L14.4 4.95652L7.2 14.0435V18.1739L10.4 14.8696L16 19L20 0L0 6.6087L5.6 10.7391Z"/></svg></span>
+                                </div>
+                                <div class="preview-branding">
+                                    <div class="preview-powered-by">
+                                        <span>Powered by</span>
+                                        <img src="_basePath_ui/assets/images/krista-logo.svg" alt="Krista" onerror="this.style.display='none'">
+                                    </div>
+                                    <a class="preview-tnc" id="previewTnC" style="display: none;">Terms &amp; Conditions</a>
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    <!-- Body Tag Section -->
-                    <div>
-                        <h4 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #333;">Step 2: Add before closing &lt;/body&gt; tag</h4>
-                        <div class="code-block">
-                            <button class="copy-button" onclick="copyBodyCode()">
-                                <span class="material-icons">content_copy</span>
-                                <span id="copyBodyButtonText">Copy</span>
-                            </button>
-                            <pre><code><span class="code-tag">&lt;script&gt;</span>
-  <span class="code-keyword">const</span> options = {
-    host: <span class="code-value">"_basePath_"</span>
-  }
-  <span class="code-keyword">const</span> kristaChatbot = <span class="code-keyword">new</span> <span class="code-function">Chatbot</span>(options);
-  kristaChatbot.<span class="code-function">init</span>();
-<span class="code-tag">&lt;/script&gt;</span></code></pre>
-                        </div>
                     </div>
+                    <p class="preview-note">Simulated preview of your current (unsaved) settings. Click the bubble to open the chat window. No real chat session is created.</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<!-- Full-screen host for the Live Preview (the preview frame is moved here on expand) -->
+<div class="preview-overlay" id="previewOverlay">
+    <div class="preview-overlay-toolbar">
+        <span class="preview-overlay-title">Chatbot Preview</span>
+        <span class="preview-overlay-hint">Shown at real size, exactly as your website visitors will see it. No real chat session is created.</span>
+        <span class="material-icons" id="previewCollapseBtn" title="Close preview (Esc)">close</span>
+    </div>
+    <div class="preview-overlay-host" id="previewOverlayHost"></div>
+</div>
+
 <script>
+// ── Layout: set .main-content height so both columns fill the available
+// viewport height regardless of Studio chrome height above.
+// Uses the element's live top offset so it works in any hosting context.
+function adjustLayoutHeight() {
+    var mc = document.querySelector('.main-content');
+    if (!mc) return;
+    // getBoundingClientRect().top is viewport-relative — exactly what we need.
+    // Do NOT add window.scrollY: we want the remaining viewport space, not
+    // the document offset, so this is correct even after a resize event.
+    var viewportTop = mc.getBoundingClientRect().top;
+    var BOTTOM_GAP = 20; // mirrors the container's bottom margin
+    var height = window.innerHeight - viewportTop - BOTTOM_GAP;
+    mc.style.height = Math.max(500, height) + 'px';
+}
+adjustLayoutHeight();
+window.addEventListener('resize', adjustLayoutHeight);
+
 // Configuration object
 let chatbotConfig = {};
+
+// Default bubble icon (matches launcher.js defaultConfig.chatBubble.icon)
+const DEFAULT_BUBBLE_ICON = `<svg width="26" height="21" viewBox="0 0 26 21" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M0.175781 13.2497C0.175781 11.7472 0.62133 10.2784 1.45609 9.02911C2.29084 7.77981 3.47731 6.8061 4.86546 6.23111C6.2536 5.65612 7.78108 5.50568 9.25473 5.79881C10.7284 6.09193 12.082 6.81547 13.1445 7.87791C14.2069 8.94035 14.9304 10.294 15.2236 11.7676C15.5167 13.2413 15.3662 14.7688 14.7912 16.1569C14.2163 17.5451 13.2425 18.7315 11.9932 19.5663C10.7439 20.401 9.27517 20.8466 7.77265 20.8466C6.48811 20.8466 5.27802 20.5278 4.21722 19.9649L1.12576 20.8482L2.00889 18.1988C0.866308 16.8694 0.175781 15.1402 0.175781 13.2497Z" fill="white"/>
+    <mask id="path-2-outside-1_1277_11480" maskUnits="userSpaceOnUse" x="7.71973" y="0.146484" width="19" height="20" fill="black">
+    <rect fill="white" x="7.71973" y="0.146484" width="19" height="20"/>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M24.7197 9.74336C24.7197 8.24084 24.2742 6.77206 23.4394 5.52276C22.6047 4.27346 21.4182 3.29975 20.03 2.72476C18.6419 2.14978 17.1144 1.99933 15.6408 2.29246C14.1671 2.58559 12.8135 3.30912 11.7511 4.37156C10.6886 5.434 9.96508 6.78764 9.67195 8.26129C9.37883 9.73494 9.52927 11.2624 10.1043 12.6506C10.6792 14.0387 11.653 15.2252 12.9023 16.0599C14.1516 16.8947 15.6203 17.3402 17.1229 17.3402C18.4074 17.3402 19.6174 17.0214 20.6782 16.4586L23.7697 17.3419L22.8866 14.6925C24.0292 13.3631 24.7197 11.6339 24.7197 9.74336Z"/>
+    </mask>
+    <path fill-rule="evenodd" clip-rule="evenodd" d="M24.7197 9.74336C24.7197 8.24084 24.2742 6.77206 23.4394 5.52276C22.6047 4.27346 21.4182 3.29975 20.03 2.72476C18.6419 2.14978 17.1144 1.99933 15.6408 2.29246C14.1671 2.58559 12.8135 3.30912 11.7511 4.37156C10.6886 5.434 9.96508 6.78764 9.67195 8.26129C9.37883 9.73494 9.52927 11.2624 10.1043 12.6506C10.6792 14.0387 11.653 15.2252 12.9023 16.0599C14.1516 16.8947 15.6203 17.3402 17.1229 17.3402C18.4074 17.3402 19.6174 17.0214 20.6782 16.4586L23.7697 17.3419L22.8866 14.6925C24.0292 13.3631 24.7197 11.6339 24.7197 9.74336Z" fill="white"/>
+    <path d="M23.4394 5.52276L24.4995 4.81441L24.4995 4.81441L23.4394 5.52276ZM20.03 2.72476L19.5421 3.90271V3.90271L20.03 2.72476ZM15.6408 2.29246L15.392 1.04196L15.6408 2.29246ZM11.7511 4.37156L12.6526 5.27312V5.27312L11.7511 4.37156ZM9.67195 8.26129L10.9225 8.51003L9.67195 8.26129ZM10.1043 12.6506L11.2822 12.1626L11.2822 12.1626L10.1043 12.6506ZM12.9023 16.0599L13.6106 14.9998H13.6106L12.9023 16.0599ZM20.6782 16.4586L20.0807 15.3323L20.5345 15.0915L21.0285 15.2327L20.6782 16.4586ZM23.7697 17.3419L24.9793 16.9387L25.7437 19.2319L23.4194 18.5678L23.7697 17.3419ZM22.8866 14.6925L21.677 15.0957L21.4484 14.4098L21.9196 13.8615L22.8866 14.6925ZM24.4995 4.81441C25.4744 6.27338 25.9947 7.98867 25.9947 9.74336H23.4447C23.4447 8.49301 23.074 7.27074 22.3793 6.23112L24.4995 4.81441ZM20.518 1.54682C22.1391 2.21831 23.5247 3.35544 24.4995 4.81441L22.3793 6.23112C21.6846 5.19149 20.6973 4.3812 19.5421 3.90271L20.518 1.54682ZM15.392 1.04196C17.113 0.699635 18.8968 0.875328 20.518 1.54682L19.5421 3.90271C18.387 3.42422 17.1158 3.29903 15.8895 3.54296L15.392 1.04196ZM10.8495 3.47C12.0902 2.22925 13.6711 1.38428 15.392 1.04196L15.8895 3.54296C14.6632 3.78689 13.5367 4.38899 12.6526 5.27312L10.8495 3.47ZM8.42145 8.01255C8.76377 6.29157 9.60874 4.71075 10.8495 3.47L12.6526 5.27312C11.7685 6.15725 11.1664 7.2837 10.9225 8.51003L8.42145 8.01255ZM8.92631 13.1385C8.25482 11.5174 8.07913 9.73352 8.42145 8.01255L10.9225 8.51003C10.6785 9.73635 10.8037 11.0075 11.2822 12.1626L8.92631 13.1385ZM12.1939 17.1201C10.7349 16.1452 9.5978 14.7596 8.92631 13.1385L11.2822 12.1626C11.7607 13.3178 12.571 14.3052 13.6106 14.9998L12.1939 17.1201ZM17.1229 18.6152C15.3682 18.6152 13.6529 18.0949 12.1939 17.1201L13.6106 14.9998C14.6502 15.6945 15.8725 16.0652 17.1229 16.0652V18.6152ZM21.2758 17.5849C20.0354 18.243 18.6207 18.6152 17.1229 18.6152V16.0652C18.194 16.0652 19.1995 15.7999 20.0807 15.3323L21.2758 17.5849ZM21.0285 15.2327L24.12 16.116L23.4194 18.5678L20.328 17.6846L21.0285 15.2327ZM22.5601 17.7451L21.677 15.0957L24.0961 14.2893L24.9793 16.9387L22.5601 17.7451ZM25.9947 9.74336C25.9947 11.9502 25.1874 13.9716 23.8535 15.5236L21.9196 13.8615C22.871 12.7545 23.4447 11.3175 23.4447 9.74336H25.9947Z" fill="currentColor" mask="url(#path-2-outside-1_1277_11480)"/>
+    <circle cx="14.2002" cy="9.15996" r="1.16875" fill="currentColor"/>
+    <circle cx="18.8758" cy="9.15996" r="1.16875" fill="currentColor"/>
+    </svg>`;
 
 function loadConfiguration() {
     chatbotConfig = _uiConfigJson_;
     console.log("Loaded Configuration:", chatbotConfig);
 }
 
-// Copy head tag code
-function copyHeadCode() {
-    const codeBlocks = document.querySelectorAll('.code-block pre');
-    const headCodeBlock = codeBlocks[0].innerText;
-    const button = codeBlocks[0].parentElement.querySelector('.copy-button');
-    const buttonText = document.getElementById('copyHeadButtonText');
-
-    navigator.clipboard.writeText(headCodeBlock).then(() => {
-        button.classList.add('copied');
-        buttonText.textContent = 'Copied!';
-
-        setTimeout(() => {
-            button.classList.remove('copied');
-            buttonText.textContent = 'Copy';
-        }, 2000);
-    }).catch(err => {
-        console.error('Failed to copy:', err);
-    });
+// Toggle the collapsible Integration Script strip (script is one-time setup,
+// so the code block stays collapsed by default; Copy works without expanding)
+function toggleIntegrationScript() {
+    const strip = document.getElementById('integrationStrip');
+    const chevron = document.getElementById('integrationStrip-chevron');
+    const expanded = strip.classList.toggle('expanded');
+    chevron.textContent = expanded ? 'keyboard_arrow_up' : 'keyboard_arrow_down';
 }
 
-// Copy body tag code
-function copyBodyCode() {
-    const codeBlocks = document.querySelectorAll('.code-block pre');
-    const bodyCodeBlock = codeBlocks[1].innerText;
-    const button = codeBlocks[1].parentElement.querySelector('.copy-button');
-    const buttonText = document.getElementById('copyBodyButtonText');
+// Copy integration code
+function copyIntegrationCode() {
+    const codeBlock = document.querySelector('.code-block pre');
+    // textContent (not innerText): the code block may be collapsed (display:none)
+    const integrationCode = codeBlock.textContent.trim();
+    const button = document.querySelector('.integration-strip .copy-button');
+    const buttonText = document.getElementById('copyIntegrationButtonText');
 
-    navigator.clipboard.writeText(bodyCodeBlock).then(() => {
+    navigator.clipboard.writeText(integrationCode).then(() => {
         button.classList.add('copied');
         buttonText.textContent = 'Copied!';
 
@@ -1109,6 +1830,16 @@ function hideMessages() {
 function populateForm() {
     document.getElementById('botName').value = chatbotConfig.botName || 'Krista';
     document.getElementById('botSubTitle').value = chatbotConfig.botSubTitle || '';
+    // Show the built-in default as the actual VALUE (not just a greyed placeholder) so the
+    // admin sees exactly what visitors are greeted with, and it comes back if they clear the
+    // field. The default is read off the placeholder, which the server substitutes from
+    // Constants.DEFAULT_WELCOME_MESSAGE — avoids escaping the text into JS.
+    const welcomeMessageInput = document.getElementById('welcomeMessage');
+    welcomeMessageInput.value = chatbotConfig.welcomeMessage || welcomeMessageInput.placeholder;
+    // Same treatment for the fallback message: show the built-in default as the actual value
+    // so the admin sees what is really shown, and it returns if they clear the field.
+    const fallbackMessageInput = document.getElementById('fallbackMessage');
+    fallbackMessageInput.value = chatbotConfig.fallbackMessage || fallbackMessageInput.placeholder;
     document.getElementById('logo').value = chatbotConfig.logo || '';
 
     document.getElementById('borderWidth').value = chatbotConfig.outlineWidth || '';
@@ -1129,24 +1860,12 @@ function populateForm() {
     document.getElementById('dashboardCallbackUrl').value = chatbotConfig['Dashboard Callback Url'] || '';
 
     // Chatbot Bubble fields with proper defaults
-    const defaultBubbleIcon = `<svg width="26" height="21" viewBox="0 0 26 21" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-    <path fill-rule="evenodd" clip-rule="evenodd" d="M0.175781 13.2497C0.175781 11.7472 0.62133 10.2784 1.45609 9.02911C2.29084 7.77981 3.47731 6.8061 4.86546 6.23111C6.2536 5.65612 7.78108 5.50568 9.25473 5.79881C10.7284 6.09193 12.082 6.81547 13.1445 7.87791C14.2069 8.94035 14.9304 10.294 15.2236 11.7676C15.5167 13.2413 15.3662 14.7688 14.7912 16.1569C14.2163 17.5451 13.2425 18.7315 11.9932 19.5663C10.7439 20.401 9.27517 20.8466 7.77265 20.8466C6.48811 20.8466 5.27802 20.5278 4.21722 19.9649L1.12576 20.8482L2.00889 18.1988C0.866308 16.8694 0.175781 15.1402 0.175781 13.2497Z" fill="white"/>
-    <mask id="path-2-outside-1_1277_11480" maskUnits="userSpaceOnUse" x="7.71973" y="0.146484" width="19" height="20" fill="black">
-    <rect fill="white" x="7.71973" y="0.146484" width="19" height="20"/>
-    <path fill-rule="evenodd" clip-rule="evenodd" d="M24.7197 9.74336C24.7197 8.24084 24.2742 6.77206 23.4394 5.52276C22.6047 4.27346 21.4182 3.29975 20.03 2.72476C18.6419 2.14978 17.1144 1.99933 15.6408 2.29246C14.1671 2.58559 12.8135 3.30912 11.7511 4.37156C10.6886 5.434 9.96508 6.78764 9.67195 8.26129C9.37883 9.73494 9.52927 11.2624 10.1043 12.6506C10.6792 14.0387 11.653 15.2252 12.9023 16.0599C14.1516 16.8947 15.6203 17.3402 17.1229 17.3402C18.4074 17.3402 19.6174 17.0214 20.6782 16.4586L23.7697 17.3419L22.8866 14.6925C24.0292 13.3631 24.7197 11.6339 24.7197 9.74336Z"/>
-    </mask>
-    <path fill-rule="evenodd" clip-rule="evenodd" d="M24.7197 9.74336C24.7197 8.24084 24.2742 6.77206 23.4394 5.52276C22.6047 4.27346 21.4182 3.29975 20.03 2.72476C18.6419 2.14978 17.1144 1.99933 15.6408 2.29246C14.1671 2.58559 12.8135 3.30912 11.7511 4.37156C10.6886 5.434 9.96508 6.78764 9.67195 8.26129C9.37883 9.73494 9.52927 11.2624 10.1043 12.6506C10.6792 14.0387 11.653 15.2252 12.9023 16.0599C14.1516 16.8947 15.6203 17.3402 17.1229 17.3402C18.4074 17.3402 19.6174 17.0214 20.6782 16.4586L23.7697 17.3419L22.8866 14.6925C24.0292 13.3631 24.7197 11.6339 24.7197 9.74336Z" fill="white"/>
-    <path d="M23.4394 5.52276L24.4995 4.81441L24.4995 4.81441L23.4394 5.52276ZM20.03 2.72476L19.5421 3.90271V3.90271L20.03 2.72476ZM15.6408 2.29246L15.392 1.04196L15.6408 2.29246ZM11.7511 4.37156L12.6526 5.27312V5.27312L11.7511 4.37156ZM9.67195 8.26129L10.9225 8.51003L9.67195 8.26129ZM10.1043 12.6506L11.2822 12.1626L11.2822 12.1626L10.1043 12.6506ZM12.9023 16.0599L13.6106 14.9998H13.6106L12.9023 16.0599ZM20.6782 16.4586L20.0807 15.3323L20.5345 15.0915L21.0285 15.2327L20.6782 16.4586ZM23.7697 17.3419L24.9793 16.9387L25.7437 19.2319L23.4194 18.5678L23.7697 17.3419ZM22.8866 14.6925L21.677 15.0957L21.4484 14.4098L21.9196 13.8615L22.8866 14.6925ZM24.4995 4.81441C25.4744 6.27338 25.9947 7.98867 25.9947 9.74336H23.4447C23.4447 8.49301 23.074 7.27074 22.3793 6.23112L24.4995 4.81441ZM20.518 1.54682C22.1391 2.21831 23.5247 3.35544 24.4995 4.81441L22.3793 6.23112C21.6846 5.19149 20.6973 4.3812 19.5421 3.90271L20.518 1.54682ZM15.392 1.04196C17.113 0.699635 18.8968 0.875328 20.518 1.54682L19.5421 3.90271C18.387 3.42422 17.1158 3.29903 15.8895 3.54296L15.392 1.04196ZM10.8495 3.47C12.0902 2.22925 13.6711 1.38428 15.392 1.04196L15.8895 3.54296C14.6632 3.78689 13.5367 4.38899 12.6526 5.27312L10.8495 3.47ZM8.42145 8.01255C8.76377 6.29157 9.60874 4.71075 10.8495 3.47L12.6526 5.27312C11.7685 6.15725 11.1664 7.2837 10.9225 8.51003L8.42145 8.01255ZM8.92631 13.1385C8.25482 11.5174 8.07913 9.73352 8.42145 8.01255L10.9225 8.51003C10.6785 9.73635 10.8037 11.0075 11.2822 12.1626L8.92631 13.1385ZM12.1939 17.1201C10.7349 16.1452 9.5978 14.7596 8.92631 13.1385L11.2822 12.1626C11.7607 13.3178 12.571 14.3052 13.6106 14.9998L12.1939 17.1201ZM17.1229 18.6152C15.3682 18.6152 13.6529 18.0949 12.1939 17.1201L13.6106 14.9998C14.6502 15.6945 15.8725 16.0652 17.1229 16.0652V18.6152ZM21.2758 17.5849C20.0354 18.243 18.6207 18.6152 17.1229 18.6152V16.0652C18.194 16.0652 19.1995 15.7999 20.0807 15.3323L21.2758 17.5849ZM21.0285 15.2327L24.12 16.116L23.4194 18.5678L20.328 17.6846L21.0285 15.2327ZM22.5601 17.7451L21.677 15.0957L24.0961 14.2893L24.9793 16.9387L22.5601 17.7451ZM25.9947 9.74336C25.9947 11.9502 25.1874 13.9716 23.8535 15.5236L21.9196 13.8615C22.871 12.7545 23.4447 11.3175 23.4447 9.74336H25.9947Z" fill="currentColor" mask="url(#path-2-outside-1_1277_11480)"/>
-    <circle cx="14.2002" cy="9.15996" r="1.16875" fill="currentColor"/>
-    <circle cx="18.8758" cy="9.15996" r="1.16875" fill="currentColor"/>
-    </svg>`;
-
     document.getElementById('bubbleText').value = chatbotConfig.chatBubble?.text != null ? chatbotConfig.chatBubble.text : 'Talk to us';
     document.getElementById('bubblePosition').value = chatbotConfig.chatBubble?.position != null ? chatbotConfig.chatBubble.position : 'bottomRight';
     document.getElementById('bubbleBackgroundColor').value = chatbotConfig.chatBubble?.backgroundColor != null ? chatbotConfig.chatBubble.backgroundColor : '#4fd7ed';
     document.getElementById('bubbleBackgroundColorPicker').value = chatbotConfig.chatBubble?.backgroundColor != null ? chatbotConfig.chatBubble.backgroundColor : '#4fd7ed';
     document.getElementById('bubbleBorderWidth').value = chatbotConfig.chatBubble?.borderWidth != null ? chatbotConfig.chatBubble.borderWidth : '1px';
-    document.getElementById('bubbleIcon').value = chatbotConfig.chatBubble?.icon != null ? chatbotConfig.chatBubble.icon : defaultBubbleIcon;
+    document.getElementById('bubbleIcon').value = chatbotConfig.chatBubble?.icon != null ? chatbotConfig.chatBubble.icon : DEFAULT_BUBBLE_ICON;
 
     // Checkboxes - use proper default values and handle undefined/null vs false
     document.getElementById('startAsBubble').checked = chatbotConfig.startAsBubble != null ? chatbotConfig.startAsBubble : true;
@@ -1154,6 +1873,15 @@ function populateForm() {
     document.getElementById('hideSendMessage').checked = chatbotConfig.hideSendMessage != null ? chatbotConfig.hideSendMessage : false;
     document.getElementById('restartOnRefresh').checked = chatbotConfig.restartOnRefresh != null ? chatbotConfig.restartOnRefresh : false;
     document.getElementById('canChangeLanguage').checked = chatbotConfig.canChangeLanguage != null ? chatbotConfig.canChangeLanguage : false;
+    document.getElementById('createPoolUsers').checked = chatbotConfig.createPoolUsers != null ? chatbotConfig.createPoolUsers : false;
+
+    // Concurrency & Idle (master flag + 2 numbers). Defaults match the backend
+    // ConcurrencyConstants; the two numbers are disabled until the flag is on.
+    var concurrencyEnabled = chatbotConfig.concurrencyControlEnabled === true;
+    document.getElementById('concurrencyControlEnabled').checked = concurrencyEnabled;
+    document.getElementById('maxConcurrentUsers').value = chatbotConfig.maxConcurrentUsers != null ? chatbotConfig.maxConcurrentUsers : 100;
+    document.getElementById('idleDisconnectSeconds').value = chatbotConfig.idleDisconnectSeconds != null ? chatbotConfig.idleDisconnectSeconds : 300;
+    applyConcurrencyEnabledState(concurrencyEnabled);
 }
 
 // Sync color picker with text input
@@ -1278,6 +2006,13 @@ document.addEventListener('DOMContentLoaded', function() {
     setupColorValidation('textColor');
     setupColorValidation('dividerColor');
     setupColorValidation('bubbleBackgroundColor');
+
+    var concurrencyToggle = document.getElementById('concurrencyControlEnabled');
+    if (concurrencyToggle) {
+        concurrencyToggle.addEventListener('change', function(e) {
+            applyConcurrencyEnabledState(e.target.checked);
+        });
+    }
 });
 
 // Validation functions
@@ -1365,6 +2100,20 @@ function validateForm() {
     return hasErrors;
 }
 
+// Concurrency & Idle helpers
+function clampInt(rawValue, minValue, fallbackValue) {
+    var parsed = parseInt(rawValue, 10);
+    if (isNaN(parsed)) {
+        return fallbackValue;
+    }
+    return Math.max(minValue, parsed);
+}
+
+function applyConcurrencyEnabledState(enabled) {
+    document.getElementById('maxConcurrentUsers').disabled = !enabled;
+    document.getElementById('idleDisconnectSeconds').disabled = !enabled;
+}
+
 // Save configuration
 async function saveConfiguration() {
     // Hide any previous messages
@@ -1381,9 +2130,33 @@ async function saveConfiguration() {
     const botNamePositionValue = document.getElementById('botNamePosition').value;
     const startAsBubbleChecked = document.getElementById('startAsBubble').checked;
 
+    // Persist welcomeMessage only when it is a real custom greeting. Empty/whitespace-only —
+    // or the untouched built-in default — is stored as blank, so the default keeps living in
+    // one place (Constants.DEFAULT_WELCOME_MESSAGE) and can be changed centrally later
+    // instead of being frozen into every workspace that pressed Save.
+    const welcomeMessageInputEl = document.getElementById('welcomeMessage');
+    const welcomeMessageValue = welcomeMessageInputEl.value;
+    const welcomeMessageIsDefault =
+        welcomeMessageValue.trim() === (welcomeMessageInputEl.placeholder || '').trim();
+    const welcomeMessageToSave =
+        (welcomeMessageValue.trim().length > 0 && !welcomeMessageIsDefault) ? welcomeMessageValue : '';
+
+    // Fallback message (KR-21127): shown when the Welcome Conversation can't run. Blank does
+    // NOT disable it — the backend falls back to Constants.DEFAULT_FALLBACK_MESSAGE — so, as
+    // with the welcome message, store blank for an empty field or the untouched default and
+    // keep that default owned in one place.
+    const fallbackMessageInputEl = document.getElementById('fallbackMessage');
+    const fallbackMessageValue = fallbackMessageInputEl.value;
+    const fallbackMessageIsDefault =
+        fallbackMessageValue.trim() === (fallbackMessageInputEl.placeholder || '').trim();
+    const fallbackMessageToSave =
+        (fallbackMessageValue.trim().length > 0 && !fallbackMessageIsDefault) ? fallbackMessageValue : '';
+
     chatbotConfig = {
         botName: botNameValue || 'Krista',
         botSubTitle: document.getElementById('botSubTitle').value,
+        welcomeMessage: welcomeMessageToSave,
+        fallbackMessage: fallbackMessageToSave,
         logo: document.getElementById('logo').value,
         outlineWidth: document.getElementById('borderWidth').value,
         outlineColor: document.getElementById('borderColor').value,
@@ -1407,6 +2180,10 @@ async function saveConfiguration() {
         restartOnRefresh: document.getElementById('restartOnRefresh').checked,
         botNamePosition: botNameValue ? botNamePositionValue : 'center',
         canChangeLanguage: document.getElementById('canChangeLanguage').checked,
+        createPoolUsers: document.getElementById('createPoolUsers').checked,
+        concurrencyControlEnabled: document.getElementById('concurrencyControlEnabled').checked,
+        maxConcurrentUsers: clampInt(document.getElementById('maxConcurrentUsers').value, 1, 100),
+        idleDisconnectSeconds: clampInt(document.getElementById('idleDisconnectSeconds').value, 30, 600),
         TnC: document.getElementById('TnC').value,
         TnCLabel: document.getElementById('TnCLabel').value,
         'Dashboard Callback Url': document.getElementById('dashboardCallbackUrl').value
@@ -1463,10 +2240,218 @@ async function saveConfiguration() {
     }
 }
 
+// ===== Live Preview (mini-site simulator) =====
+// Mirrors how launcher.js renders the bubble and how the chat app applies the
+// theme (theme.service.ts defaults). Reads the CURRENT (unsaved) form values so
+// every keystroke/color-pick is reflected immediately.
+let previewOpen = false;
+let previewFontLink = null;
+let previewAssetTimer = null;
+let lastPreviewLogoSrc = null;
+
+function previewValue(id) {
+    return document.getElementById(id).value.trim();
+}
+
+function previewHexOr(id, fallback) {
+    const value = previewValue(id);
+    return value && isValidHexColor(value) ? value : fallback;
+}
+
+function applyPreviewLogo(logoUrl) {
+    const img = document.getElementById('previewLogo');
+    const src = logoUrl && isValidUrl(logoUrl) ? logoUrl : '_basePath_ui/assets/images/krista-logo.svg';
+    if (src === lastPreviewLogoSrc) {
+        return;
+    }
+    lastPreviewLogoSrc = src;
+    img.style.display = '';
+    img.src = src;
+}
+
+function loadPreviewFont(fontUrl) {
+    const isUsable = fontUrl && isValidUrl(fontUrl) && /^https?:/i.test(fontUrl);
+    if (!isUsable) {
+        if (previewFontLink) {
+            previewFontLink.remove();
+            previewFontLink = null;
+        }
+        return;
+    }
+    if (previewFontLink && previewFontLink.getAttribute('href') === fontUrl) {
+        return;
+    }
+    if (!previewFontLink) {
+        previewFontLink = document.createElement('link');
+        previewFontLink.rel = 'stylesheet';
+        document.head.appendChild(previewFontLink);
+    }
+    previewFontLink.setAttribute('href', fontUrl);
+}
+
+function updatePreview(immediateAssets) {
+    // Chat bubble (mirrors launcher.js template + applyBranding)
+    const position = document.getElementById('bubblePosition').value;
+    const bubbleBg = previewHexOr('bubbleBackgroundColor', '#4fd7ed');
+    const bubble = document.getElementById('previewBubble');
+    bubble.className = 'preview-bubble ' + position;
+    const bubbleBtn = bubble.querySelector('.preview-bubble-btn');
+    bubbleBtn.style.borderColor = bubbleBg;
+    bubbleBtn.style.borderWidth = previewValue('bubbleBorderWidth') || '1px';
+    const bubbleText = previewValue('bubbleText');
+    const bubbleTextSpan = document.getElementById('previewBubbleText');
+    bubbleTextSpan.textContent = bubbleText;
+    bubbleTextSpan.style.display = bubbleText ? '' : 'none';
+    const bubbleIconSpan = document.getElementById('previewBubbleIcon');
+    const bubbleIcon = document.getElementById('bubbleIcon').value.trim() || DEFAULT_BUBBLE_ICON;
+    if (bubbleIconSpan.dataset.icon !== bubbleIcon) {
+        bubbleIconSpan.dataset.icon = bubbleIcon;
+        bubbleIconSpan.innerHTML = bubbleIcon;
+    }
+    bubbleIconSpan.style.backgroundColor = bubbleBg;
+    bubbleIconSpan.style.color = bubbleBg;
+
+    // Window container (outline + full size)
+    const win = document.getElementById('previewWindow');
+    const isFullSize = document.getElementById('isFullSize').checked;
+    win.className = 'preview-window ' + position + (isFullSize ? ' fullSize' : '') + (previewOpen ? ' open' : '');
+    win.style.borderColor = previewHexOr('borderColor', '');
+    win.style.borderWidth = previewValue('borderWidth') || '';
+
+    // Theme (defaults mirror theme.service.ts). NOTE: dividerColor is deliberately
+    // NOT applied — the real header/footer borders are hardcoded rgba values in
+    // header.component.css / footer.component.css, not the theme dividerColor.
+    const brandColor = previewHexOr('brandColor', '#0177C6');
+    const textColor = previewHexOr('textColor', '');
+    const fontFamily = previewValue('fontFamily').replace(/\+/g, ' ');
+    win.style.fontFamily = fontFamily ? '"' + fontFamily + '", "Roboto", "Helvetica", Arial, sans-serif' : '';
+
+    // Header (name = --krista-text-primary, subtitle = --krista-text-secondary,
+    // action icons = --krista-primary — per header.component.css)
+    const botNameDiv = document.getElementById('previewBotName');
+    botNameDiv.textContent = previewValue('botName') || 'Krista';
+    botNameDiv.style.color = textColor || '#212121';
+    const subtitle = previewValue('botSubTitle');
+    const subtitleDiv = document.getElementById('previewBotSubtitle');
+    subtitleDiv.textContent = subtitle;
+    subtitleDiv.style.display = subtitle ? '' : 'none';
+    subtitleDiv.style.color = textColor || 'rgba(0, 0, 0, 0.6)';
+    const botInfo = document.getElementById('previewBotInfo');
+    botInfo.className = 'preview-bot-info text-align-' + document.getElementById('botNamePosition').value;
+    document.querySelectorAll('#previewHeaderActions .preview-action-btn .material-icons').forEach(icon => {
+        icon.style.color = brandColor;
+    });
+    document.getElementById('previewLangIcon').style.display = document.getElementById('canChangeLanguage').checked ? '' : 'none';
+
+    // Messages. The welcome message always shows (the backend falls back to the default
+    // when empty), so mirror that here by using the input's placeholder default.
+    const welcomeInput = document.getElementById('welcomeMessage');
+    const welcomeMessage = previewValue('welcomeMessage') || welcomeInput.placeholder;
+    const welcomeMsgDiv = document.getElementById('previewWelcomeMsg');
+    welcomeMsgDiv.textContent = welcomeMessage;
+    welcomeMsgDiv.style.display = welcomeMessage ? '' : 'none';
+    document.querySelectorAll('#previewWindow .preview-msg.bot').forEach(msg => {
+        msg.style.color = textColor || '#212121';
+    });
+    const userMsg = document.getElementById('previewUserMsg');
+    userMsg.style.backgroundColor = brandColor;
+    userMsg.style.color = textColor || '#ffffff';
+
+    // Footer
+    const inputRow = document.getElementById('previewInput');
+    inputRow.style.display = document.getElementById('hideSendMessage').checked ? 'none' : '';
+    document.getElementById('previewSendBtn').style.backgroundColor = brandColor;
+    const tnc = document.getElementById('previewTnC');
+    if (previewValue('TnC')) {
+        tnc.style.display = '';
+        tnc.textContent = previewValue('TnCLabel') || 'Terms & Conditions';
+    } else {
+        tnc.style.display = 'none';
+    }
+
+    // Logo + custom font hit the network — debounce while typing
+    const logoUrl = previewValue('logo');
+    const fontUrl = previewValue('fontImportUrl');
+    clearTimeout(previewAssetTimer);
+    if (immediateAssets === true) {
+        applyPreviewLogo(logoUrl);
+        loadPreviewFont(fontUrl);
+    } else {
+        previewAssetTimer = setTimeout(function() {
+            applyPreviewLogo(logoUrl);
+            loadPreviewFont(fontUrl);
+        }, 400);
+    }
+}
+
+// Expand/collapse: the ONE preview frame node is reparented between the sidebar
+// card and the full-screen overlay, so all live bindings keep working and the
+// two views can never drift apart.
+function expandPreview() {
+    const frame = document.getElementById('previewFrame');
+    document.getElementById('previewOverlayHost').appendChild(frame);
+    frame.classList.add('expanded');
+    document.getElementById('previewOverlay').classList.add('open');
+}
+
+function collapsePreview() {
+    const frame = document.getElementById('previewFrame');
+    document.getElementById('previewFrameHome').appendChild(frame);
+    frame.classList.remove('expanded');
+    document.getElementById('previewOverlay').classList.remove('open');
+}
+
+// ===== Live chatbot test drive (new tab) =====
+// Opens the server-served demo page (GET /chatbot/preview -> integration/preview.html)
+// that embeds the REAL launcher script — the exact one-line integration customers
+// paste — so the complete production path (launcher.js -> launcher-core -> bubble
+// -> chat iframe) runs with SAVED settings. Chatting there creates a real session,
+// hence opt-in via a clearly labeled button, never automatic. Being a real URL,
+// the tab is refreshable (e.g. to test Restart on Refresh) and shareable.
+function openLiveChatbotTab() {
+    const previewUrl = new URL('_basePath_preview', window.location.href).href;
+    const tab = window.open(previewUrl, '_blank');
+    if (!tab) {
+        alert('Please allow pop-ups for this page to open the live chatbot preview.');
+    }
+}
+
+function initPreview() {
+    previewOpen = !document.getElementById('startAsBubble').checked;
+    const form = document.getElementById('configForm');
+    form.addEventListener('input', function() { updatePreview(); });
+    form.addEventListener('change', function() { updatePreview(); });
+    // Toggling "Start as Bubble" demos the initial state (element listener runs
+    // before the form-level one, so the re-render picks up the new state).
+    document.getElementById('startAsBubble').addEventListener('change', function(e) {
+        previewOpen = !e.target.checked;
+    });
+    document.getElementById('previewBubble').addEventListener('click', function() {
+        previewOpen = true;
+        updatePreview();
+    });
+    document.getElementById('previewMinimize').addEventListener('click', function() {
+        previewOpen = false;
+        updatePreview();
+    });
+    document.getElementById('previewLogo').addEventListener('error', function() {
+        this.style.display = 'none';
+    });
+    document.getElementById('previewExpandBtn').addEventListener('click', expandPreview);
+    document.getElementById('previewCollapseBtn').addEventListener('click', collapsePreview);
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && document.getElementById('previewOverlay').classList.contains('open')) {
+            collapsePreview();
+        }
+    });
+    updatePreview(true);
+}
+
 // Initialize on page load
 window.addEventListener('DOMContentLoaded', function() {
     loadConfiguration();
     populateForm();
+    initPreview();
 });
 </script>
 </body>

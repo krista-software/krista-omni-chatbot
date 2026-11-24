@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.resource.dto;
@@ -21,6 +21,12 @@ package app.krista.extensions.essentials.collaboration.omnichatbot.resource.dto;
 public class SessionDto {
 
     private final String sessionInboxId;
+    // True once the configured welcome conversation has been auto-triggered
+    // for this session at least once. Used to suppress re-triggering on WS
+    // reconnects within the same session (network drops, page refreshes)
+    // — the welcome conversation is a one-shot per session, not per WS
+    // connection.
+    private boolean welcomeExecuted;
 
     public SessionDto(String sessionInboxId) {
         this.sessionInboxId = sessionInboxId;
@@ -28,5 +34,13 @@ public class SessionDto {
 
     public String getSessionInboxId() {
         return sessionInboxId;
+    }
+
+    public boolean isWelcomeExecuted() {
+        return welcomeExecuted;
+    }
+
+    public void setWelcomeExecuted(boolean welcomeExecuted) {
+        this.welcomeExecuted = welcomeExecuted;
     }
 }

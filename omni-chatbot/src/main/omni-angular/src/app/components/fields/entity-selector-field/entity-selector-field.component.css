@@ -1,0 +1,558 @@
+.entity-selector-field {
+  width: 100%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+/* Readonly field styling */
+.readonly-field {
+}
+
+.field-label {
+  display: block;
+  font-size: var(--kr-font-size-sm);
+  font-weight: 500;
+  color: rgba(0, 0, 0, 0.87);
+  margin-bottom: 8px;
+  line-height: 1.5;
+}
+
+.required-asterisk {
+  color: #f44336;
+  margin-left: 4px;
+}
+
+.readonly-value {
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  color: rgba(0, 0, 0, 0.87);
+  font-size: 1rem;
+}
+
+.field-error-message {
+  color: #f44336;
+  font-size: 0.75rem;
+  margin-top: 4px;
+  line-height: 1.66;
+}
+
+/* Custom Form Field */
+.custom-form-field {
+  width: 100%;
+}
+
+/* Size and colour come from the shared .field-label rule; only the
+   entity-selector-specific line-height is kept here. */
+.custom-form-field .field-label {
+  line-height: 1.5;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.42);
+  transition: border-color 0.2s ease;
+}
+
+.input-wrapper:hover {
+  border-bottom-color: rgba(0, 0, 0, 0.87);
+}
+
+.custom-form-field.has-error .input-wrapper {
+  border-bottom-color: #f44336;
+}
+
+.custom-input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  padding: 6px 0;
+  font-size: var(--kr-font-size-sm);
+  color: rgba(0, 0, 0, 0.87);
+  cursor: pointer;
+}
+
+.custom-input::placeholder {
+  color: rgba(0, 0, 0, 0.38);
+}
+
+.custom-input:focus {
+  outline: none;
+}
+
+/* Search button styling */
+.search-button {
+  background: none;
+  border: none;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.54);
+  transition: color 0.2s ease;
+  border-radius: 50%;
+}
+
+.search-button:hover {
+  color: rgba(0, 0, 0, 0.87);
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.search-icon {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+/* Error state */
+.custom-form-field.has-error .field-label {
+  color: #f44336;
+}
+
+.error {
+  border-color: #f44336 !important;
+}
+
+/* Selected Entities Table */
+.selected-entities-table-wrapper {
+  margin-top: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  max-height: 400px;
+  overflow: auto;
+  width: 100%;
+  display: block;
+}
+
+.entity-table {
+  width: max-content;
+  min-width: 100%;
+  border-collapse: collapse;
+  table-layout: auto;
+  display: table;
+}
+
+.entity-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.entity-table th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  text-align: left;
+  padding: 12px 16px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.87);
+  font-size: var(--kr-font-size-sm);
+  white-space: nowrap;
+}
+
+.entity-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.87);
+  font-size: var(--kr-font-size-sm);
+}
+
+.entity-row {
+  transition: background-color 0.2s ease;
+}
+
+.entity-row:hover {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+.field-column {
+  min-width: 150px;
+  max-width: 300px;
+  padding: 12px 16px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.selected-cell-highlight {
+  background-color: #EAF2FA !important;
+}
+
+.action-column {
+  width: 56px;
+  min-width: 56px;
+  max-width: 56px;
+  padding: 8px 12px !important;
+  text-align: center;
+  /*position: sticky;*/
+  left: 0;
+  background-color: white;
+  z-index: 3;
+}
+
+.entity-table th.action-column {
+  background-color: #f5f5f5;
+  z-index: 4;
+}
+
+.remove-button {
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(0, 0, 0, 0.54);
+  transition: color 0.2s ease, background-color 0.2s ease;
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+}
+
+.remove-button:hover {
+  color: #f44336;
+  background-color: rgba(244, 67, 54, 0.08);
+}
+
+.delete-icon {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+/* Modal Overlay */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 16px;
+}
+
+.modal-container {
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  border-radius: 4px;
+  box-shadow: 0 11px 15px -7px rgba(0, 0, 0, 0.2),
+              0 24px 38px 3px rgba(0, 0, 0, 0.14),
+              0 9px 46px 8px rgba(0, 0, 0, 0.12);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Rating Display */
+.rating-display {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.star-icon {
+  width: 18px;
+  height: 18px;
+  fill: #ffa726;
+}
+
+.star-icon.filled {
+  fill: #ffa726;
+}
+
+.star-icon:not(.filled) {
+  fill: #e0e0e0;
+}
+
+/* Selected Cell Container */
+.selected-cell-container {
+  min-height: 48px;
+  max-height: 96px;
+  flex: none;
+  border-bottom: 1px solid #e4e4e4;
+}
+
+.selected-cell-data {
+  min-height: 48px;
+  max-height: 96px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  background-color: #ffffff;
+}
+
+.selected-cell {
+  padding: 8px 8px 8px 16px;
+  max-height: 80px;
+  overflow-y: auto;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+  word-break: break-word;
+  margin: 0;
+  line-height: 20px;
+  color: #0f0f0f;
+}
+
+.selected-cell.color-light {
+  color: #727272;
+}
+
+/* Responsive Design - Mobile First (350px+) */
+
+/* Extra Extra Small Devices (350px - 425px) - Very small mobile phones */
+@media (max-width: 425px) {
+  /* Modal Overlay - Full screen on very small devices */
+  .modal-overlay {
+    padding: 0;
+  }
+
+  .modal-container {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  /* Field Labels */
+  .field-label {
+    font-size: 0.75rem;
+  }
+
+  .custom-form-field .field-label {
+    font-size: 0.6875rem;
+  }
+
+  /* Input Fields */
+  .custom-input {
+    font-size: 0.75rem;
+    padding: 6px 0;
+  }
+
+  /* Search Button */
+  .search-button {
+    padding: 4px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .search-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Selected Entities Table */
+  .selected-entities-table-wrapper {
+    margin-top: 10px;
+    max-height: 280px;
+    font-size: 0.6875rem;
+  }
+
+  .entity-table th,
+  .entity-table td {
+    padding: 6px 10px;
+    font-size: 0.6875rem;
+  }
+
+  .field-column {
+    min-width: 80px;
+    max-width: 100px;
+    padding: 6px 10px;
+  }
+
+  .action-column {
+    width: 44px;
+    min-width: 44px;
+    max-width: 44px;
+    padding: 4px 6px !important;
+  }
+
+  .remove-button {
+    width: 26px;
+    height: 26px;
+    padding: 3px;
+  }
+
+  .delete-icon {
+    width: 16px;
+    height: 16px;
+  }
+
+  /* Selected Cell Container */
+  .selected-cell-container {
+    min-height: 36px;
+    max-height: 72px;
+  }
+
+  .selected-cell-data {
+    min-height: 36px;
+    max-height: 72px;
+    font-size: 0.625rem;
+  }
+
+  .selected-cell {
+    padding: 5px 5px 5px 10px;
+    max-height: 60px;
+    font-size: 0.625rem;
+    line-height: 14px;
+  }
+
+  /* Rating Display */
+  .star-icon {
+    width: 12px;
+    height: 12px;
+  }
+
+  /* Error Messages */
+  .field-error-message {
+    font-size: 0.625rem;
+  }
+
+  /* Readonly Value */
+  .readonly-value {
+    font-size: 0.8125rem;
+  }
+}
+
+/* Extra Small Devices (426px - 480px) - Mobile phones */
+@media (min-width: 426px) and (max-width: 480px) {
+  /* Modal Overlay */
+  .modal-overlay {
+    padding: 0;
+  }
+
+  .modal-container {
+    max-width: 100%;
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  /* Field Labels */
+  .field-label {
+    font-size: 0.8125rem;
+  }
+
+  /* Input Fields */
+  .custom-input {
+    font-size: 0.8125rem;
+    padding: 8px 0;
+  }
+
+  /* Search Button */
+  .search-button {
+    padding: 6px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .search-icon {
+    width: 20px;
+    height: 20px;
+  }
+
+  /* Selected Entities Table */
+  .selected-entities-table-wrapper {
+    margin-top: 12px;
+    max-height: 300px;
+    font-size: 0.75rem;
+  }
+
+  .entity-table th,
+  .entity-table td {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+  }
+
+  .field-column {
+    min-width: 100px;
+    max-width: 120px;
+    padding: 8px 12px;
+  }
+
+  .action-column {
+    width: 48px;
+    min-width: 48px;
+    max-width: 48px;
+    padding: 6px 8px !important;
+  }
+
+  .remove-button {
+    width: 28px;
+    height: 28px;
+    padding: 4px;
+  }
+
+  .delete-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  /* Selected Cell Container */
+  .selected-cell-container {
+    min-height: 40px;
+    max-height: 80px;
+  }
+
+  .selected-cell-data {
+    min-height: 40px;
+    max-height: 80px;
+    font-size: 0.6875rem;
+  }
+
+  .selected-cell {
+    padding: 6px 6px 6px 12px;
+    max-height: 68px;
+    font-size: 0.6875rem;
+    line-height: 16px;
+  }
+
+  /* Rating Display */
+  .star-icon {
+    width: 14px;
+    height: 14px;
+  }
+}
+
+/* Small Devices (481px - 768px) - Tablets portrait */
+@media (min-width: 481px) and (max-width: 768px) {
+  .modal-container {
+    max-width: 95vw;
+    max-height: 95vh;
+  }
+
+  .field-column {
+    min-width: 120px;
+    max-width: 180px;
+  }
+
+  .selected-entities-table-wrapper {
+    max-height: 350px;
+  }
+
+  /* Rating Display */
+  .star-icon {
+    width: 16px;
+    height: 16px;
+  }
+}
+
+/* Medium Devices (769px - 1024px) - Tablets landscape */
+@media (min-width: 769px) and (max-width: 1024px) {
+  .field-column {
+    min-width: 140px;
+    max-width: 250px;
+  }
+}
+

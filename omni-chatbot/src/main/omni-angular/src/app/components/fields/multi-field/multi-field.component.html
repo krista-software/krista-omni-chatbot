@@ -1,0 +1,50 @@
+<div class="multi-field-container" role="group" [attr.aria-labelledby]="'multi-label-' + field.name">
+  <!-- Parent field label -->
+  <div class="multi-field-label" [attr.id]="'multi-label-' + field.name">
+    {{ getLabel() }}
+    <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+  </div>
+
+  <!-- Sub-fields container with left border -->
+  <div class="multi-field-content" *ngIf="subFields.length > 0">
+    <div *ngFor="let subField of subFields; trackBy: trackByFieldName" class="sub-field-wrapper" [ngStyle]="getSubFieldWidth(subField)">
+      <!-- Use DynamicFieldComponent to render any field type -->
+      <app-dynamic-field
+        [field]="subField"
+        [textFieldConfig]="getTextFieldConfig(subField)"
+        [numberFieldConfig]="getNumberFieldConfig(subField)"
+        [basicFieldConfig]="getSubFieldConfig(subField)"
+        [addressFieldConfig]="getAddressFieldConfig(subField)"
+        [locationFieldConfig]="getLocationFieldConfig(subField)"
+        [fileFieldConfig]="getFileFieldConfig(subField)"
+        [addressValue]="getAddressValue(subField)"
+        [subFields]="getSubFieldsForNestedField(subField)"
+        [multiFieldConfig]="getSubFieldConfig(subField)"
+        [workspaceId]="workspaceId"
+        [clientSessionId]="clientSessionId"
+        [kristaFields]="kristaFields"
+        [hasAttemptedSubmit]="hasAttemptedSubmit"
+        (valueChange)="onSubFieldChange(subField.name, $event)"
+        (subFieldValueChange)="onNestedSubFieldChange($event)"
+        (blur)="onSubFieldBlur(subField.name, $event)"
+        (focus)="onSubFieldFocus(subField.name)"
+        (keyPress)="onKeyPress($event)">
+      </app-dynamic-field>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div *ngIf="subFields.length === 0" class="empty-state" role="status">
+    <em>No sub-fields defined</em>
+  </div>
+
+  <!-- Parent field error message. Not rendered in readonly: the placeholder is kept
+       visible-but-hidden to reserve space so the form does not jump when a message
+       appears while editing, and a readonly field has nothing to validate. -->
+  <div *ngIf="!isFieldReadOnly()" class="field-error-message"
+       [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+       role="alert"
+       [attr.id]="'multi-error-' + field.name">
+    {{ config.errorMessage }}
+  </div>
+</div>

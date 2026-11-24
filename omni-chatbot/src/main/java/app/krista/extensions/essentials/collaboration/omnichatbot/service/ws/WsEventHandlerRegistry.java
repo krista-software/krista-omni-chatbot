@@ -13,15 +13,22 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.service.ws;
 
 import app.krista.extension.request.protos.ws.*;
+import app.krista.extension.util.InvokerAttributeProvider;
+import app.krista.extensions.essentials.collaboration.omnichatbot.audit.AuditService;
+import app.krista.extensions.essentials.collaboration.omnichatbot.concurrency.ConcurrencyManager;
+import app.krista.extensions.essentials.collaboration.omnichatbot.contants.Constants;
 import app.krista.extensions.essentials.collaboration.omnichatbot.service.ws.impl.*;
 import app.krista.extensions.essentials.collaboration.omnichatbot.store.ConnectionStore;
+import app.krista.extensions.essentials.collaboration.omnichatbot.store.SessionStore;
+import app.krista.extensions.util.KeyValueStore;
 import app.krista.model.field.util.GsonJsonMapper;
+import app.krista.omni.sdk.medium.interactive.InteractiveMediumService;
 import app.krista.omni.sdk.spi.util.GsonJsonMapperImpl;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -30,6 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.inject.Inject;
+import javax.inject.Named;
 
 /**
  * Registry for WebSocket event handlers.
@@ -50,14 +58,18 @@ public class WsEventHandlerRegistry {
     private final GsonJsonMapper gsonJsonMapper;
 
     @Inject
-    private WsEventHandlerRegistry(WsPayloadHandlerRegistry payloadHandlerRegistry, ConnectionStore connectionStore) {
+    private WsEventHandlerRegistry(WsPayloadHandlerRegistry payloadHandlerRegistry, ConnectionStore connectionStore,
+            SessionStore sessionStore, ConcurrencyManager concurrencyManager, KeyValueStore keyValueStore,
+            AuditService auditService,
+            @Named(Constants.WELCOME_CONVERSATION_NAME) InvokerAttributeProvider<String> welcomeConversationProvider) {
+        InteractiveMediumService mediumService = InteractiveMediumService.getInstance();
         this.connectionUpgradeRequestHandler = new WsConnectionUpgradeRequestHandler();
-        this.connectionOpenedHandler = new WsConnectionOpenedHandler(connectionStore);
-        this.requestHandler = new WsRequestHandler( payloadHandlerRegistry);
-        this.connectionClosedHandler = new WsConnectionClosedHandler(connectionStore);
-        this.connectionPingHandler = new WsConnectionPingHandler();
+        this.connectionOpenedHandler = new WsConnectionOpenedHandler(connectionStore, mediumService,
+                welcomeConversationProvider, sessionStore, concurrencyManager, keyValueStore, auditService);
+        this.requestHandler = new WsRequestHandler(payloadHandlerRegistry, connectionStore);
+        this.connectionClosedHandler = new WsConnectionClosedHandler(connectionStore, sessionStore, concurrencyManager, auditService);
+        this.connectionPingHandler = new WsConnectionPingHandler(concurrencyManager, connectionStore, auditService);
         this.gsonJsonMapper = GsonJsonMapperImpl.getInstance();
-
     }
 
     /**

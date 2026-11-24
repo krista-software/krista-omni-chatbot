@@ -1,0 +1,54 @@
+/* Harness chrome only. Nothing here styles the fields themselves — those keep
+   their production styles so screenshots reflect real rendering. */
+
+.vt-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 24px;
+  background: #eceff1;
+  align-items: flex-start;
+}
+
+/* Fixed width keeps wrapping deterministic across runs and machines. */
+.vt-case {
+  width: 340px;
+  background: #ffffff;
+  border: 1px solid #cfd8dc;
+  border-radius: 8px;
+  padding: 12px;
+}
+
+.vt-caption {
+  font: 500 11px/1.4 monospace;
+  color: #546e7a;
+  margin-bottom: 8px;
+}
+
+/* Bubble replica. Source of truth is message-bubble.component.css
+   (.message-content background at :68 incoming / :81 outgoing) — kept in sync
+   manually because that component is not rendered here. */
+.message-bubble {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.message-content {
+  background: var(--krista-background-paper, #ffffff);
+  border-radius: 12px;
+  padding: 12px;
+}
+
+.message-content.vt-outgoing {
+  background: var(--krista-primary, #0177C6);
+}
+
+/* Screenshot stability: no transitions or animations mid-capture. */
+.vt-grid *,
+.vt-grid *::before,
+.vt-grid *::after {
+  transition: none !important;
+  animation: none !important;
+  caret-color: transparent !important;
+}

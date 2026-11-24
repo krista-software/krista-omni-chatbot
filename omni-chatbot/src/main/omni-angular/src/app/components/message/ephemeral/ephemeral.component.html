@@ -1,0 +1,20 @@
+<div class="ephemeral-container" [title]="tooltipText">
+  <div class="progress-wrapper">
+    <!-- Background circle -->
+    <div class="progress-background"></div>
+    
+    <!-- Progress circle -->
+    <mat-progress-spinner
+      [diameter]="32"
+      [value]="timeElapsedPercent"
+      mode="determinate"
+      color="warn"
+      class="progress-spinner">
+    </mat-progress-spinner>
+    
+    <!-- Lock icon -->
+    <div class="lock-icon-wrapper">
+      <mat-icon class="lock-icon" color="warn">lock</mat-icon>
+    </div>
+  </div>
+</div>

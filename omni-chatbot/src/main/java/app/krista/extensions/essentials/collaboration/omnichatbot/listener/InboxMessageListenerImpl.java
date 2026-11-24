@@ -13,20 +13,16 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.listener;
 
+import app.krista.extensions.essentials.collaboration.omnichatbot.metrics.ChatBotMetrics;
 import app.krista.ksdk.inboxes.Inbox;
 import app.krista.ksdk.inboxes.InboxMessageListener;
 import app.krista.ksdk.message.Message;
 import app.krista.omni.sdk.medium.api.KristaMessageReceiver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import java.text.MessageFormat;
-import java.util.UUID;
 
 /**
  * Implementation of InboxMessageListener for the chatbot extension.
@@ -35,9 +31,7 @@ import java.util.UUID;
  * to the KristaMessageReceiver for processing.
  */
 public class InboxMessageListenerImpl implements InboxMessageListener {
-    private static final UUID traceId = UUID.nameUUIDFromBytes(InboxMessageListenerImpl.class.getName().getBytes());
     private final KristaMessageReceiver kristaMessageReceiver;
-    private static final Logger LOGGER = LoggerFactory.getLogger(InboxMessageListenerImpl.class);
 
     public InboxMessageListenerImpl() {
         this.kristaMessageReceiver = KristaMessageReceiver.getInstance();
@@ -54,11 +48,7 @@ public class InboxMessageListenerImpl implements InboxMessageListener {
      */
     @Override
     public void messageReceived(Inbox inbox, Message message) {
-        String logMessage = MessageFormat.format("messageID: {0}, listener inboxId: {1}, Message Type: {2}",
-                message.getMessageId(), inbox.getInboxId(), message.getClass());
-        LOGGER.info("#####-CHATBOT-MESSAGE RECEIVED - TRACE ID: {}, CLASS: {}, METHOD: {}, MESSAGE: {}, ACL: {}",
-                        traceId, this.getClass().getName(), Thread.currentThread().getStackTrace()[1].getMethodName(),
-                        logMessage, message.getAcl());
+        ChatBotMetrics.recordInboxMessage(message.getClass().getSimpleName());
         kristaMessageReceiver.messageReceived(message);
     }
 }

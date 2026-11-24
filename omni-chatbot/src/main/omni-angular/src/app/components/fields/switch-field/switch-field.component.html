@@ -1,0 +1,39 @@
+<div class="switch-field">
+  <div class="field-container">
+    <label *ngIf="shouldShowLabel() && getFieldLabel()"
+           class="field-label"
+           [attr.id]="'switch-label-' + field.name">
+      {{ getFieldLabel() }}
+      <span *ngIf="isFieldRequired() && !config?.hideRequiredIndicator" class="required-asterisk" aria-hidden="true">*</span>
+    </label>
+
+    <!-- Secured mode: show masked value -->
+    <div *ngIf="isSecured()" class="secured-value" role="status">••••••••</div>
+
+    <!-- Toggle switch for yes/no -->
+    <div *ngIf="!isSecured()" class="custom-toggle"
+         [class.checked]="!!field.value"
+         [class.disabled]="isFieldReadOnly()"
+         (click)="onToggleClick()"
+         (keydown.enter)="onToggleClick()"
+         (keydown.space)="onToggleClick(); $event.preventDefault()"
+         [attr.aria-checked]="!!field.value"
+         [attr.aria-labelledby]="'switch-label-' + field.name"
+         [attr.aria-describedby]="config.hasError ? 'switch-error-' + field.name : null"
+         [attr.aria-disabled]="isFieldReadOnly()"
+         [attr.tabindex]="isFieldReadOnly() ? -1 : 0"
+         role="switch">
+      <div class="toggle-track" aria-hidden="true">
+        <div class="toggle-thumb"></div>
+      </div>
+    </div>
+
+    <!-- Error message -->
+    <div *ngIf="!isFieldReadOnly()" class="field-error-message"
+         [style.visibility]="config.hasError && config.errorMessage ? 'visible' : 'hidden'"
+         role="alert"
+         [attr.id]="'switch-error-' + field.name">
+      {{ config.errorMessage }}
+    </div>
+  </div>
+</div>

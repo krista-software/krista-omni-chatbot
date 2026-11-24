@@ -1,0 +1,21 @@
+<!-- Text Input Area -->
+<div class="text-input-wrapper">
+  <label for="chat-message-input" class="visually-hidden">Type your message</label>
+  <textarea
+    id="chat-message-input"
+    [placeholder]="translatedPlaceholder"
+    [value]="value"
+    [disabled]="disabled"
+    (input)="handleChange($event)"
+    (paste)="onPaste($event)"
+    (keydown)="onKeyDown($event)"
+    (blur)="onBlur()"
+    cdkTextareaAutosize
+    #autosize="cdkTextareaAutosize"
+    cdkAutosizeMinRows="1"
+    cdkAutosizeMaxRows="2"
+    class="text-input"
+    aria-label="Type your message"
+    autocomplete="off">
+  </textarea>
+</div>

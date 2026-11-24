@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.utils;
@@ -126,7 +126,6 @@ public class TranscriptUtils {
                 .post(Entity.entity(GsonJsonMapperImpl.getInstance().toString(requestPayload), MediaType.APPLICATION_JSON))) {
 
             if (response.getStatus() == Response.Status.OK.getStatusCode()) {
-                logger.info("#####-CHATBOT-POST request to {} succeeded.", url);
                 return Response.Status.OK;
             } else {
                 logger.warn("#####-CHATBOT-POST request to {} returned status: {}", url, response.getStatus());

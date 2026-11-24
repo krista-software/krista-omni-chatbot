@@ -1,0 +1,20 @@
+<div class="waiting-screen" role="status" aria-live="polite" [attr.aria-label]="'concurrency.waiting.ariaLabel' | translate">
+  <div class="waiting-icon" aria-hidden="true">
+    <img src="/assets/images/people-in-queue.svg" alt="" width="52" height="50">
+  </div>
+  <div class="waiting-header">
+    <h2 class="waiting-title">{{ 'concurrency.waiting.title' | translate }}</h2>
+    <p class="waiting-message">{{ 'concurrency.waiting.message' | translate }}</p>
+  </div>
+  <div class="queue-position-card">
+    <span class="queue-position-value">{{ position }}</span>
+    <span class="queue-position-label">{{ 'concurrency.waiting.positionLabel' | translate }}</span>
+  </div>
+  <button
+    class="waiting-close-btn"
+    type="button"
+    (click)="onClose()"
+    [attr.aria-label]="'concurrency.waiting.closeBtnAria' | translate">
+    {{ 'concurrency.waiting.closeBtn' | translate }}
+  </button>
+</div>

@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics &amp; Audit</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: #f6f6f7;
+            min-height: 100vh;
+        }
+        .audit-panel {
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            overflow: hidden;
+        }
+        .panel-header {
+            background: white;
+            color: #212121;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid rgba(0,0,0,0.12);
+        }
+        .panel-header .material-icons { color: #009BF4; font-size: 24px; }
+        .panel-header-text .title { font-size: 18px; font-weight: 500; color: #212121; }
+        .panel-header-text .subtitle { font-size: 13px; color: rgba(0,0,0,0.6); }
+        .audit-status-bar {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 10px 24px;
+            background: #f8f9fa;
+            border-bottom: 1px solid rgba(0,0,0,0.06);
+            font-size: 13px;
+            color: #555;
+            flex-wrap: wrap;
+        }
+        .audit-status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4caf50;
+            display: inline-block;
+            margin-right: 4px;
+            animation: audit-pulse 2s infinite;
+        }
+        @keyframes audit-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+        @keyframes audit-spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .audit-refresh-btn:disabled { opacity: 0.6; cursor: default; }
+        .audit-refresh-btn.loading .material-icons { animation: audit-spin 0.8s linear infinite; }
+        .audit-status-item { display: flex; align-items: center; gap: 4px; }
+        .audit-status-item strong { color: #212121; font-weight: 600; }
+        .audit-status-sep { color: rgba(0,0,0,0.2); }
+        .audit-refresh-btn {
+            margin-left: auto;
+            background: none;
+            border: 1px solid rgba(0,0,0,0.15);
+            border-radius: 4px;
+            padding: 3px 10px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .audit-refresh-btn:hover { background: #f0f0f0; }
+        .audit-refresh-btn .material-icons { font-size: 14px; }
+        .audit-body { padding: 20px 24px; }
+        .audit-range-row { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; align-items: center; }
+        .audit-range-caption { font-size: 12px; color: #777; margin-right: 4px; }
+        .audit-range-btn {
+            padding: 5px 14px;
+            border: 1px solid rgba(0,0,0,0.18);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            background: white;
+            color: #555;
+            transition: all 0.15s;
+        }
+        .audit-range-btn:hover { border-color: #009BF4; color: #009BF4; }
+        .audit-range-btn.active { background: #009BF4; border-color: #009BF4; color: white; }
+        .audit-kpi-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 28px;
+        }
+        @media (max-width: 900px) { .audit-kpi-row { grid-template-columns: repeat(2, 1fr); } }
+        @media (max-width: 500px) { .audit-kpi-row { grid-template-columns: 1fr 1fr; } }
+        .audit-kpi-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 14px 16px;
+            border: 1px solid rgba(0,0,0,0.06);
+        }
+        .audit-kpi-label {
+            font-size: 11px;
+            color: #777;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+        .audit-kpi-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: #212121;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        .audit-kpi-delta { font-size: 11px; font-weight: 500; }
+        .audit-kpi-delta.up { color: #4caf50; }
+        .audit-kpi-delta.down { color: #f44336; }
+        .audit-kpi-delta.neutral { color: #999; }
+        .audit-section-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+        .audit-users-section {
+            border-top: 1px solid rgba(0,0,0,0.08);
+            padding-top: 20px;
+        }
+        .audit-users-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .audit-stat-row { display: flex; gap: 10px; flex-wrap: wrap; }
+        .audit-stat {
+            background: #eef7ff;
+            border: 1px solid rgba(0,155,244,0.25);
+            border-radius: 8px;
+            padding: 8px 14px;
+            min-width: 96px;
+        }
+        .audit-stat .lbl { font-size: 10px; color: #0277bd; text-transform: uppercase; letter-spacing: 0.4px; }
+        .audit-stat .val { font-size: 20px; font-weight: 700; color: #01579b; line-height: 1.2; }
+        .audit-gran-toggle { display: flex; border: 1px solid rgba(0,0,0,0.18); border-radius: 6px; overflow: hidden; }
+        .audit-gran-btn {
+            padding: 5px 14px;
+            border: none;
+            background: white;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            color: #555;
+        }
+        .audit-gran-btn + .audit-gran-btn { border-left: 1px solid rgba(0,0,0,0.12); }
+        .audit-gran-btn.active { background: #009BF4; color: white; }
+        .audit-chart-wrap { display: flex; align-items: flex-end; gap: 4px; height: max(120px, calc(100vh - 520px)); }
+        .audit-bar-group {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            height: 100%;
+            justify-content: flex-end;
+            min-width: 0;
+        }
+        .audit-bar-stack {
+            width: 70%;
+            max-width: 22px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            flex: 1;
+            min-height: 0;
+        }
+        .audit-bar {
+            border-radius: 3px 3px 0 0;
+            min-height: 2px;
+            transition: height 0.4s ease;
+            background: #009BF4;
+        }
+        .audit-bar-label {
+            font-size: 10px;
+            color: #999;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            height: 14px;
+            line-height: 14px;
+        }
+        .audit-empty { text-align: center; padding: 24px 0; color: #aaa; font-size: 13px; width: 100%; }
+        .audit-loading { text-align: center; padding: 16px 0; color: #aaa; font-size: 12px; width: 100%; }
+        .audit-tooltip {
+            position: fixed;
+            background: #333;
+            color: white;
+            font-size: 12px;
+            padding: 5px 10px;
+            border-radius: 4px;
+            pointer-events: none;
+            white-space: nowrap;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+        .audit-tooltip.visible { opacity: 1; }
+    </style>
+</head>
+<body>
+<div class="audit-panel">
+    <div class="panel-header">
+        <span class="material-icons">bar_chart</span>
+        <div class="panel-header-text">
+            <div class="title">Analytics &amp; Audit</div>
+            <div class="subtitle">Live usage, visitor trends, and message volume</div>
+        </div>
+    </div>
+    <div class="audit-status-bar" id="auditStatusBar">
+        <span class="audit-status-item"><span class="audit-status-dot"></span><strong id="auditActiveUsers">—</strong> active now</span>
+        <span class="audit-status-sep">|</span>
+        <span class="audit-status-item"><strong id="auditQueueDepth">—</strong> queued</span>
+        <span class="audit-status-sep">|</span>
+        <span class="audit-status-item">Last activity: <strong id="auditLastActivity">—</strong></span>
+        <button class="audit-refresh-btn" id="auditRefreshBtn" onclick="refreshAuditStatus()">
+            <span class="material-icons">refresh</span> <span id="auditRefreshLabel">Refresh</span>
+        </button>
+    </div>
+    <div class="audit-body">
+        <div class="audit-range-row">
+            <span class="audit-range-caption">Totals for:</span>
+            <button class="audit-range-btn" data-range="1h" onclick="selectAuditRange('1h')">1H</button>
+            <button class="audit-range-btn" data-range="6h" onclick="selectAuditRange('6h')">6H</button>
+            <button class="audit-range-btn active" data-range="24h" onclick="selectAuditRange('24h')">24H</button>
+            <button class="audit-range-btn" data-range="7d" onclick="selectAuditRange('7d')">7D</button>
+            <button class="audit-range-btn" data-range="30d" onclick="selectAuditRange('30d')">30D</button>
+        </div>
+        <div class="audit-kpi-row">
+            <div class="audit-kpi-card">
+                <div class="audit-kpi-label">New Visitors</div>
+                <div class="audit-kpi-value" id="kpiNewSessions">—</div>
+                <div class="audit-kpi-delta neutral" id="kpiNewSessionsDelta"></div>
+            </div>
+            <div class="audit-kpi-card">
+                <div class="audit-kpi-label">Returning Users</div>
+                <div class="audit-kpi-value" id="kpiReturningSessions">—</div>
+                <div class="audit-kpi-delta neutral" id="kpiReturningDelta"></div>
+            </div>
+            <div class="audit-kpi-card">
+                <div class="audit-kpi-label">User Messages</div>
+                <div class="audit-kpi-value" id="kpiUserMsg">—</div>
+                <div class="audit-kpi-delta neutral" id="kpiUserMsgDelta"></div>
+            </div>
+            <div class="audit-kpi-card">
+                <div class="audit-kpi-label">Bot Messages</div>
+                <div class="audit-kpi-value" id="kpiBotMsg">—</div>
+                <div class="audit-kpi-delta neutral" id="kpiBotMsgDelta"></div>
+            </div>
+        </div>
+
+        <div class="audit-users-section">
+            <div class="audit-section-label">Users Created</div>
+            <div class="audit-users-header">
+                <div class="audit-stat-row">
+                    <div class="audit-stat"><div class="lbl">Last hour</div><div class="val" id="newUsersLastHour">—</div></div>
+                    <div class="audit-stat"><div class="lbl">Last 24 hours</div><div class="val" id="newUsersLast24h">—</div></div>
+                    <div class="audit-stat"><div class="lbl">Last 30 days</div><div class="val" id="newUsersLast30d">—</div></div>
+                </div>
+                <div class="audit-gran-toggle">
+                    <button class="audit-gran-btn" data-gran="hourly" onclick="setGranularity('hourly')">Hourly (24h)</button>
+                    <button class="audit-gran-btn active" data-gran="daily" onclick="setGranularity('daily')">Daily (30d)</button>
+                </div>
+            </div>
+            <div class="audit-chart-wrap" id="auditChart">
+                <div class="audit-loading">Loading…</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="audit-tooltip" id="auditTooltip"></div>
+<script>
+// Derive audit API base from the page URL (.../chatbot/audit[/]) by stripping any
+// trailing slash so fetches don't produce a double slash (.../audit//status).
+const AUDIT_BASE = window.location.pathname.replace(/\/+$/, '');
+let _auditRange = '24h';
+let _granularity = 'daily';
+let _lastSummary = null;
+let _statusTimer = null;
+
+window.addEventListener('DOMContentLoaded', function() {
+    loadAuditSummary(_auditRange);
+    loadAuditStatus();
+    _statusTimer = setInterval(loadAuditStatus, 30000);
+});
+
+function selectAuditRange(range) {
+    _auditRange = range;
+    document.querySelectorAll('.audit-range-btn').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.range === range);
+    });
+    loadAuditSummary(range);
+}
+
+function setGranularity(gran) {
+    _granularity = gran;
+    document.querySelectorAll('[data-gran]').forEach(function(btn) {
+        btn.classList.toggle('active', btn.dataset.gran === gran);
+    });
+    renderNewUsersChart();
+}
+
+async function refreshAuditStatus() {
+    const btn = document.getElementById('auditRefreshBtn');
+    const label = document.getElementById('auditRefreshLabel');
+    btn.classList.add('loading');
+    btn.disabled = true;
+    if (label) label.textContent = 'Refreshing…';
+    try {
+        await Promise.all([loadAuditStatus(), loadAuditSummary(_auditRange)]);
+    } finally {
+        btn.classList.remove('loading');
+        btn.disabled = false;
+        if (label) label.textContent = 'Refresh';
+    }
+}
+
+async function loadAuditStatus() {
+    try {
+        const res = await fetch(AUDIT_BASE + '/status', { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        document.getElementById('auditActiveUsers').textContent = data.activeUsers != null ? data.activeUsers : 0;
+        document.getElementById('auditQueueDepth').textContent = data.queueDepth != null ? data.queueDepth : 0;
+        document.getElementById('auditLastActivity').textContent =
+            data.lastActivityAt ? auditRelativeTime(data.lastActivityAt) : 'No activity yet';
+    } catch (e) {
+        // non-fatal
+    }
+}
+
+async function loadAuditSummary(range) {
+    try {
+        const res = await fetch(AUDIT_BASE + '/summary?range=' + range, { cache: 'no-store' });
+        if (!res.ok) return;
+        const data = await res.json();
+        _lastSummary = data;
+        document.getElementById('kpiNewSessions').textContent = data.newSessions;
+        document.getElementById('kpiReturningSessions').textContent = data.returningSessions;
+        document.getElementById('kpiUserMsg').textContent = data.userMessages;
+        document.getElementById('kpiBotMsg').textContent = data.botMessages;
+        auditSetDelta('kpiNewSessionsDelta', data.newSessions, data.newSessionsPrev);
+        auditSetDelta('kpiUserMsgDelta', data.userMessages, data.userMessagesPrev);
+        document.getElementById('kpiReturningDelta').textContent = '';
+        document.getElementById('kpiBotMsgDelta').textContent = '';
+        document.getElementById('newUsersLastHour').textContent = data.newUsersLastHour;
+        document.getElementById('newUsersLast24h').textContent = data.newUsersLast24h;
+        document.getElementById('newUsersLast30d').textContent = data.newUsersLast30d;
+        renderNewUsersChart();
+    } catch (e) {
+        // non-fatal
+    }
+}
+
+function renderNewUsersChart() {
+    const container = document.getElementById('auditChart');
+    if (!_lastSummary) return;
+    const series = _granularity === 'hourly' ? _lastSummary.newUsersHourly : _lastSummary.newUsersDaily;
+    if (!series || series.length === 0) {
+        container.innerHTML = '<div class="audit-empty">No data yet.</div>';
+        return;
+    }
+    const max = Math.max(1, ...series.map(function(p) { return p.value; }));
+    const step = Math.max(1, Math.ceil(series.length / 8));
+    container.innerHTML = series.map(function(p, i) {
+        const pct = p.value > 0 ? Math.max(Math.round((p.value / max) * 100), 3) : 2;
+        const showLabel = (i % step === 0) || (i === series.length - 1);
+        const plural = p.value === 1 ? '' : 's';
+        return '<div class="audit-bar-group">'
+            + '<div class="audit-bar-stack">'
+            + '<div class="audit-bar" data-tip="' + p.label + ': ' + p.value + ' new user' + plural + '" style="height:' + pct + '%;' + (p.value > 0 ? '' : 'background:rgba(0,0,0,0.08);') + '"></div>'
+            + '</div>'
+            + '<div class="audit-bar-label">' + (showLabel ? p.label : '') + '</div>'
+            + '</div>';
+    }).join('');
+}
+
+function auditRelativeTime(epochMs) {
+    const diffSec = Math.floor((Date.now() - epochMs) / 1000);
+    if (diffSec < 60) return diffSec + 's ago';
+    if (diffSec < 3600) return Math.floor(diffSec / 60) + 'm ago';
+    if (diffSec < 86400) return Math.floor(diffSec / 3600) + 'h ago';
+    return Math.floor(diffSec / 86400) + 'd ago';
+}
+
+function auditSetDelta(elId, current, prev) {
+    const el = document.getElementById(elId);
+    if (!el) return;
+    if (prev === 0 || prev == null) { el.textContent = ''; el.className = 'audit-kpi-delta neutral'; return; }
+    const pct = Math.round(((current - prev) / prev) * 100);
+    if (pct > 0) { el.textContent = '▲ ' + pct + '% vs prev'; el.className = 'audit-kpi-delta up'; }
+    else if (pct < 0) { el.textContent = '▼ ' + Math.abs(pct) + '% vs prev'; el.className = 'audit-kpi-delta down'; }
+    else { el.textContent = '— same as prev'; el.className = 'audit-kpi-delta neutral'; }
+}
+
+// ---- custom tooltip for chart bars (100ms delay, viewport-aware) ----
+(function() {
+    var tip = document.getElementById('auditTooltip');
+    var showTimer = null;
+    var currentBar = null;
+    function positionTip(x, y) {
+        var tipRect = tip.getBoundingClientRect();
+        var left = x + 12;
+        var top = y - 28;
+        if (left + tipRect.width > window.innerWidth) {
+            left = x - tipRect.width - 8;
+        }
+        if (top < 0) {
+            top = y + 16;
+        }
+        tip.style.left = left + 'px';
+        tip.style.top = top + 'px';
+    }
+    document.addEventListener('mouseover', function(e) {
+        var bar = e.target.closest('[data-tip]');
+        if (bar && bar !== currentBar) {
+            clearTimeout(showTimer);
+            currentBar = bar;
+            tip.textContent = bar.dataset.tip;
+            showTimer = setTimeout(function() {
+                tip.classList.add('visible');
+            }, 100);
+        }
+    });
+    document.addEventListener('mouseout', function(e) {
+        var bar = e.target.closest('[data-tip]');
+        if (bar && bar === currentBar) {
+            clearTimeout(showTimer);
+            tip.classList.remove('visible');
+            currentBar = null;
+        }
+    });
+    document.addEventListener('mousemove', function(e) {
+        if (currentBar) {
+            positionTip(e.clientX, e.clientY);
+        }
+    });
+})();
+</script>
+</body>
+</html>

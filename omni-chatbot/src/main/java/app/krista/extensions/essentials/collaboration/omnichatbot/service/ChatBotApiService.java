@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.service;
@@ -22,6 +22,7 @@ import app.krista.extension.authorization.AuthorizationException;
 import app.krista.extension.executor.Invoker;
 import app.krista.extensions.essentials.collaboration.omnichatbot.ChatBotExtension;
 import app.krista.extensions.essentials.collaboration.omnichatbot.contants.Constants;
+import app.krista.extensions.essentials.collaboration.omnichatbot.metrics.ChatBotMetrics;
 import app.krista.extensions.essentials.collaboration.omnichatbot.resource.dto.Configuration;
 import app.krista.extensions.essentials.collaboration.omnichatbot.resource.dto.SessionDto;
 import app.krista.extensions.essentials.collaboration.omnichatbot.store.SessionStore;
@@ -42,6 +43,7 @@ import app.krista.omni.sdk.medium.api.message.MediumInfo;
 import app.krista.omni.sdk.medium.interactive.InteractiveMediumService;
 import app.krista.omni.sdk.medium.interactive.InteractiveMessageIn;
 import app.krista.omni.sdk.spi.OmniChannelService;
+import app.krista.omni.sdk.spi.SessionCreationResult;
 import org.jvnet.hk2.annotations.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -112,14 +114,48 @@ public class ChatBotApiService {
      * @return the inbox ID associated with the user's session
      */
     public String getOrCreateSession(String languageCode) {
-        Account authorizedAccount = authorizationContext.getAuthorizedAccount();
+        Account authorizedAccount = (authorizationContext != null && authorizationContext.isAuthenticated())
+                ? authorizationContext.getAuthorizedAccount() : null;
         if (authorizedAccount == null) {
             LOGGER.error("#####-CHATBOT- NO AUTHORIZED ACCOUNT FOUND IN CONTEXT");
+            throw new IllegalStateException("No authorized account found in context");
         }
-        InteractiveMessageIn textMediumMessageIn = new InteractiveMessageIn(new MediumInfo(Constants.MEDIUM_TYPE, authorizedAccount.getAccountId()), null);
-        Account authenticatedAccount = mediumService.getAuthenticatedAccount(textMediumMessageIn, languageCode);
-        String inboxId = mediumService.getSessionInbox(authenticatedAccount).getInboxId();
-        sessionStore.put(authenticatedAccount.getAccountId(), new SessionDto(inboxId));
+        return getOrCreateSession(authorizedAccount.getAccountId(), languageCode);
+    }
+
+    /**
+     * Gets or creates the OmniChannel session for an EXPLICIT account id — independent of the
+     * request's {@link AuthorizationContext} — and returns its session inbox (inbox_S_…).
+     *
+     * <p>Used by the login endpoint to fold the session into login so the SPA needs a single
+     * call. A fresh guest login authenticates AS the invoker's runtime account, so its session
+     * must be created for the freshly-provisioned guest account (not the context account);
+     * returning-user logins pass their own account id to revalidate/recreate a possibly-swept
+     * session. Mirrors the context-based variant's SessionStore publish + welcomeExecuted
+     * preservation.
+     */
+    public String getOrCreateSession(String accountId, String languageCode) {
+        InteractiveMessageIn textMediumMessageIn = new InteractiveMessageIn(new MediumInfo(Constants.MEDIUM_TYPE, accountId), null);
+        // Use the combined getOrCreateSession API to avoid the extra getSessionInbox roundtrip.
+        SessionCreationResult result = mediumService.getOrCreateSession(textMediumMessageIn, languageCode);
+        String resolvedAccountId = result.account().getAccountId();
+        String inboxId = result.sessionInboxId();
+        // Preserve welcomeExecuted across re-creates of SessionDto. A normal-login user
+        // refreshing the page re-enters this path — without this preservation, the freshly
+        // constructed SessionDto would have welcomeExecuted=false, and the next WS open would
+        // re-run the welcome conversation on top of the user's in-progress chat. The flag is
+        // session-scoped, so as long as the underlying session is the same it must survive
+        // this re-put.
+        SessionDto existing = sessionStore.get(resolvedAccountId);
+        SessionDto sessionDto = new SessionDto(inboxId);
+        if (existing != null && existing.isWelcomeExecuted()) {
+            sessionDto.setWelcomeExecuted(true);
+        }
+        sessionStore.put(resolvedAccountId, sessionDto);
+        ChatBotMetrics.recordSessionCreated();
+        if (existing == null) {
+            ChatBotMetrics.recordNewUser();
+        }
         return inboxId;
     }
 
@@ -150,6 +186,7 @@ public class ChatBotApiService {
             }
         } catch (Exception e) {
             LOGGER.error("#####-CHATBOT- ERROR RETRIEVING MESSAGES FOR INBOX ID: {}", inboxId, e);
+            ChatBotMetrics.recordError("ChatBotApiService", e);
         }
         return messageDtos;
     }
@@ -170,10 +207,21 @@ public class ChatBotApiService {
      * @throws AuthorizationException if authorization context is invalid
      */
     public Configuration getConfiguration() throws AuthorizationException {
-        String configJson = ChatBotUtil.getJsonConfig(invoker, chatBotExtension);
+        String configJson = ChatBotUtil.getJsonConfig(chatBotExtension);
         Map<String, Object> configMap = ChatBotUtil.getConfigMap(configJson);
         String nodeName = invoker.getRoutingInfo().getNodeName();
-        return new Configuration(configMap, workspace.getWorkspaceId(), nodeName, workspace.getWorkspaceLogo(), isMultilingualEnabled(), runtimeContext.getKristaAccount().getAccountId());
+        boolean multilingualEnabled = isMultilingualEnabled();
+        // Inline the supported-languages list into the config envelope so a
+        // multilingual chatbot avoids a separate GET /chatbot/supportedLanguages
+        // round-trip on every page load. Empty list when multilingual is off so
+        // the FE's canChangeLanguage gate still short-circuits without an API call.
+        List<Map<String, String>> supportedLanguageDtos = multilingualEnabled
+                ? workspace.getSupportedLanguages().stream()
+                        .map(language -> Map.of("code", language.getCode(), "name", language.getName()))
+                        .toList()
+                : List.of();
+        return new Configuration(configMap, workspace.getWorkspaceId(), nodeName, workspace.getWorkspaceLogo(),
+                multilingualEnabled, runtimeContext.getKristaAccount().getAccountId(), supportedLanguageDtos);
     }
 
     /**
@@ -197,11 +245,15 @@ public class ChatBotApiService {
             MessageAnswer.SubmitType submitType = MessageAnswer.SubmitType.valueOf(formResponse.getSubmit().getType().toUpperCase());
             MessageAnswer messageAnswer = MessageAnswer.create(messageId, formResponse.getValues(), submitType, formResponse.getSubmit().getValue());
             omniChannelService.getReceiver().receiveMessageAnswerForInbox(inboxId, messageAnswer);
+            // Telemetry only — covers the HTTP submit path (WS messages are counted at the outermost
+            // ChatBotProtocolHandler). No account id is resolved on this path. No functional change.
+            ChatBotMetrics.recordMessageReceived(submitType.name(), null);
             Inbox inbox = inboxManager.getInbox(inboxId);
             Message message = inbox.getMessage(messageId);
             return MessageDtoFactory.create(message);
         } catch (Exception e) {
             LOGGER.error("#####-CHATBOT- ERROR SUBMITTING ANSWER FOR INBOX ID: {}, MESSAGE ID: {}", inboxId, messageId, e);
+            ChatBotMetrics.recordError("ChatBotApiService", e);
             return null;
         }
     }

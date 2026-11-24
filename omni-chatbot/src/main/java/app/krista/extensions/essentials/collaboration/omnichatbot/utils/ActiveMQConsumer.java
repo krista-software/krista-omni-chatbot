@@ -13,7 +13,7 @@
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>. 
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
 package app.krista.extensions.essentials.collaboration.omnichatbot.utils;
@@ -23,7 +23,6 @@ import app.krista.ksdk.storage.StorageProvider;
 
 import javax.jms.*;
 import java.io.IOException;
-import java.net.InetAddress;
 
 /**
  * ActiveMQ message consumer for receiving state notifications across nodes.
@@ -54,7 +53,7 @@ public class ActiveMQConsumer implements AutoCloseable {
     public static ActiveMQConsumer create(StorageProvider storageProvider, Invoker invoker)
             throws IOException, JMSException {
         String clientId = "websocket-chatbot-consumer-" + invoker.getInvokerId()
-                + "-" + InetAddress.getLocalHost().getHostName();
+                + "-" + LocalHostInfo.hostName();
         return new ActiveMQConsumer(
                 storageProvider.getStorage(clientId, Connection.class),
                 "chatbot-message-state-notifications"

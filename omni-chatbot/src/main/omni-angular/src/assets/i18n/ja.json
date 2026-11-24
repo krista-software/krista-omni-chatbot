@@ -1,0 +1,191 @@
+{
+  "general": {
+    "defaultApiErrorMessage": "問題が発生しました。後でもう一度お試しください。",
+    "retry": "再試行",
+    "close": "閉じる"
+  },
+  "footer": {
+    "sendMessage": "メッセージを送信",
+    "poweredBy": "提供元",
+    "termsAndConditions": "利用規約"
+  },
+  "authProvider": {
+    "failedToLogin": "ログインに失敗しました。サポートにお問い合わせください。"
+  },
+  "loginCallback": {
+    "loginFailed": "ログインに失敗しました。再試行してください。問題が続く場合はサポートチームにお問い合わせください。",
+    "loginProgress": "ログイン処理中です。お待ちください..."
+  },
+  "initializerProvider": {
+    "fetching": "設定を取得しています。",
+    "initializing": "初期化しています。",
+    "initFail": "チャットボットの初期化に失敗しました。再試行してください。問題が続く場合は、サポートチームにお問い合わせください。",
+    "reason": "理由: {{errorMessage}}",
+    "loadingConfiguration": "設定を読み込んでいます...",
+    "authenticating": "認証中...",
+    "creatingSession": "セッションを作成中...",
+    "loadingConversationHistory": "会話履歴を読み込んでいます..."
+  },
+  "unknownMessageComponent": {
+    "message": "不明なメッセージタイプ"
+  },
+  "responseAckCompRenderer": {
+    "unnamed": "匿名ユーザー",
+    "responseAck": "{{_responseCount}} 件の応答。{{_contactName}} が {{_time}} に {{_conversationName}} に応答しました",
+    "loading": "読み込み中..."
+  },
+  "banner": {
+    "unread": "未読メッセージ"
+  },
+  "newMessagesBtn": {
+    "newMessages": "新しいメッセージ"
+  },
+  "agent": {
+    "joined": "{{name}} が参加しました",
+    "left": "{{name}} が退出しました"
+  },
+  "placeholder": {
+    "enter": "{{fieldName}} を入力",
+    "select": "{{fieldName}} を選択",
+    "set": "{{fieldName}} を設定"
+  },
+  "fields": {
+    "stream": {
+      "pauseStreaming": "ストリーミングを一時停止",
+      "resumeStreaming": "ストリーミングを再開"
+    },
+    "location": {
+      "selectLocationPlaceholder": "場所を検索..."
+    }
+  },
+  "concurrency": {
+    "waiting": {
+      "ariaLabel": "チャットの空き枠を待っています",
+      "title": "順番待ちです",
+      "message": "現在、すべてのチャット担当者が他のお客様に対応しています。担当者が空き次第、自動的に接続します。",
+      "positionLabel": "待ち順位",
+      "estimatedWaitLabel": "推定待ち時間:",
+      "estimatedWaitValue": "約 {{minutes}} 分",
+      "closeBtn": "閉じる",
+      "closeBtnAria": "チャットウィンドウを閉じる"
+    },
+    "idleWarning": {
+      "title": "セッションの有効期限が近づいています",
+      "message": "会話が一定時間操作されていません。「セッションを継続」を選択すると有効な状態が保たれます。そうしない場合、会話は自動的に終了します。",
+      "secondsLabel": "秒",
+      "stillHereBtn": "セッションを継続",
+      "stillHereBtnAria": "セッションを継続して会話を有効な状態に保ちます"
+    },
+    "disconnected": {
+      "title": "セッションが終了しました",
+      "message": "非アクティブのため会話が終了しました。",
+      "reconnectBtn": "新しいセッションを開始",
+      "reconnectBtnAria": "新しいチャットセッションを開始",
+      "closeBtn": "閉じる",
+      "closeBtnAria": "チャットウィンドウを閉じる"
+    }
+  },
+  "krista": {
+    "general": {
+      "defaultErrorMessage": "問題が発生しました。後でもう一度お試しください。",
+      "ok": "OK",
+      "search": "検索",
+      "cancel": "キャンセル",
+      "clear": "クリア",
+      "remove": "削除",
+      "delete": "削除",
+      "save": "保存",
+      "noResults": "エントリが見つかりません。",
+      "selectAll": "すべて選択",
+      "unknownField": "不明なフィールド",
+      "enterCorrectValues": "適切な値を入力してください。"
+    },
+    "address": {
+      "street": "番地",
+      "street2": "番地2",
+      "city": "市区町村",
+      "state": "都道府県",
+      "country": "国",
+      "postalCode": "郵便番号"
+    },
+    "table": {
+      "deletedRows": "削除された行",
+      "selectedRows": "選択された行:",
+      "rowsPerPage": "ページあたりの行数:",
+      "noData": "表示するデータがありません。",
+      "confirmDelete": "完全に削除してもよろしいですか？"
+    },
+    "entity": {
+      "authRequired": "認証が必要です。続行するには下の「認証」をクリックしてください。",
+      "searchAgainAfterAuth": "認証が完了したら、このウィンドウに戻ってください。結果を表示するにはもう一度検索してください。",
+      "authenticate": "認証",
+      "selectAllHelpText": "このページのすべてのオプションを選択",
+      "selected": "選択済み"
+    },
+    "file": {
+      "atLeastOneUploadOption": "ファイル設定で少なくとも1つのアップロードオプションを選択する必要があります。",
+      "unknownFormat": "{{filename}} をアップロードできませんでした。不明なファイル形式です。",
+      "unknownFileFormat": "ファイルをアップロードできませんでした。不明なファイル形式です。",
+      "notSupported": "{{filename}} をアップロードできませんでした。ファイル形式がサポートされていません。ZIPファイルに圧縮して再度アップロードしてください。",
+      "typeNotSupported": "{{filename}} をアップロードできませんでした。ファイルタイプがサポートされていません。",
+      "minSize": "{{filename}} をアップロードできませんでした。ファイルサイズは {{size}} 以上である必要があります。",
+      "maxSize": "{{filename}} をアップロードできませんでした。ファイルサイズは {{size}} 以下である必要があります。",
+      "uploadInProgress": "ファイルのアップロード中です。"
+    },
+    "location": {
+      "grantPermission": "位置情報の許可を付与してください。",
+      "selectLocation": "場所を選択",
+      "selectedLocation": "選択された場所",
+      "searchPlaceholder": "場所を検索..."
+    },
+    "date": {
+      "selectAfter": "{{date}} より後の日付を選択してください",
+      "selectOnOrAfter": "{{date}} 以降の日付を選択してください",
+      "select": "{{date}} を選択",
+      "selectBefore": "{{date}} より前の日付を選択してください",
+      "selectOnOrBefore": "{{date}} 以前の日付を選択してください",
+      "selectBeforeOrAfterDate": "{{date}} の前後の日付を選択してください",
+      "selectBeforeDateOrAfterDate": "{{before}} より前または {{after}} より後の日付を選択してください",
+      "selectBetween": "{{min}} から {{max}} の間の日付を選択してください"
+    },
+    "dateRange": {
+      "selectBetween": "{{min}} から {{max}} の間の日付範囲を選択してください",
+      "selectOnOrAfter": "{{min}} 以降の日付範囲を選択してください",
+      "selectOnOrBefore": "{{max}} 以前の日付範囲を選択してください",
+      "selectMaxDays": "最大 {{days}} 日間を選択してください",
+      "selectMaxHours": "最大 {{hours}} 時間を選択してください",
+      "rulesConflict": "選択されたルールが競合しています。有効な日付範囲を許可するように調整してください。"
+    },
+    "radio": {
+      "noSelection": "オプションが選択されていません。",
+      "noOptions": "オプションは利用できません。"
+    },
+    "validators": {
+      "required": "この項目は必須です。",
+      "noSelection": "オプションが選択されていません。",
+      "noOptions": "オプションは利用できません。",
+      "invalidEmail": "無効なメールアドレスです。",
+      "invalidPhoneNumber": "無効な電話番号です。",
+      "enterCorrectValues": "正しい値を入力してください。",
+      "minLength": "長さは {{length}} 以上である必要があります。",
+      "maxLength": "長さは {{length}} 以下である必要があります。",
+      "minValue": "値は {{min}} 以上である必要があります。",
+      "maxValue": "値は {{max}} 以下である必要があります。",
+      "minSelection": "少なくとも {{count}} 個のオプションを選択してください。",
+      "maxSelection": "{{count}} 個を超えるオプションは選択できません。",
+      "pattern": "値が必要なパターンと一致しません: {{pattern}}",
+      "allowedEmailDomains": "許可されたドメイン: {{domains}}",
+      "startDateLessThanEndDate": "開始日は終了日より前である必要があります。",
+      "maxDateRangeInDays": "範囲は {{days}} 日を超えてはなりません。",
+      "maxDateRangeInHours": "範囲は {{hours}} 時間を超えてはなりません。"
+    }
+  },
+  "bootFailed": {
+    "title": "チャットを利用できません",
+    "message": "チャットを開始できませんでした。もう一度お試しください。",
+    "retryBtn": "再試行",
+    "retryBtnAria": "チャットの開始を再試行",
+    "closeBtn": "閉じる",
+    "closeBtnAria": "チャットウィンドウを閉じる"
+  }
+}
